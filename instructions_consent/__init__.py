@@ -7,7 +7,7 @@ Instructions and consent
 
 
 class C(BaseConstants):
-    NAME_IN_URL = 'instructions'
+    NAME_IN_URL = 'instructions_consent'
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 1
 
@@ -25,16 +25,12 @@ class Player(BasePlayer):
 
 
 # PAGES
-class MyPage(Page):
+class Welcome(Page):
     pass
 
 
-class ResultsWaitPage(WaitPage):
+class SessionZero(Page):
     pass
 
 
-class Results(Page):
-    pass
-
-
-page_sequence = [MyPage, ResultsWaitPage, Results]
+page_sequence = [Welcome, SessionZero]
