@@ -10,6 +10,8 @@ class C(BaseConstants):
     NAME_IN_URL = 'instructions_consent'
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 1
+    TOTAL_DURATION = 80
+    AVG_ADD_INCOME = cu(5.0)
 
 
 class Subsession(BaseSubsession):
