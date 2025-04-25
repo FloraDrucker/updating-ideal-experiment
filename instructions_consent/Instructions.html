@@ -1,0 +1,82 @@
+{{ block title }}
+    Instructions for the first and subsequent parts
+{{ endblock }}
+
+{{ block content }}
+
+<p>
+    In all five parts, you will work on the task you just saw for at most 10 minutes. You will receive a fixed payoff for each correctly solved encryption task in the part that will be randomly chosen for payment. The payoff is between 25 cents and 75 cents per task. Every part will have the following stages:
+</p>
+
+<br>
+
+<h5> 1. Guessing the true payoff of the task </h5>
+
+<p>
+    You will have to state a number for how large you think the fixed payoff per correctly solved task is based on your current information. You will receive a bonus payment of {{C.BELIEF_BONUS}} if your guess in the randomly chosen part is close to the true task payoff. The more precise your guess about the fixed task payoff is – i.e., the closer it is to the true fixed payoff for each correctly solved task -, the more likely it is that you win x. Given this payment rule, you should state your best guess to ensure the largest chance of receiving the x. If you are interested in the exact mathematical formula stating the precise payment rule, please click on the button “Show mathematical formula”.
+</p>
+
+<br>
+
+<button type="button" onclick="toggleMathFormula()" style="
+    background-color: #f0f0f0;
+    color: black;
+    font-size: 1rem;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+">Show mathematical formula</button>
+
+<br>
+
+<div id="mathFormula" class="border rounded p-3 mt-3 mx-auto" style="display: none; width: 80%; background-color: #f9f9f9;">
+    <p>
+        You will have to guess the actual payoff per task at the beginning of each part. The closer your guess is to the actual payoff, the higher the probability that you receive an extra payment of
+        {{C.BELIEF_BONUS}}.
+    </p>
+
+    <p>
+        The probability of receiving the payment is
+    </p>
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
+
+    $$ {p = 1- \frac{(\text{your guess} -- \text{actual task payoff})^2}{B},} $$
+
+    <p>
+        where B (={{C.SCALING_PAR}}) is a scaling parameter that ensures probabilities remain between 0 and 1.
+    </p>
+
+    <p>
+        In each part, we will draw a new, random number. Each number between 0 and 1 will be equally likely. If the randomly drawn number is smaller than or equal to p (the probability that you will receive the extra payment for your guess), you will receive the extra payment of {{C.BELIEF_BONUS}}. If the randomly drawn number is larger than p, you will not receive the extra payment.
+    </p>
+</div>
+
+<br>
+
+<h5> 2. Further information about the true payoff per task </h5>
+
+<p>
+    During the course of the experiment, you will get more and more information that will allow you to obtain more precise knowledge of this fixed payoff. This will work in the following way: The fixed payoff is the average of 120 numbers that lie between 25 cents and 75 cents. The same number can occur several times. At the beginning of parts 1 to 4, we will briefly display 30 of these 120 numbers (represented by balls) on the screen. Each of the 120 balls will be displayed only once, so you will have seen all the balls after part 4.
+</p>
+
+<script>
+    function toggleMathFormula() {
+        const section = document.getElementById('mathFormula');
+        const button = event.target;
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            button.textContent = 'Hide mathematical formula';
+        } else {
+            section.style.display = 'none';
+            button.textContent = 'Show mathematical formula';
+        }
+    }
+</script>
+
+{{ next_button }}
+{{ endblock }}
+
+

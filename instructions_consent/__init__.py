@@ -11,7 +11,9 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 1
     TOTAL_DURATION = 80
-    AVG_ADD_INCOME = cu(5.0)
+    AVG_ADD_INCOME = cu(5.0)  # average extra income they can earn from the tasks
+    BELIEF_BONUS = cu(2.0)  # bonus for correct beliefs
+    SCALING_PAR = 25  # TODO: change this!! scaling parameter for the binarized quadratic scoring rule
 
 
 class Subsession(BaseSubsession):
@@ -35,5 +37,12 @@ class EncryptionTask(Page):
     pass
 
 
+class Instructions(Page):
+    pass
 
-page_sequence = [Welcome, EncryptionTask]
+
+page_sequence = [
+    Welcome,
+    EncryptionTask,
+    Instructions
+]
