@@ -31,8 +31,9 @@ class Welcome(Page):
     pass
 
 
-class SessionZero(Page):
+class EncryptionTask(Page):
     pass
 
 
-page_sequence = [Welcome, SessionZero]
+
+page_sequence = [Welcome, EncryptionTask]

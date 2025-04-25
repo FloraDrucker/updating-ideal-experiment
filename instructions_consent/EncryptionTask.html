@@ -1,0 +1,33 @@
+{{ block title }}
+    Encryption Task
+{{ endblock }}
+
+{{ block content }}
+
+<p>
+    In all parts of the study, you will work on a simple task. In this task, you have to encrypt letter
+    combinations (=”words”) into numbers, based on the key you see at the bottom of the page. Please see a
+    screenshot of the task below.
+</p>
+
+<br>
+
+<p style="text-align:center">
+    <img src="{{ static 'task_screenshot.png' }}" width="900px"/>
+</p>
+
+<br>
+
+<p>
+    In this example, the letter “W” corresponds to the number 411, “A” to 133, “F” to 331, and “Z” to 162,
+    so you have to type 411, 133, 331, and 162 into the boxes below the letters, respectively.
+    You can submit your response by clicking the Submit button below the task. If any of the entries are
+    incorrect, the computer will tell you the number of entries that are wrong, but not which ones are wrong.
+    Then you will be able to revise your solution. Once the correct numbers are entered, after clicking the
+    Submit button, you will see a new word to encrypt. After each correctly solved task, the computer generates
+    a new encryption key. The order of the letters in the key is also shuffled between the tasks.
+</p>
+    {{ next_button }}
+{{ endblock }}
+
+
