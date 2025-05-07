@@ -4,7 +4,7 @@ SESSION_CONFIGS = [
     dict(
         name='study_on_work',
         display_name="Study on Work",
-        app_sequence=['instructions_consent'],
+        app_sequence=['instructions_consent', 'task'],
         num_demo_participants=10,
         participation_fee=11.0,
      ),
