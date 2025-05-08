@@ -174,43 +174,43 @@ td {
 
 <script>
 
-  var letters_per_word = {{letters_per_word | safe}};
-  alphabet = genCharArray('A', 'Z');
-  legend_letters = alphabet;
-  word_letters = alphabet;
+  const letters_per_word = {{letters_per_word | safe}};
+  const alphabet = genCharArray('A', 'Z');
+  const legend_letters = alphabet;
+  const word_letters = alphabet;
 
 document.addEventListener("DOMContentLoaded", (event) => {
     liveSend({});
 });
 
 function myFunction() {
-    errors=checkSolution(letters_per_word);
+    let errors=checkSolution(letters_per_word);
 
     if (errors == 0) {
-        var temp = Number(document.getElementById("performance").value) + 1
+        let temp = Number(document.getElementById("performance").value) + 1
         document.getElementById("performance").value = temp;
         document.getElementById("error-form").style.display = "none";
-        var performance = Number(document.getElementById("performance").value);
+        let performance = Number(document.getElementById("performance").value);
         liveSend({'performance': performance});
         document.getElementById("task_code_0").focus();
 
-        dict=genNewDict();
+        let dict=genNewDict();
         shuffle(legend_letters);
 
-        for (var i = 0; i <= 25; i++) {
+        for (let i = 0; i <= 25; i++) {
             document.getElementById("llid_"+i).innerText=legend_letters[i];
             document.getElementById("lcid_"+i).innerText=dict[legend_letters[i]];
         }
 
-        word = genNewWord(letters_per_word, word_letters);
-        for (var i=0; i< letters_per_word; i++) {
+        let word = genNewWord(letters_per_word, word_letters);
+        for (let i=0; i< letters_per_word; i++) {
             document.getElementById("task_letter_"+i).innerText=word[i];
             document.getElementById("task_code_"+i).value='';
         }
     }
 
     else if (errors > 0) {
-        var temp = Number(document.getElementById("mistakes").value) + 1
+        let temp = Number(document.getElementById("mistakes").value) + 1
         document.getElementById("mistakes").value = temp;
         document.getElementById("error-form").innerText = "There are "+errors+" mistakes.";
         document.getElementById("error-form").style.display = "block";
@@ -218,9 +218,9 @@ function myFunction() {
 }
 
 function checkSolution(letters_per_word) {
-    var answers = [];
-    var errors = 0;
-    for (var i = 0; i < letters_per_word; i++) {
+    let answers = [];
+    let errors = 0;
+    for (let i = 0; i < letters_per_word; i++) {
         answers[i] = Number(document.getElementById("task_code_"+i).value);
         if (dict[word[i]] != answers[i]) {errors += 1}
     }
@@ -229,15 +229,15 @@ function checkSolution(letters_per_word) {
 
 function genNewWord(letters_per_word, word_letters) {
     shuffle(word_letters)
-    word = [];
-      for (var i = 0; i < letters_per_word; i++) {
+    let word = [];
+      for (let i = 0; i < letters_per_word; i++) {
            word[i] = word_letters[i];
        }
     return word
 }
 
 function genCharArray(charA, charZ) {
-    var a = [], i = charA.charCodeAt(0), j = charZ.charCodeAt(0);
+    let a = [], i = charA.charCodeAt(0), j = charZ.charCodeAt(0);
     for (; i <= j; ++i) {
         a.push(String.fromCharCode(i));
     }
@@ -245,8 +245,8 @@ function genCharArray(charA, charZ) {
 }
 
 function shuffle(a) {
-    var j, x, i;
-    var b=a;
+    let j, x, i;
+    let b=a;
     for (i = b.length - 1; i > 0; i--) {
         j = Math.floor(Math.random() * (i + 1));
         x = b[i];
@@ -263,7 +263,7 @@ function randomDataSet(dataSetSize, minValue, maxValue) {
 }
 
 function genNewDict() {
-    dict = {}
+    let dict = {}
     dict["A"] = Math.floor(Math.random() * (999 - 100) + 100);
     dict["B"] = Math.floor(Math.random() * (999 - 100) + 100);
     dict["C"] = Math.floor(Math.random() * (999 - 100) + 100);
@@ -301,13 +301,13 @@ function liveRecv(data) {
         dict = genNewDict();
         shuffle(legend_letters);
 
-        for (var i = 0; i <= 25; i++) {
+        for (let i = 0; i <= 25; i++) {
             document.getElementById("llid_"+i).innerText=legend_letters[i];
             document.getElementById("lcid_"+i).innerText=dict[legend_letters[i]];
         }
 
         word = genNewWord(letters_per_word, word_letters);
-        for (var i=0; i< letters_per_word; i++) {
+        for (let i=0; i< letters_per_word; i++) {
             document.getElementById("task_letter_"+i).innerText=word[i];
         }
         document.getElementById("task_code_0").focus();
