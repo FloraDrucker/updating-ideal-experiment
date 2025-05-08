@@ -42,6 +42,7 @@ def creating_session(subsession: Subsession):
     dictionary = dict([(d[0][i], d[1][i]) for i in range(26)])
     subsession.dictionary = json.dumps(dictionary)
 
+
 def live_update_performance(player: Player, data):
     own_id = player.id_in_group
     if 'performance' in data:
@@ -54,6 +55,7 @@ def live_update_performance(player: Player, data):
         print('received nothing, shuffle?', shuffle)
     answer = dict(performance=player.performance, shuffle=shuffle)
     return {own_id: answer}
+
 
 # PAGES
 class Task(Page):
@@ -73,6 +75,7 @@ class Task(Page):
             'letters_per_word': letters_per_word,
             'task_list': task_list,
         }
+
 
 class Results(Page):
         pass
