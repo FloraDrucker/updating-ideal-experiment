@@ -212,6 +212,7 @@ function myFunction() {
     else if (errors > 0) {
         let temp = Number(document.getElementById("mistakes").value) + 1
         document.getElementById("mistakes").value = temp;
+        <!-- TODO: change this to 1 mistake or x mistakes -->
         document.getElementById("error-form").innerText = "There are "+errors+" mistakes.";
         document.getElementById("error-form").style.display = "block";
     }
