@@ -48,7 +48,7 @@ def live_update_performance(player: Player, data):
     if 'performance' in data:
         perf = data['performance']
         player.performance = perf
-        shuffle = False
+        shuffle = True
         print('received ', perf, 'shuffle?', shuffle)
     else:
         shuffle = True

@@ -25,7 +25,7 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    pass
+    consent = models.BooleanField(label="Do you wish to participate in the study?")
 
 
 # PAGES
@@ -41,8 +41,21 @@ class Instructions(Page):
     pass
 
 
+class Consent(Page):
+    form_model = 'player'
+    form_fields = ['consent']
+
+
+class NoConsent(Page):
+    def is_displayed(player):
+        return player.consent is False
+    pass
+
+
 page_sequence = [
     Welcome,
     EncryptionTask,
-    Instructions
+    Instructions,
+    Consent,
+    NoConsent
 ]
