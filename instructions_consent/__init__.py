@@ -14,6 +14,9 @@ class C(BaseConstants):
     AVG_ADD_INCOME = cu(5.0)  # average extra income they can earn from the tasks
     BELIEF_BONUS = cu(2.0)  # bonus for correct beliefs
     SCALING_PAR = 25  # TODO: change this!! scaling parameter for the binarized quadratic scoring rule
+    BENEFIT_RANGE_MIN = 50
+    BENEFIT_RANGE_MAX = 150
+    PERCENT_IDEAL = 5  # percentage chance that they will have to do the ideal number of tasks
 
 
 class Subsession(BaseSubsession):

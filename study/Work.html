@@ -1,0 +1,18 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+    Work on the task
+{% endblock %}
+
+{% block content %}
+
+<p>
+    The {{ C.TIMEOUT_MINUTES }} minutes of work will start on the next page.
+</p>
+
+
+{% next_button %}
+
+
+{% endblock %}

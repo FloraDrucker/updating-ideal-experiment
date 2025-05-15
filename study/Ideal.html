@@ -1,0 +1,18 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+    Questions about ideal number of tasks
+{% endblock %}
+
+{% block content %}
+
+<p>
+    We first ask you to choose, based on your experience with the task in the trial round, the number of tasks you would ideally want to do in {{ C.TIMEOUT_MINUTES }} minutes for each possible level of the true task payoff shown below. In Part 5, there is a {{ percent_ideal }} percent chance that you will have to do as many tasks as you stated as ideal for the true task payoff.
+</p>
+
+
+{% next_button %}
+
+
+{% endblock %}

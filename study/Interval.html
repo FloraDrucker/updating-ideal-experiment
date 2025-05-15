@@ -1,0 +1,18 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+    Information about the task payoff
+{% endblock %}
+
+{% block content %}
+
+<p>
+    The payoff per task you are going to earn is between {{ benefit_min }} and {{ benefit_max}} cents.
+</p>
+
+
+{% next_button %}
+
+
+{% endblock %}

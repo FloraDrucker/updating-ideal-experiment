@@ -1,5 +1,6 @@
 from otree.api import *
 import random, string, json
+from instructions_consent import C as base_constants
 
 doc = """
 Task
@@ -7,11 +8,12 @@ Task
 
 
 class C(BaseConstants):
-    NAME_IN_URL = 'task'
+    NAME_IN_URL = 'study'
     PLAYERS_PER_GROUP = None
-    NUM_ROUNDS = 1
+    NUM_ROUNDS = 2  # = number of sessions including trial. Certain pages will only be shown in certain rounds, e.g. predicted and ideal in only rounds 2 and 6
     USE_TIMEOUT = True
     TIMEOUT_SECONDS = 120
+    TIMEOUT_MINUTES = round(TIMEOUT_SECONDS / 60)
     TASK_LENGTH = 4
 
 
@@ -24,8 +26,22 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
+    # These will be stored separately in each round they are relevant:
     performance = models.IntegerField(initial=0, blank=False)
     mistakes = models.IntegerField(initial=0, blank=False)
+    ideal = models.IntegerField(blank=False, label="How many tasks do you ideally want to do?")
+    predicted = models.IntegerField(blank=False, label="How many tasks do you predict you will do?")
+
+    belief = models.IntegerField(
+        blank=False,
+        label="What do you think is the true task payoff?"
+    )
+
+
+def belief_error_message(player, value):
+    print('value is', value)
+    if not base_constants.BENEFIT_RANGE_MIN <= value <= base_constants.BENEFIT_RANGE_MAX:
+        return f"Please enter a number between {base_constants.BENEFIT_RANGE_MIN} and {base_constants.BENEFIT_RANGE_MAX}."
 
 
 def creating_session(subsession: Subsession):
@@ -58,6 +74,38 @@ def live_update_performance(player: Player, data):
 
 
 # PAGES
+class Interval(Page):
+    def vars_for_template(player):
+        return {
+            'benefit_min': base_constants.BENEFIT_RANGE_MIN,
+            'benefit_max': base_constants.BENEFIT_RANGE_MAX,
+        }
+
+
+class Ideal(Page):
+    def vars_for_template(player):
+        return {
+            'percent_ideal': base_constants.PERCENT_IDEAL,
+        }
+
+
+class Predicted(Page):
+    pass
+
+
+class Belief(Page):
+    form_model = 'player'
+    form_fields = ['belief']
+
+
+class Signal(Page):
+    pass
+
+
+class Work(Page):  # in period 5, we tell the participants the number of tasks they have to do here
+    pass
+
+
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
@@ -78,7 +126,21 @@ class Task(Page):
 
 
 class Results(Page):
-        pass
+    pass
 
 
-page_sequence = [Task, Results]
+class Survey(Page):
+    pass
+
+
+page_sequence = [
+    Interval,
+    Ideal,
+    Predicted,
+    Belief,
+    Signal,
+    Work,
+    Task,
+    Results,
+    Survey
+]
