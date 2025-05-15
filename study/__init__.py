@@ -26,11 +26,34 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    # These will be stored separately in each round they are relevant:
+    # TODO: so far in each round these are newly generated, so save everything in participant variables!!
     performance = models.IntegerField(initial=0, blank=False)
     mistakes = models.IntegerField(initial=0, blank=False)
-    ideal = models.IntegerField(blank=False, label="How many tasks do you ideally want to do?")
-    predicted = models.IntegerField(blank=False, label="How many tasks do you predict you will do?")
+
+    ideal50 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you ideally want to do for 50 cents per task?"
+    )
+    ideal100 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you ideally want to do for 100 cents per task?"
+    )
+    ideal150 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you ideally want to do for 150 cents per task?"
+    )
+
+    predicted50 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you predict you will do for 50 cents per task?")
+
+    predicted100 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you predict you will do for 100 cents per task?")
+
+    predicted150 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you predict you will do for 150 cents per task?")
 
     belief = models.IntegerField(
         blank=False,
@@ -83,6 +106,9 @@ class Interval(Page):
 
 
 class Ideal(Page):
+    form_model = 'player'
+    form_fields = ['ideal50', 'ideal100', 'ideal150']
+
     def vars_for_template(player):
         return {
             'percent_ideal': base_constants.PERCENT_IDEAL,
@@ -90,7 +116,8 @@ class Ideal(Page):
 
 
 class Predicted(Page):
-    pass
+    form_model = 'player'
+    form_fields = ['predicted50', 'predicted100', 'predicted150']
 
 
 class Belief(Page):
