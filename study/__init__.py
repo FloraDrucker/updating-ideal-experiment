@@ -124,7 +124,7 @@ class Player(BasePlayer):
 
     belief = models.IntegerField(
         blank=False,
-        label="What do you think is the true task payoff?"
+        label="What do you think is the true task payoff in cents?"
     )
 
 
@@ -174,7 +174,8 @@ class Interval(Page):
 
 class Ideal(Page):
     form_model = 'player'
-    form_fields = ['ideal50', 'ideal100', 'ideal150']
+    form_fields = ['ideal50', 'ideal60', 'ideal70', 'ideal80', 'ideal90', 'ideal100',
+                   'ideal110', 'ideal120', 'ideal130', 'ideal140', 'ideal150']
 
     def vars_for_template(player):
         return {
@@ -184,7 +185,9 @@ class Ideal(Page):
 
 class Predicted(Page):
     form_model = 'player'
-    form_fields = ['predicted50', 'predicted100', 'predicted150']
+    form_fields = ['predicted50', 'predicted60', 'predicted70', 'predicted80', 'predicted90',
+                   'predicted100', 'predicted110', 'predicted120', 'predicted130', 'predicted140',
+                   'predicted150']
 
 
 class Belief(Page):
