@@ -12,7 +12,7 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 6  # = number of sessions including trial. Certain pages will only be shown in certain rounds, e.g. predicted and ideal in only rounds 2 and 6
     USE_TIMEOUT = True
-    TIMEOUT_SECONDS = 60  # TODO: set this to 600 for the real experiment (10 minutes)
+    TIMEOUT_SECONDS = 1  # TODO: set this to 600 for the real experiment (10 minutes)
     TIMEOUT_MINUTES = round(TIMEOUT_SECONDS / 60)
     TASK_LENGTH = 4
 
