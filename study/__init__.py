@@ -30,30 +30,97 @@ class Player(BasePlayer):
     performance = models.IntegerField(initial=0, blank=False)
     mistakes = models.IntegerField(initial=0, blank=False)
 
+    # Ideal values
     ideal50 = models.IntegerField(
         blank=False,
         label="How many tasks do you ideally want to do for 50 cents per task?"
     )
+    ideal60 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you ideally want to do for 60 cents per task?"
+    )
+    ideal70 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you ideally want to do for 70 cents per task?"
+    )
+    ideal80 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you ideally want to do for 80 cents per task?"
+    )
+    ideal90 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you ideally want to do for 90 cents per task?"
+    )
     ideal100 = models.IntegerField(
         blank=False,
         label="How many tasks do you ideally want to do for 100 cents per task?"
+    )
+    ideal110 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you ideally want to do for 110 cents per task?"
+    )
+    ideal120 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you ideally want to do for 120 cents per task?"
+    )
+    ideal130 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you ideally want to do for 130 cents per task?"
+    )
+    ideal140 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you ideally want to do for 140 cents per task?"
     )
     ideal150 = models.IntegerField(
         blank=False,
         label="How many tasks do you ideally want to do for 150 cents per task?"
     )
 
+    # Predicted values
     predicted50 = models.IntegerField(
         blank=False,
-        label="How many tasks do you predict you will do for 50 cents per task?")
-
+        label="How many tasks do you predict you will do for 50 cents per task?"
+    )
+    predicted60 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you predict you will do for 60 cents per task?"
+    )
+    predicted70 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you predict you will do for 70 cents per task?"
+    )
+    predicted80 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you predict you will do for 80 cents per task?"
+    )
+    predicted90 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you predict you will do for 90 cents per task?"
+    )
     predicted100 = models.IntegerField(
         blank=False,
-        label="How many tasks do you predict you will do for 100 cents per task?")
-
+        label="How many tasks do you predict you will do for 100 cents per task?"
+    )
+    predicted110 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you predict you will do for 110 cents per task?"
+    )
+    predicted120 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you predict you will do for 120 cents per task?"
+    )
+    predicted130 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you predict you will do for 130 cents per task?"
+    )
+    predicted140 = models.IntegerField(
+        blank=False,
+        label="How many tasks do you predict you will do for 140 cents per task?"
+    )
     predicted150 = models.IntegerField(
         blank=False,
-        label="How many tasks do you predict you will do for 150 cents per task?")
+        label="How many tasks do you predict you will do for 150 cents per task?"
+    )
 
     belief = models.IntegerField(
         blank=False,
