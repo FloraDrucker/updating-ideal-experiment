@@ -5,7 +5,7 @@ SESSION_CONFIGS = [
         name='study_on_work',
         display_name="Study on Work",
         app_sequence=['instructions_consent', 'study'],
-        num_demo_participants=10,
+        num_demo_participants=3,
         participation_fee=11.0,
      ),
 ]

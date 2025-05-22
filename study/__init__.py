@@ -12,12 +12,12 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 6  # = number of sessions including trial. Certain pages will only be shown in certain rounds, e.g. predicted and ideal in only rounds 2 and 6
     PARTS = {
-        1: 'the trial part',
-        2: 'Part one',
-        3: 'Part two',
-        4: 'Part three',
-        5: 'Part four',
-        6: 'Part five',
+        1: 'the Trial Part',
+        2: 'Part One',
+        3: 'Part Two',
+        4: 'Part Three',
+        5: 'Part Four',
+        6: 'Part Five',
     }
     USE_TIMEOUT = True
     TIMEOUT_SECONDS = 1  # TODO: set this to 600 for the real experiment (10 minutes)
@@ -163,6 +163,14 @@ def creating_session(subsession: Subsession):
     dictionary = dict([(d[0][i], d[1][i]) for i in range(26)])
     subsession.dictionary = json.dumps(dictionary)
 
+    # define participant variables
+    for p in subsession.get_players():
+        p.participant.vars['actual'] = {i: None for i in range(C.NUM_ROUNDS)}
+        p.participant.vars['belief'] = {i+1: None for i in range(C.NUM_ROUNDS-1)}
+        p.participant.vars['ideal'] = {i+1: None for i in range(12)}
+        p.participant.vars['predicted'] = {i+1: None for i in range(12)}
+        print(p.participant.vars)
+
     # TODO: select the 5 percent here?
 
 
@@ -225,6 +233,27 @@ class Ideal(Page):
             'percent_ideal': base_constants.PERCENT_IDEAL,
         }
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        if player.round_number == 2:
+            player.participant.vars['ideal'][1] = player.ideal50
+            player.participant.vars['ideal'][2] = player.ideal60
+            player.participant.vars['ideal'][3] = player.ideal70
+            player.participant.vars['ideal'][4] = player.ideal80
+            player.participant.vars['ideal'][5] = player.ideal90
+            player.participant.vars['ideal'][6] = player.ideal100
+            player.participant.vars['ideal'][7] = player.ideal110
+            player.participant.vars['ideal'][8] = player.ideal120
+            player.participant.vars['ideal'][9] = player.ideal130
+            player.participant.vars['ideal'][10] = player.ideal140
+            player.participant.vars['ideal'][11] = player.ideal150
+        elif player.round_number == 6:
+            player.participant.vars['ideal'][12] = player.lastideal
+        else:
+            pass
+
+        print(player.participant.vars)
+
 
 class Predicted(Page):
     form_model = 'player'
@@ -244,6 +273,27 @@ class Predicted(Page):
     def is_displayed(player):
         return player.round_number == 2 or player.round_number == 6
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        if player.round_number == 2:
+            player.participant.vars['predicted'][1] = player.predicted50
+            player.participant.vars['predicted'][2] = player.predicted60
+            player.participant.vars['predicted'][3] = player.predicted70
+            player.participant.vars['predicted'][4] = player.predicted80
+            player.participant.vars['predicted'][5] = player.predicted90
+            player.participant.vars['predicted'][6] = player.predicted100
+            player.participant.vars['predicted'][7] = player.predicted110
+            player.participant.vars['predicted'][8] = player.predicted120
+            player.participant.vars['predicted'][9] = player.predicted130
+            player.participant.vars['predicted'][10] = player.predicted140
+            player.participant.vars['predicted'][11] = player.predicted150
+        elif player.round_number == 6:
+            player.participant.vars['predicted'][12] = player.lastpredicted
+        else:
+            pass
+
+        print(player.participant.vars)
+
 
 class Performance(Page):  # display performance from the previous round
 
@@ -259,6 +309,12 @@ class Belief(Page):
 
     form_model = 'player'
     form_fields = ['belief']
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        if player.round_number > 1:
+            player.participant.vars['belief'][player.round_number-1] = player.belief
+        print(player.participant.vars)
 
 
 class Signal(Page):
@@ -288,6 +344,12 @@ class Task(Page):
             'letters_per_word': letters_per_word,
             'task_list': task_list,
         }
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        player.participant.vars['actual'][player.round_number-1] = player.performance
+
+        print(player.participant.vars)
 
 
 class Results(Page):
