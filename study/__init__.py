@@ -11,6 +11,14 @@ class C(BaseConstants):
     NAME_IN_URL = 'study'
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 6  # = number of sessions including trial. Certain pages will only be shown in certain rounds, e.g. predicted and ideal in only rounds 2 and 6
+    PARTS = {
+        1: 'the trial part',
+        2: 'Part one',
+        3: 'Part two',
+        4: 'Part three',
+        5: 'Part four',
+        6: 'Part five',
+    }
     USE_TIMEOUT = True
     TIMEOUT_SECONDS = 1  # TODO: set this to 600 for the real experiment (10 minutes)
     TIMEOUT_MINUTES = round(TIMEOUT_SECONDS / 60)
@@ -173,6 +181,14 @@ def live_update_performance(player: Player, data):
 
 
 # PAGES
+class PartStart(Page):
+    @staticmethod
+    def vars_for_template(player):
+        return {
+            'part': C.PARTS[player.round_number]
+        }
+
+
 class Interval(Page):
     @staticmethod
     def is_displayed(player):
@@ -285,6 +301,7 @@ class Survey(Page):
 
 
 page_sequence = [
+    PartStart,
     Interval,
     Ideal,
     Predicted,
