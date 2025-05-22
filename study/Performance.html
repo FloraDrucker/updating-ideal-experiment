@@ -1,0 +1,16 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+    Performance in previous period.
+{% endblock %}
+
+{% block content %}
+
+    <p>Your did {{ player.performance }} in the previous period.</p>
+
+
+    {% next_button %}
+
+
+{% endblock %}

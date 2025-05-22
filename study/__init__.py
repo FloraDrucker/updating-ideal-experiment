@@ -137,7 +137,6 @@ class Player(BasePlayer):
 
 
 def belief_error_message(player, value):
-    print('value is', value)
     if not base_constants.BENEFIT_RANGE_MIN <= value <= base_constants.BENEFIT_RANGE_MAX:
         return f"Please enter a number between {base_constants.BENEFIT_RANGE_MIN} and {base_constants.BENEFIT_RANGE_MAX}."
 
@@ -230,6 +229,13 @@ class Predicted(Page):
         return player.round_number == 2 or player.round_number == 6
 
 
+class Performance(Page):  # display performance from the previous round
+
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number > 2
+
+
 class Belief(Page):
     @staticmethod
     def is_displayed(player):
@@ -282,6 +288,7 @@ page_sequence = [
     Interval,
     Ideal,
     Predicted,
+    Performance,
     Belief,
     Signal,
     Work,
