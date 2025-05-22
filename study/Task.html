@@ -131,6 +131,11 @@ td {
 </p>
 
 <div class="test" id="hide_task">
+    <!-- 1) In your HTML, you add this once, outside any <script> block: -->
+<audio id="alarm-sound" preload="auto" style="display:none">
+  <source src="{% static 'alarm.mp3' %}" type="audio/mpeg">
+</audio>
+
 <div style="margin-top: 20px;">
     <p><strong>You may visit these pages instead of working on the task:</strong></p>
     <ul>
@@ -190,6 +195,21 @@ td {
 document.addEventListener("DOMContentLoaded", (event) => {
     liveSend({});
 });
+// Unlock alarm audio on first user interaction
+document.addEventListener('click', () => {
+    const alarm = document.getElementById('alarm-sound');
+    if (alarm) {
+        // Attempt a quick play/pause to satisfy autoplay policy
+        alarm.play()
+            .then(() => {
+                alarm.pause();
+                alarm.currentTime = 0;
+            })
+            .catch(() => {
+                // ignore if it still fails
+            });
+    }
+}, { once: true });
 
 function myFunction() {
     let errors=checkSolution(letters_per_word);
@@ -330,7 +350,32 @@ document.getElementById("submit-solution")
             document.getElementById("submit-solution").click();
         }
     });
+const REMINDER_SECONDS = 15;
+setTimeout(() => {
+    // Only remind if the tab is hidden
+    if (document.visibilityState === 'hidden') {
+        // 1) Blink the tab title
+        const originalTitle = document.title;
+        let toggle = false;
+        const blinkInterval = setInterval(() => {
+            document.title = toggle ? '⏰ Time’s up!' : originalTitle;
+            toggle = !toggle;
+        }, 1000);
 
+        // 2) Play the alarm sound
+        const alarm = document.getElementById('alarm-sound');
+        if (alarm) alarm.play().catch(() => {});
+
+        // 3) Optional: when they return, stop blinking
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                clearInterval(blinkInterval);
+                document.title = originalTitle;
+            }
+        });
+    }
+    // If the tab is visible at timeout, do nothing.
+}, REMINDER_SECONDS * 1000);
 </script>
 
 {% endblock %}
