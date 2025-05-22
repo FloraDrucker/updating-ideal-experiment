@@ -20,7 +20,7 @@ class C(BaseConstants):
         6: 'Part Five',
     }
     USE_TIMEOUT = True
-    TIMEOUT_SECONDS = 1  # TODO: set this to 600 for the real experiment (10 minutes)
+    TIMEOUT_SECONDS = 20  # TODO: set this to 600 for the real experiment (10 minutes)
     TIMEOUT_MINUTES = round(TIMEOUT_SECONDS / 60)
     TASK_LENGTH = 4
 
@@ -300,6 +300,12 @@ class Performance(Page):  # display performance from the previous round
     @staticmethod
     def is_displayed(player):
         return player.round_number > 2
+
+    @staticmethod
+    def vars_for_template(player):
+        return {
+            'performance': player.participant.vars['actual'][player.round_number]  # TODO: this is not correct
+        }
 
 
 class Belief(Page):
