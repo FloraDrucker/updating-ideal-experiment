@@ -20,23 +20,15 @@
     Now we ask you to <b> predict how many tasks you would actually do </b> for each possible task payoff level shown below.
 </p>
 
-{% formfield player.predicted50 %}
-{% formfield player.predicted60 %}
-{% formfield player.predicted70 %}
-{% formfield player.predicted80 %}
-{% formfield player.predicted90 %}
-{% formfield player.predicted100 %}
-{% formfield player.predicted110 %}
-{% formfield player.predicted120 %}
-{% formfield player.predicted130 %}
-{% formfield player.predicted140 %}
-{% formfield player.predicted150 %}
-
 {{ elif player.round_number == 6 }}
 
-{% formfield player.lastpredicted %}
+<p>
+    Please think of what you think the task payoff is, and answer the following question.
+</p>
 
 {{ endif }}
+
+{% formfields %}
 
 {% next_button %}
 

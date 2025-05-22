@@ -24,27 +24,15 @@
     In Part 5, there is a {{ percent_ideal }} percent chance that you will have to do as many tasks as you stated as ideal for the true task payoff. Should the true task payoff be different from the payoffs you stated your ideal work amounts, we will extrapolate the ideal amount of work to the true payoff from your answers.
 </p>
 
-{% formfield player.ideal50 %}
-{% formfield player.ideal60 %}
-{% formfield player.ideal70 %}
-{% formfield player.ideal80 %}
-{% formfield player.ideal90 %}
-{% formfield player.ideal100 %}
-{% formfield player.ideal110 %}
-{% formfield player.ideal120 %}
-{% formfield player.ideal130 %}
-{% formfield player.ideal140 %}
-{% formfield player.ideal150 %}
-
 {{ elif player.round_number == 6 }}
 
 <p>
     Please think of what you think the task payoff is, and answer the following question.
 </p>
 
-{% formfield player.lastideal %}
-
 {{ endif }}
+
+{% formfields %}
 
 {% next_button %}
 

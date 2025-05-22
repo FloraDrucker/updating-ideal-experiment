@@ -188,13 +188,21 @@ class Interval(Page):
 
 
 class Ideal(Page):
+    form_model = 'player'
+
+    @staticmethod
+    def get_form_fields(player):
+        if player.round_number == 2:
+            return ['ideal50', 'ideal60', 'ideal70', 'ideal80', 'ideal90', 'ideal100',
+                    'ideal110', 'ideal120', 'ideal130', 'ideal140', 'ideal150']
+        elif player.round_number == 6:
+            return ['lastideal']
+        else:
+            return []
+
     @staticmethod
     def is_displayed(player):
         return player.round_number == 2 or player.round_number == 6
-
-    form_model = 'player'
-    form_fields = ['ideal50', 'ideal60', 'ideal70', 'ideal80', 'ideal90', 'ideal100',
-                   'ideal110', 'ideal120', 'ideal130', 'ideal140', 'ideal150', 'lastideal']
 
     @staticmethod
     def vars_for_template(player):
@@ -204,14 +212,22 @@ class Ideal(Page):
 
 
 class Predicted(Page):
+    form_model = 'player'
+
+    @staticmethod
+    def get_form_fields(player):
+        if player.round_number == 2:
+            return ['predicted50', 'predicted60', 'predicted70', 'predicted80', 'predicted90',
+                   'predicted100', 'predicted110', 'predicted120', 'predicted130', 'predicted140',
+                   'predicted150']
+        elif player.round_number == 6:
+            return ['lastpredicted']
+        else:
+            return []
+
     @staticmethod
     def is_displayed(player):
         return player.round_number == 2 or player.round_number == 6
-
-    form_model = 'player'
-    form_fields = ['predicted50', 'predicted60', 'predicted70', 'predicted80', 'predicted90',
-                   'predicted100', 'predicted110', 'predicted120', 'predicted130', 'predicted140',
-                   'predicted150', 'lastpredicted']
 
 
 class Belief(Page):
