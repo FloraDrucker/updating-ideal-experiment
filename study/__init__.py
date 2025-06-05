@@ -20,7 +20,7 @@ class C(BaseConstants):
         6: 'Part Five',
     }
     USE_TIMEOUT = True
-    TIMEOUT_SECONDS = 20  # TODO: set this to 600 for the real experiment (10 minutes)
+    TIMEOUT_SECONDS = 20  # TODO: set this to 600 for the real experiment (10 minutes))
     TIMEOUT_MINUTES = round(TIMEOUT_SECONDS / 60)
     TASK_LENGTH = 4
 
