@@ -3,7 +3,7 @@ import random, string, json
 from instructions_consent import C as base_constants
 
 doc = """
-Task
+Study
 """
 
 
@@ -336,7 +336,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
-    form_fields = ['performance', 'mistakes']
+    form_fields = ['performance', 'mistakes']  # TODO: save mistakes!
     if C.USE_TIMEOUT:
         timeout_seconds = C.TIMEOUT_SECONDS
 
