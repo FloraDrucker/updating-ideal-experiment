@@ -320,7 +320,7 @@ class Belief(Page):
     def before_next_page(player, timeout_happened):
         if player.round_number > 1:
             player.participant.vars['belief'][player.round_number-1] = player.belief
-        print(player.participant.vars)
+        print(player.participant.vars)  # TODO: remind them here about the interval again?
 
 
 class Signal(Page):
