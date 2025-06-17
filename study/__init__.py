@@ -304,7 +304,7 @@ class Performance(Page):  # display performance from the previous round
     @staticmethod
     def vars_for_template(player):
         return {
-            'performance': player.participant.vars['actual'][player.round_number-1]
+            'performance': player.participant.vars['actual'][player.round_number-2]
         }
 
 
