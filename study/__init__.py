@@ -23,6 +23,7 @@ class C(BaseConstants):
     TIMEOUT_SECONDS = 20  # TODO: set this to 600 for the real experiment (10 minutes)
     TIMEOUT_MINUTES = round(TIMEOUT_SECONDS / 60)
     TASK_LENGTH = 4
+    SIGNAL_TIMEOUT = 5  # seconds signal is shown
 
 
 class Subsession(BaseSubsession):
@@ -324,6 +325,8 @@ class Belief(Page):
 
 
 class Signal(Page):
+    timeout_seconds = C.SIGNAL_TIMEOUT
+
     @staticmethod
     def is_displayed(player):
         return 1 < player.round_number < 6
