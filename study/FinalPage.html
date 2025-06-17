@@ -1,0 +1,23 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+    Thank you for your participation.
+{% endblock %}
+
+{% block content %}
+
+<p>
+    Thank you for participating in this study. You will receive your payments within 3 days via the Prolific payment system.
+
+    </p>
+
+    <p>
+        Please click <a href="{{ completion_url }}" rel="noopener noreferrer">HERE</a> to <b>go back to Prolific, proving that you completed this part of the study.</b> Alternatively, you can go back to Prolific, and manually enter the following <b>completion code:</b> {{ completion_code }}
+    </p>
+
+    <p>
+        Goodbye!
+    </p>
+
+{% endblock %}

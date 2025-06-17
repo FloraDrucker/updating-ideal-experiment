@@ -368,6 +368,20 @@ class Survey(Page):
         return 1 < player.round_number < 6
 
 
+class FinalPage(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == C.NUM_ROUNDS
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        config = player.session.config
+        return {
+            'completion_url': config.get('prolific_completion_url', ''),
+            'completion_code': config.get('prolific_completion_code', ''),
+        }
+
+
 page_sequence = [
     PartStart,
     Interval,
@@ -379,5 +393,6 @@ page_sequence = [
     Work,
     Task,
     Results,
-    Survey
+    Survey,
+    FinalPage
 ]
