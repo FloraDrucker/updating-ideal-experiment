@@ -132,14 +132,22 @@ td {
 
 <div class="test" id="hide_task">
 
+<!-- alarm sound input-->
 <audio id="alarm-sound" preload="auto" style="display:none">
   <source src="{% static 'alarm.mp3' %}" type="audio/mpeg">
 </audio>
 
-
+<!-- linkclick tracker-->
 <input type="hidden" name="link_click_count"
        id="link_click_count" value="0">
+<!-- duration tracker-->
+<input
+  type="hidden"
+  name="active_tab_seconds"
+  id="active_tab_seconds"
+  value="0">
 
+<!-- link fields -->
 <div style="margin-top: 20px;">
     <p><strong>You may visit these pages instead of working on the task:</strong></p>
     <ul>
@@ -388,6 +396,30 @@ document.querySelectorAll('a').forEach(link => {
     input.value = parseInt(input.value, 10) + 1;
   });
 });
+
+
+let activeTabSeconds = 0;
+let activeInterval = null;
+
+function startTimer() {
+  if (activeInterval) return;              // ← do nothing if already running
+  activeInterval = setInterval(() => {
+    activeTabSeconds++;
+    document.getElementById('active_tab_seconds').value = activeTabSeconds;
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(activeInterval);
+  activeInterval = null;                    // ← allow it to be restarted later
+}
+  window.addEventListener('focus', startTimer);
+  window.addEventListener('blur', stopTimer);
+
+  // If the tab is already focused on load, start counting immediately
+  if (document.hasFocus()) {
+    startTimer();
+  }
 </script>
 
 {% endblock %}

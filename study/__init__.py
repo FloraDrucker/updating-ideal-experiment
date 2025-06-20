@@ -39,6 +39,7 @@ class Player(BasePlayer):
     performance = models.IntegerField(initial=0, blank=False)
     mistakes = models.IntegerField(initial=0, blank=False)
     link_click_count = models.IntegerField(initial=0) # Added this to track the links clicked in the Task.html
+    active_tab_seconds = models.IntegerField(initial=0) # Added this to track the time spend on the Tab
     # Ideal values
     ideal50 = models.IntegerField(
         blank=False,
@@ -339,7 +340,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
-    form_fields = ['performance', 'mistakes', 'link_click_count']  # TODO: save mistakes!
+    form_fields = ['performance', 'mistakes', 'link_click_count', 'active_tab_seconds',]  # TODO: save mistakes!
     if C.USE_TIMEOUT:
         timeout_seconds = C.TIMEOUT_SECONDS
 
