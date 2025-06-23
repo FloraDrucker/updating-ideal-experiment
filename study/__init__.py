@@ -171,6 +171,8 @@ def creating_session(subsession: Subsession):
         p.participant.vars['belief'] = {i+1: None for i in range(C.NUM_ROUNDS-1)}
         p.participant.vars['ideal'] = {i+1: None for i in range(12)}
         p.participant.vars['predicted'] = {i+1: None for i in range(12)}
+        p.participant.vars['link_click_count'] = {i: None for i in range(C.NUM_ROUNDS)}
+        p.participant.vars['active_tab_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
         print(p.participant.vars)
 
     # TODO: select the 5 percent here?
@@ -358,7 +360,8 @@ class Task(Page):
     @staticmethod
     def before_next_page(player, timeout_happened):
         player.participant.vars['actual'][player.round_number-1] = player.performance
-
+        player.participant.vars['link_click_count'][player.round_number-1] = player.link_click_count
+        player.participant.vars['active_tab_seconds'][player.round_number-1] = player.active_tab_seconds
         print(player.participant.vars)
 
 
