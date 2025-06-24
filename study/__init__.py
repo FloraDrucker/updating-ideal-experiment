@@ -38,7 +38,8 @@ class Player(BasePlayer):
     # TODO: so far in each round these are newly generated, so save everything in participant variables!!
     performance = models.IntegerField(initial=0, blank=False)
     mistakes = models.IntegerField(initial=0, blank=False)
-
+    link_click_count = models.IntegerField(initial=0) # Added this to track the links clicked in the Task.html
+    active_tab_seconds = models.IntegerField(initial=0) # Added this to track the time spend on the Tab
     # Ideal values
     ideal50 = models.IntegerField(
         blank=False,
@@ -170,6 +171,8 @@ def creating_session(subsession: Subsession):
         p.participant.vars['belief'] = {i+1: None for i in range(C.NUM_ROUNDS-1)}
         p.participant.vars['ideal'] = {i+1: None for i in range(12)}
         p.participant.vars['predicted'] = {i+1: None for i in range(12)}
+        p.participant.vars['link_click_count'] = {i: None for i in range(C.NUM_ROUNDS)}
+        p.participant.vars['active_tab_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
         print(p.participant.vars)
 
     # TODO: select the 5 percent here?
@@ -339,7 +342,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
-    form_fields = ['performance', 'mistakes']  # TODO: save mistakes!
+    form_fields = ['performance', 'mistakes', 'link_click_count', 'active_tab_seconds',]  # TODO: save mistakes!
     if C.USE_TIMEOUT:
         timeout_seconds = C.TIMEOUT_SECONDS
 
@@ -357,7 +360,8 @@ class Task(Page):
     @staticmethod
     def before_next_page(player, timeout_happened):
         player.participant.vars['actual'][player.round_number-1] = player.performance
-
+        player.participant.vars['link_click_count'][player.round_number-1] = player.link_click_count
+        player.participant.vars['active_tab_seconds'][player.round_number-1] = player.active_tab_seconds
         print(player.participant.vars)
 
 
