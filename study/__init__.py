@@ -35,7 +35,6 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    # TODO: so far in each round these are newly generated, so save everything in participant variables!!
     performance = models.IntegerField(initial=0, blank=False)
     mistakes = models.IntegerField(initial=0, blank=False)
     link_click_count = models.IntegerField(initial=0) # Added this to track the links clicked in the Task.html
@@ -173,9 +172,9 @@ def creating_session(subsession: Subsession):
         p.participant.vars['predicted'] = {i+1: None for i in range(12)}
         p.participant.vars['link_click_count'] = {i: None for i in range(C.NUM_ROUNDS)}
         p.participant.vars['active_tab_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
-        print(p.participant.vars)
+        print("Participant:", p.participant.code, "Variables:", p.participant.vars)
 
-    # TODO: select the 5 percent here?
+    # TODO: select the 3 percent here?
 
 
 def live_update_performance(player: Player, data):
@@ -256,7 +255,7 @@ class Ideal(Page):
         else:
             pass
 
-        print(player.participant.vars)
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
 class Predicted(Page):
@@ -296,7 +295,7 @@ class Predicted(Page):
         else:
             pass
 
-        print(player.participant.vars)
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
 class Performance(Page):  # display performance from the previous round
@@ -324,7 +323,7 @@ class Belief(Page):
     def before_next_page(player, timeout_happened):
         if player.round_number > 1:
             player.participant.vars['belief'][player.round_number-1] = player.belief
-        print(player.participant.vars)  # TODO: remind them here about the interval again?
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)  # TODO: remind them here about the interval again?
 
 
 class Signal(Page):
@@ -362,7 +361,7 @@ class Task(Page):
         player.participant.vars['actual'][player.round_number-1] = player.performance
         player.participant.vars['link_click_count'][player.round_number-1] = player.link_click_count
         player.participant.vars['active_tab_seconds'][player.round_number-1] = player.active_tab_seconds
-        print(player.participant.vars)
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
 class Results(Page):
