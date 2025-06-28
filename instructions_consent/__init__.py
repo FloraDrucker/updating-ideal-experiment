@@ -30,6 +30,13 @@ class Player(BasePlayer):
     consent = models.BooleanField(label="Do you wish to participate in the study?")
 
 
+def creating_session(subsession: Subsession):
+    # define participant variables
+    for p in subsession.get_players():
+        p.participant.vars['consent'] = None
+        print(p.participant.vars)
+
+
 # PAGES
 class Welcome(Page):
     pass
@@ -46,6 +53,11 @@ class Instructions(Page):
 class Consent(Page):
     form_model = 'player'
     form_fields = ['consent']
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        player.participant.vars['consent'] = player.consent
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
 class NoConsent(Page):

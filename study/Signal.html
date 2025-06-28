@@ -7,9 +7,37 @@
 
 {% block content %}
 
-Signal here.
+<style>
+img {
+  border: 2px solid #555;
+}
+</style>
 
-{% next_button %}
+{{ if player.round_number == 2 }}
+
+<p style="text-align:center" >
+    <img src="{{ static 'draw1.png' }}" width="900px"/>
+</p>
+
+{{ elif player.round_number == 3 }}
+
+<p style="text-align:center" >
+    <img src="{{ static 'draw2.png' }}" width="900px"/>
+</p>
+
+{{ elif player.round_number == 4 }}
+
+<p style="text-align:center" >
+    <img src="{{ static 'draw3.png' }}" width="900px"/>
+</p>
+
+{{ elif player.round_number == 5 }}
+
+<p style="text-align:center" >
+    <img src="{{ static 'draw4.png' }}" width="900px"/>
+</p>
+
+{{ endif }}
 
 
 {% endblock %}

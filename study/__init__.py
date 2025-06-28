@@ -23,6 +23,7 @@ class C(BaseConstants):
     TIMEOUT_SECONDS = 20  # TODO: set this to 600 for the real experiment (10 minutes)
     TIMEOUT_MINUTES = round(TIMEOUT_SECONDS / 60)
     TASK_LENGTH = 4
+    SIGNAL_TIMEOUT = 5  # seconds signal is shown
 
 
 class Subsession(BaseSubsession):
@@ -34,10 +35,10 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    # TODO: so far in each round these are newly generated, so save everything in participant variables!!
     performance = models.IntegerField(initial=0, blank=False)
     mistakes = models.IntegerField(initial=0, blank=False)
-
+    link_click_count = models.IntegerField(initial=0) # Added this to track the links clicked in the Task.html
+    active_tab_seconds = models.IntegerField(initial=0) # Added this to track the time spend on the Tab
     # Ideal values
     ideal50 = models.IntegerField(
         blank=False,
@@ -169,9 +170,11 @@ def creating_session(subsession: Subsession):
         p.participant.vars['belief'] = {i+1: None for i in range(C.NUM_ROUNDS-1)}
         p.participant.vars['ideal'] = {i+1: None for i in range(12)}
         p.participant.vars['predicted'] = {i+1: None for i in range(12)}
-        print(p.participant.vars)
+        p.participant.vars['link_click_count'] = {i: None for i in range(C.NUM_ROUNDS)}
+        p.participant.vars['active_tab_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
+        print("Participant:", p.participant.code, "Variables:", p.participant.vars)
 
-    # TODO: select the 5 percent here?
+    # TODO: select the 3 percent here?
 
 
 def live_update_performance(player: Player, data):
@@ -252,7 +255,7 @@ class Ideal(Page):
         else:
             pass
 
-        print(player.participant.vars)
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
 class Predicted(Page):
@@ -292,7 +295,7 @@ class Predicted(Page):
         else:
             pass
 
-        print(player.participant.vars)
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
 class Performance(Page):  # display performance from the previous round
@@ -304,7 +307,7 @@ class Performance(Page):  # display performance from the previous round
     @staticmethod
     def vars_for_template(player):
         return {
-            'performance': player.participant.vars['actual'][player.round_number]  # TODO: this is not correct
+            'performance': player.participant.vars['actual'][player.round_number-2]
         }
 
 
@@ -320,10 +323,12 @@ class Belief(Page):
     def before_next_page(player, timeout_happened):
         if player.round_number > 1:
             player.participant.vars['belief'][player.round_number-1] = player.belief
-        print(player.participant.vars)
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)  # TODO: remind them here about the interval again?
 
 
 class Signal(Page):
+    timeout_seconds = C.SIGNAL_TIMEOUT
+
     @staticmethod
     def is_displayed(player):
         return 1 < player.round_number < 6
@@ -336,7 +341,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
-    form_fields = ['performance', 'mistakes']  # TODO: save mistakes!
+    form_fields = ['performance', 'mistakes', 'link_click_count', 'active_tab_seconds',]  # TODO: save mistakes!
     if C.USE_TIMEOUT:
         timeout_seconds = C.TIMEOUT_SECONDS
 
@@ -354,8 +359,9 @@ class Task(Page):
     @staticmethod
     def before_next_page(player, timeout_happened):
         player.participant.vars['actual'][player.round_number-1] = player.performance
-
-        print(player.participant.vars)
+        player.participant.vars['link_click_count'][player.round_number-1] = player.link_click_count
+        player.participant.vars['active_tab_seconds'][player.round_number-1] = player.active_tab_seconds
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
 class Results(Page):
@@ -366,6 +372,20 @@ class Survey(Page):
     @staticmethod
     def is_displayed(player):
         return 1 < player.round_number < 6
+
+
+class FinalPage(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == C.NUM_ROUNDS
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        config = player.session.config
+        return {
+            'completion_url': config.get('prolific_completion_url', ''),
+            'completion_code': config.get('prolific_completion_code', ''),
+        }
 
 
 page_sequence = [
@@ -379,5 +399,6 @@ page_sequence = [
     Work,
     Task,
     Results,
-    Survey
+    Survey,
+    FinalPage
 ]
