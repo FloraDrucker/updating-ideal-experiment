@@ -1,6 +1,5 @@
 from otree.api import *
 
-
 doc = """
 Instructions and consent
 """
