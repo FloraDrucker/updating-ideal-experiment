@@ -312,6 +312,255 @@ class Player(BasePlayer):
         widget=widgets.RadioSelectHorizontal,
     )
 
+    gender = models.IntegerField(
+        choices=[
+            [0, 'Male'],
+            [1, 'Female'],
+            [2, 'Diverse'],
+        ],
+        blank=False,
+        label='What is your gender?'
+    )
+
+    age = models.IntegerField(
+        choices=[(i, str(i)) for i in range(18, 101)],
+        blank=False,
+        label='What is your age?'
+    )
+
+    employment = models.IntegerField(
+        choices=[
+            [0, 'Unemployed and not currently looking for work'],
+            [1, 'Unemployed and looking for work'],
+            [2, 'Part-time employee'],
+            [3, 'Full-time employee'],
+            [4, 'Self-employed or business owner'],
+            [5, 'Retired'],
+            [6, 'Student'],
+        ],
+        blank=False,
+        label='What is your employment status?'
+    )
+
+    education = models.IntegerField(
+        choices=[
+            [0, 'Less than high school (no diploma)'],
+            [1, 'High school graduate (includes GED)'],
+            [2, 'Some college, no degree'],
+            [3, 'Associate degree (e.g., AA, AS)'],
+            [4, 'Bachelor’s degree (e.g., BA, BS)'],
+            [5, 'Master’s degree (e.g., MA, MS, MBA)'],
+            [6, 'Professional degree (e.g., MD, JD)'],
+            [7, 'Doctorate degree (e.g., PhD, EdD)'],
+        ],
+        blank=False,
+        label='What is your highest level of education?'
+    )
+
+    socialclass = models.IntegerField(
+        choices=[
+            [0, 'Lower class or poor'],
+            [1, 'Working class'],
+            [2, 'Middle class'],
+            [3, 'Upper-middle class'],
+            [4, 'Upper class'],
+        ],
+        blank=False,
+        label='If you had to use one of these five commonly-used names to describe your social class, wich one would it be?'
+    )
+
+    children = models.IntegerField(
+        min=0,
+        blank=False,
+        label='How many children do you have?'
+    )
+
+    mathgrade = models.StringField(
+        choices=[
+            'A', 'A-',
+            'B+', 'B', 'B-',
+            'C+', 'C', 'C-',
+            'D+', 'D', 'D-',
+            'F'
+        ],
+        blank=False,
+        label='What was your last math grade?'
+    )
+
+    BSCS_temptation = models.IntegerField(
+        label="I am good at resisting temptation.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    BSCS_badhabits = models.IntegerField(
+        label="I have a hard time breaking bad habits.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    BSCS_lazy = models.IntegerField(
+        label="I am lazy.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+
+    BSCS_inappropriate = models.IntegerField(
+        label="I say inappropriate things.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+
+    BSCS_dobadthings = models.IntegerField(
+        label="I do certain things that are bad for me, if they are fun.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+
+    BSCS_refusebad = models.IntegerField(
+        label="I refuse things that are bad for me.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    BSCS_morediscipline = models.IntegerField(
+        label="I wish I had more self-discipline.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    BSCS_irondiscipline = models.IntegerField(
+        label="People would say that I have iron self-discipline.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+
+    BSCS_pleasure = models.IntegerField(
+        label="Pleasure and fun sometimes keep me from getting work done.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+
+    BSCS_concentrating = models.IntegerField(
+        label="I have trouble concentrating.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    BSCS_work = models.IntegerField(
+        label="I am able to work effectively toward long-term goals.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    BSCS_stop = models.IntegerField(
+        label="Sometimes I can't stop myself from doing something, even if I know it is wrong.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    BSCS_alternatives = models.IntegerField(
+        label="I often act without thinking through all the alternatives.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
 
 def belief_error_message(player, value):
     if not base_constants.BENEFIT_RANGE_MIN <= value <= base_constants.BENEFIT_RANGE_MAX:
@@ -542,6 +791,9 @@ class Survey1(Page):
     def is_displayed(player):
         return player.round_number == 2
 
+    form_model = 'player'
+    form_fields = ['gender', 'age', 'employment', 'education', 'socialclass', 'children', 'mathgrade']
+
 
 class Survey2(Page):
     @staticmethod
@@ -599,6 +851,9 @@ class Survey5(Page):
     @staticmethod
     def is_displayed(player):
         return player.round_number == 6
+
+    form_model = 'player'
+    form_fields = ['BSCS_temptation', 'BSCS_badhabits', 'BSCS_lazy', 'BSCS_inappropriate', 'BSCS_dobadthings', 'BSCS_refusebad', 'BSCS_morediscipline', 'BSCS_irondiscipline', 'BSCS_pleasure', 'BSCS_concentrating', 'BSCS_work', 'BSCS_stop', 'BSCS_alternatives']
 
 
 class FinalPage(Page):
