@@ -172,6 +172,7 @@ def creating_session(subsession: Subsession):
         p.participant.vars['predicted'] = {i+1: None for i in range(12)}
         p.participant.vars['link_click_count'] = {i: None for i in range(C.NUM_ROUNDS)}
         p.participant.vars['active_tab_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
+        p.participant.vars['risk_choices'] = {i+1: None for i in range(21)}
         print("Participant:", p.participant.code, "Variables:", p.participant.vars)
 
     # TODO: select the 3 percent here?
