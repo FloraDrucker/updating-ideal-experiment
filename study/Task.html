@@ -123,11 +123,11 @@ td {
 {% endblock %}
 
 {% block content %}
-<input type="hidden" name="performance" id="performance">{{ form.performance.errors }}
-<input type="hidden" name="mistakes" id="mistakes">{{ form.mistakes.errors }}
+<input type="hidden" name="performance" id="performance"><span hidden>{{ form.performance.errors }}</span>
+<input type="hidden" name="mistakes" id="mistakes"> <span hidden>{{ form.mistakes.errors }}</span>
 
 <p>
-    Your performance so far: {{ player.performance }} tasks.
+    Your performance so far: <span id="performance-display">{{ player.performance }}</span>  tasks.
 </p>
 
 <div class="test" id="hide_task">
@@ -231,6 +231,7 @@ function myFunction() {
         document.getElementById("performance").value = temp;
         document.getElementById("error-form").style.display = "none";
         let performance = Number(document.getElementById("performance").value);
+        document.getElementById("performance-display").innerText = performance;
         liveSend({'performance': performance});
         document.getElementById("task_code_0").focus();
 
@@ -338,6 +339,7 @@ function genNewDict() {
 
 function liveRecv(data) {
     document.getElementById("performance").value = data.performance;
+    document.getElementById("performance-display").innerText = data.performance;
     if (data.shuffle) {
         dict = genNewDict();
         shuffle(legend_letters);
