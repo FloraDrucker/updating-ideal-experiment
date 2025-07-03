@@ -144,6 +144,174 @@ class Player(BasePlayer):
         label="What do you think is the true task payoff in cents?"
     )
 
+    risk_0 = models.IntegerField(
+        choices=[
+            [0, '0 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_50 = models.IntegerField(
+        choices=[
+            [0, '50 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_100 = models.IntegerField(
+        choices=[
+            [0, '100 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_150 = models.IntegerField(
+        choices=[
+            [0, '150 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_200 = models.IntegerField(
+        choices=[
+            [0, '200 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_250 = models.IntegerField(
+        choices=[
+            [0, '250 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_300 = models.IntegerField(
+        choices=[
+            [0, '300 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_350 = models.IntegerField(
+        choices=[
+            [0, '350 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_400 = models.IntegerField(
+        choices=[
+            [0, '400 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_450 = models.IntegerField(
+        choices=[
+            [0, '450 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_500 = models.IntegerField(
+        choices=[
+            [0, '500 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_550 = models.IntegerField(
+        choices=[
+            [0, '550 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_600 = models.IntegerField(
+        choices=[
+            [0, '600 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_650 = models.IntegerField(
+        choices=[
+            [0, '650 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_700 = models.IntegerField(
+        choices=[
+            [0, '700 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_750 = models.IntegerField(
+        choices=[
+            [0, '750 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_800 = models.IntegerField(
+        choices=[
+            [0, '800 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_850 = models.IntegerField(
+        choices=[
+            [0, '850 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_900 = models.IntegerField(
+        choices=[
+            [0, '900 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_950 = models.IntegerField(
+        choices=[
+            [0, '950 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_1000 = models.IntegerField(
+        choices=[
+            [0, '1000 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
 
 def belief_error_message(player, value):
     if not base_constants.BENEFIT_RANGE_MIN <= value <= base_constants.BENEFIT_RANGE_MAX:
@@ -385,6 +553,15 @@ class Survey3(Page):
     @staticmethod
     def is_displayed(player):
         return player.round_number == 4
+
+    form_model = 'player'
+    form_fields = [
+        'risk_0', 'risk_50', 'risk_100', 'risk_150', 'risk_200',
+        'risk_250', 'risk_300', 'risk_350', 'risk_400', 'risk_450',
+        'risk_500', 'risk_550', 'risk_600', 'risk_650', 'risk_700',
+        'risk_750', 'risk_800', 'risk_850', 'risk_900', 'risk_950',
+        'risk_1000'
+    ]
 
 
 class Survey4(Page):
