@@ -221,97 +221,175 @@ class Player(BasePlayer):
 
     BSCS_temptation = models.IntegerField(
         label="I am good at resisting temptation.",
-        choices=[1, 2, 3, 4, 5],
-        widget=widgets.SliderInput,
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
         blank=False
     )
 
     BSCS_badhabits = models.IntegerField(
         label="I have a hard time breaking bad habits.",
-        choices=[1, 2, 3, 4, 5],
-        widget=widgets.SliderInput,
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
         blank=False
     )
 
     BSCS_lazy = models.IntegerField(
         label="I am lazy.",
-        choices=[1, 2, 3, 4, 5],
-        widget=widgets.SliderInput,
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
         blank=False
     )
 
 
     BSCS_inappropriate = models.IntegerField(
         label="I say inappropriate things.",
-        choices=[1, 2, 3, 4, 5],
-        widget=widgets.SliderInput,
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
         blank=False
     )
 
 
     BSCS_dobadthings = models.IntegerField(
         label="I do certain things that are bad for me, if they are fun.",
-        choices=[1, 2, 3, 4, 5],
-        widget=widgets.SliderInput,
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
         blank=False
     )
 
 
     BSCS_refusebad = models.IntegerField(
         label="I refuse things that are bad for me.",
-        choices=[1, 2, 3, 4, 5],
-        widget=widgets.SliderInput,
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
         blank=False
     )
 
     BSCS_morediscipline = models.IntegerField(
         label="I wish I had more self-discipline.",
-        choices=[1, 2, 3, 4, 5],
-        widget=widgets.SliderInput,
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
         blank=False
     )
 
     BSCS_irondiscipline = models.IntegerField(
         label="People would say that I have iron self-discipline.",
-        choices=[1, 2, 3, 4, 5],
-        widget=widgets.SliderInput,
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
         blank=False
     )
 
 
     BSCS_pleasure = models.IntegerField(
         label="Pleasure and fun sometimes keep me from getting work done.",
-        choices=[1, 2, 3, 4, 5],
-        widget=widgets.SliderInput,
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
         blank=False
     )
 
 
     BSCS_concentrating = models.IntegerField(
         label="I have trouble concentrating.",
-        choices=[1, 2, 3, 4, 5],
-        widget=widgets.SliderInput,
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
         blank=False
     )
 
     BSCS_work = models.IntegerField(
         label="I am able to work effectively toward long-term goals.",
-        choices=[1, 2, 3, 4, 5],
-        widget=widgets.SliderInput,
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
         blank=False
     )
 
     BSCS_stop = models.IntegerField(
         label="Sometimes I can't stop myself from doing something, even if I know it is wrong.",
-        choices=[1, 2, 3, 4, 5],
-        widget=widgets.SliderInput,
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
         blank=False
     )
 
     BSCS_alternatives = models.IntegerField(
         label="I often act without thinking through all the alternatives.",
-        choices=[1, 2, 3, 4, 5],
-        widget=widgets.SliderInput,
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
         blank=False
     )
 
