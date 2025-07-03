@@ -448,6 +448,9 @@ class Survey1(Page):
     def is_displayed(player):
         return player.round_number == 2
 
+    form_model = 'player'
+    form_fields = ['gender', 'age', 'employment', 'education', 'socialclass', 'children', 'mathgrade']
+
 
 class Survey2(Page):
     @staticmethod
