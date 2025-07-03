@@ -563,6 +563,31 @@ class Survey3(Page):
         'risk_1000'
     ]
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        player.participant.vars['risk_choices'][1] = player.risk_0
+        player.participant.vars['risk_choices'][2] = player.risk_50
+        player.participant.vars['risk_choices'][3] = player.risk_100
+        player.participant.vars['risk_choices'][4] = player.risk_150
+        player.participant.vars['risk_choices'][5] = player.risk_200
+        player.participant.vars['risk_choices'][6] = player.risk_250
+        player.participant.vars['risk_choices'][7] = player.risk_300
+        player.participant.vars['risk_choices'][8] = player.risk_350
+        player.participant.vars['risk_choices'][9] = player.risk_400
+        player.participant.vars['risk_choices'][10] = player.risk_450
+        player.participant.vars['risk_choices'][11] = player.risk_500
+        player.participant.vars['risk_choices'][12] = player.risk_550
+        player.participant.vars['risk_choices'][13] = player.risk_600
+        player.participant.vars['risk_choices'][14] = player.risk_650
+        player.participant.vars['risk_choices'][15] = player.risk_700
+        player.participant.vars['risk_choices'][16] = player.risk_750
+        player.participant.vars['risk_choices'][17] = player.risk_800
+        player.participant.vars['risk_choices'][18] = player.risk_850
+        player.participant.vars['risk_choices'][19] = player.risk_900
+        player.participant.vars['risk_choices'][20] = player.risk_950
+        player.participant.vars['risk_choices'][21] = player.risk_1000
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
+
 
 class Survey4(Page):
     @staticmethod
