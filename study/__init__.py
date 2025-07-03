@@ -368,10 +368,34 @@ class Results(Page):
     pass  # this we don't need actually. or do we?
 
 
-class Survey(Page):
+class Survey1(Page):
     @staticmethod
     def is_displayed(player):
-        return 1 < player.round_number < 6
+        return player.round_number == 2
+
+
+class Survey2(Page):
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number == 3
+
+
+class Survey3(Page):
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number == 4
+
+
+class Survey4(Page):
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number == 5
+
+
+class Survey5(Page):
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number == 6
 
 
 class FinalPage(Page):
@@ -399,6 +423,10 @@ page_sequence = [
     Work,
     Task,
     Results,
-    Survey,
+    Survey1,
+    Survey2,
+    Survey3,
+    Survey4,
+    Survey5,
     FinalPage
 ]
