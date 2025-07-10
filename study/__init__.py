@@ -143,6 +143,424 @@ class Player(BasePlayer):
         blank=False,
         label="What do you think is the true task payoff in cents?"
     )
+
+    risk_0 = models.IntegerField(
+        choices=[
+            [0, '0 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_50 = models.IntegerField(
+        choices=[
+            [0, '50 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_100 = models.IntegerField(
+        choices=[
+            [0, '100 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_150 = models.IntegerField(
+        choices=[
+            [0, '150 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_200 = models.IntegerField(
+        choices=[
+            [0, '200 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_250 = models.IntegerField(
+        choices=[
+            [0, '250 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_300 = models.IntegerField(
+        choices=[
+            [0, '300 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_350 = models.IntegerField(
+        choices=[
+            [0, '350 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_400 = models.IntegerField(
+        choices=[
+            [0, '400 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_450 = models.IntegerField(
+        choices=[
+            [0, '450 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_500 = models.IntegerField(
+        choices=[
+            [0, '500 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_550 = models.IntegerField(
+        choices=[
+            [0, '550 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_600 = models.IntegerField(
+        choices=[
+            [0, '600 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_650 = models.IntegerField(
+        choices=[
+            [0, '650 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_700 = models.IntegerField(
+        choices=[
+            [0, '700 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_750 = models.IntegerField(
+        choices=[
+            [0, '750 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_800 = models.IntegerField(
+        choices=[
+            [0, '800 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_850 = models.IntegerField(
+        choices=[
+            [0, '850 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_900 = models.IntegerField(
+        choices=[
+            [0, '900 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_950 = models.IntegerField(
+        choices=[
+            [0, '950 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    risk_1000 = models.IntegerField(
+        choices=[
+            [0, '1000 points'],
+            [1, '50 % chance of 1000 points, 50 % chance of 0 points'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+    )
+
+    gender = models.IntegerField(
+        choices=[
+            [0, 'Male'],
+            [1, 'Female'],
+            [2, 'Diverse'],
+        ],
+        blank=False,
+        label='What is your gender?'
+    )
+
+    age = models.IntegerField(
+        choices=[(i, str(i)) for i in range(18, 101)],
+        blank=False,
+        label='What is your age?'
+    )
+
+    employment = models.IntegerField(
+        choices=[
+            [0, 'Unemployed and not currently looking for work'],
+            [1, 'Unemployed and looking for work'],
+            [2, 'Part-time employee'],
+            [3, 'Full-time employee'],
+            [4, 'Self-employed or business owner'],
+            [5, 'Retired'],
+            [6, 'Student'],
+        ],
+        blank=False,
+        label='What is your employment status?'
+    )
+
+    education = models.IntegerField(
+        choices=[
+            [0, 'Less than high school (no diploma)'],
+            [1, 'High school graduate (includes GED)'],
+            [2, 'Some college, no degree'],
+            [3, 'Associate degree (e.g., AA, AS)'],
+            [4, 'Bachelor’s degree (e.g., BA, BS)'],
+            [5, 'Master’s degree (e.g., MA, MS, MBA)'],
+            [6, 'Professional degree (e.g., MD, JD)'],
+            [7, 'Doctorate degree (e.g., PhD, EdD)'],
+        ],
+        blank=False,
+        label='What is your highest level of education?'
+    )
+
+    socialclass = models.IntegerField(
+        choices=[
+            [0, 'Lower class or poor'],
+            [1, 'Working class'],
+            [2, 'Middle class'],
+            [3, 'Upper-middle class'],
+            [4, 'Upper class'],
+        ],
+        blank=False,
+        label='If you had to use one of these five commonly-used names to describe your social class, wich one would it be?'
+    )
+
+    children = models.IntegerField(
+        min=0,
+        blank=False,
+        label='How many children do you have?'
+    )
+
+    mathgrade = models.StringField(
+        choices=[
+            'A', 'A-',
+            'B+', 'B', 'B-',
+            'C+', 'C', 'C-',
+            'D+', 'D', 'D-',
+            'F'
+        ],
+        blank=False,
+        label='What was your last math grade?'
+    )
+
+    BSCS_temptation = models.IntegerField(
+        label="I am good at resisting temptation.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    BSCS_badhabits = models.IntegerField(
+        label="I have a hard time breaking bad habits.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    BSCS_lazy = models.IntegerField(
+        label="I am lazy.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+
+    BSCS_inappropriate = models.IntegerField(
+        label="I say inappropriate things.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+
+    BSCS_dobadthings = models.IntegerField(
+        label="I do certain things that are bad for me, if they are fun.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+
+    BSCS_refusebad = models.IntegerField(
+        label="I refuse things that are bad for me.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    BSCS_morediscipline = models.IntegerField(
+        label="I wish I had more self-discipline.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    BSCS_irondiscipline = models.IntegerField(
+        label="People would say that I have iron self-discipline.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+
+    BSCS_pleasure = models.IntegerField(
+        label="Pleasure and fun sometimes keep me from getting work done.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+
+    BSCS_concentrating = models.IntegerField(
+        label="I have trouble concentrating.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    BSCS_work = models.IntegerField(
+        label="I am able to work effectively toward long-term goals.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    BSCS_stop = models.IntegerField(
+        label="Sometimes I can't stop myself from doing something, even if I know it is wrong.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    BSCS_alternatives = models.IntegerField(
+        label="I often act without thinking through all the alternatives.",
+        choices=[
+            [1, '1: Not at all like me'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5: Very much like me'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
     #Wechsler Level
     digitspan_max_level = models.IntegerField(
         initial=0,
@@ -381,11 +799,9 @@ class Survey1(Page):
 
 
 class Survey2(Page):
-    form_model = 'player'
-    form_fields = ['digitspan_max_level']
     @staticmethod
     def is_displayed(player):
-        return player.round_number == 1
+        return player.round_number == 3
 
 
 class Survey3(Page):
@@ -424,7 +840,6 @@ page_sequence = [
     PartStart,
     Interval,
     Ideal,
-    Survey2,
     Predicted,
     Performance,
     Belief,
@@ -433,6 +848,7 @@ page_sequence = [
     Task,
     Results,
     Survey1,
+    Survey2,
     Survey3,
     Survey4,
     Survey5,

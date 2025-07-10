@@ -1,17 +1,38 @@
 {% extends "global/Page.html" %}
 {% load otree %}
 
-{% block title %}
-    Please answer the following questions.
+{% block content %}
+  <form id="form" method="post">
+    {% csrf_token %}
+
+    {{ formfield_errors 'digitspan_max_level' }}
+    <input type="hidden"
+           name="digitspan_max_level"
+           id="digitspan_max_level"
+           value="0">
+
+    <div id="digit-display"></div>
+    <input id="response" type="text" style="display:none" autocomplete="off"/>
+    <button id="next-btn" type="button" style="display:none">Next</button>
+  </form>
 {% endblock %}
 
 {% block content %}
 
-<p>
-    Survey questions.
-</p>
 
 
+<script>
+  const sequences = [
+    [[23],      [47]],       // level 1: 2-digit
+    [[123],     [246]],      // level 2: 3-digit
+    [[3456],    [7890]],     // level 3: 4-digit
+    [[56789],   [01234]],    // level 4: 5-digit
+    [[678901],  [234567]],   // level 5: 6-digit
+    [[7890123], [3456789]],  // level 6: 7-digit
+    [[89012345],[45678901]]  // level 7: 8-digit
+  ];
+    
+</script>
 {% next_button %}
 
 

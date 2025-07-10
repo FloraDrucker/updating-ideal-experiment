@@ -2,15 +2,53 @@
 {% load otree %}
 
 {% block title %}
-    Please answer the following questions.
+    Survey 3
 {% endblock %}
+
 
 {% block content %}
 
-<p>
-    Survey questions.
-</p>
+<p> Please choose an option in each row. </p>
 
+
+<style>
+    table.TheTable td.buttonGroup {
+        text-align: left;
+    }
+
+    .buttonWrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5em;
+        margin: 0.5em 0;
+    }
+</style>
+
+<table class="table TheTable">
+    <colgroup>
+        <col style="width: 50%;">
+        <col style="width: 50%;">
+    </colgroup>
+    <thead>
+        <tr>
+            <th>Safe payment</th>
+            <th>Lottery</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for field in form %}
+            <tr>
+                {% for choice in field %}
+                    <td class="buttonGroup">
+                        <label class="buttonWrap">
+                            {{ choice }} {{ choice.label }}
+                        </label>
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 {% next_button %}
 
