@@ -561,6 +561,39 @@ class Player(BasePlayer):
         blank=False
     )
 
+    averagetask = models.FloatField(
+        min=0,
+        max=555,
+        blank=False,
+        label='What is the average of the following five numbers? 123, 88, 147, 102, 95'
+    )
+
+    ballsremembered = models.IntegerField(
+        choices=[
+            [0, '0'],
+            [1, '1'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7'],
+            [8, '8'],
+            [9, '9'],
+            [10, '10'],
+            [11, 'I cannot remember how many times I have seen a ball with this number on it.'],
+        ],
+        blank=False,
+        label='How many times have you seen a ball with the number 135 on it over the course of the experiment?'
+    )
+
+    screenshot = models.BooleanField(
+        choices=[[True, 'Yes'], [False, 'No']],
+        widget=widgets.RadioSelect,
+        blank=False,
+        label='Did you make a screenshot or a photo of the balls shown to you?'
+    )
+
 
 def belief_error_message(player, value):
     if not base_constants.BENEFIT_RANGE_MIN <= value <= base_constants.BENEFIT_RANGE_MAX:
@@ -853,7 +886,7 @@ class Survey5(Page):
         return player.round_number == 6
 
     form_model = 'player'
-    form_fields = ['BSCS_temptation', 'BSCS_badhabits', 'BSCS_lazy', 'BSCS_inappropriate', 'BSCS_dobadthings', 'BSCS_refusebad', 'BSCS_morediscipline', 'BSCS_irondiscipline', 'BSCS_pleasure', 'BSCS_concentrating', 'BSCS_work', 'BSCS_stop', 'BSCS_alternatives']
+    form_fields = ['BSCS_temptation', 'BSCS_badhabits', 'BSCS_lazy', 'BSCS_inappropriate', 'BSCS_dobadthings', 'BSCS_refusebad', 'BSCS_morediscipline', 'BSCS_irondiscipline', 'BSCS_pleasure', 'BSCS_concentrating', 'BSCS_work', 'BSCS_stop', 'BSCS_alternatives', 'averagetask', 'ballsremembered','screenshot']
 
 
 class FinalPage(Page):
