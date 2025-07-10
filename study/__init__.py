@@ -600,7 +600,7 @@ def creating_session(subsession: Subsession):
 
     # TODO: select the 3 percent here?
 
-
+# This is the Live Send code, so that performance etc can be stored immediately
 def live_update_performance(player: Player, data):
     own_id = player.id_in_group
     if 'performance' in data:
@@ -611,7 +611,9 @@ def live_update_performance(player: Player, data):
     else:
         shuffle = True
         print('received nothing, shuffle?', shuffle)
-    answer = dict(performance=player.performance, shuffle=shuffle)
+    if 'link_click_count' in data:
+        player.link_click_count = data['link_click_count']
+    answer = dict(performance=player.performance, link_click_count=player.link_click_count, shuffle=shuffle)
     return {own_id: answer}
 
 
