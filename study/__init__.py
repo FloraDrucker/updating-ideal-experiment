@@ -1,6 +1,7 @@
 from otree.api import *
 import random, string, json
 from instructions_consent import C as base_constants
+import numpy as np
 
 doc = """
 Study
@@ -39,6 +40,8 @@ class Player(BasePlayer):
     mistakes = models.IntegerField(initial=0, blank=False)
     link_click_count = models.IntegerField(initial=0) # Added this to track the links clicked in the Task.html
     active_tab_seconds = models.IntegerField(initial=0) # Added this to track the time spend on the Tab
+    do_ideal = models.BooleanField(initial=False) # whether the participant has to do the stated ideal number of tasks
+    ideal_to_do = models.IntegerField(blank=True)
     # Ideal values
     ideal50 = models.IntegerField(
         blank=False,
@@ -587,12 +590,12 @@ def creating_session(subsession: Subsession):
         p.participant.vars['belief'] = {i+1: None for i in range(C.NUM_ROUNDS-1)}
         p.participant.vars['ideal'] = {i+1: None for i in range(12)}
         p.participant.vars['predicted'] = {i+1: None for i in range(12)}
+        p.participant.vars['do_ideal'] = False
+        p.participant.vars['ideal_to_do'] = None
         p.participant.vars['link_click_count'] = {i: None for i in range(C.NUM_ROUNDS)}
         p.participant.vars['active_tab_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
         p.participant.vars['risk_choices'] = {i+1: None for i in range(21)}
         print("Participant:", p.participant.code, "Variables:", p.participant.vars)
-
-    # TODO: select the 3 percent here?
 
 
 def live_update_performance(player: Player, data):
@@ -741,7 +744,18 @@ class Belief(Page):
     def before_next_page(player, timeout_happened):
         if player.round_number > 1:
             player.participant.vars['belief'][player.round_number-1] = player.belief
-        print("Participant:", player.participant.code, "Variables:", player.participant.vars)  # TODO: remind them here about the interval again?
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
+        # TODO: remind them here about the interval again?
+
+        if player.round_number == 6:
+            player.do_ideal = np.random.choice([True, False], p=[0.03, 0.97])
+            player.participant.vars['do_ideal'] = player.do_ideal
+
+        # do either the ideal stated in the first round or in the last round:
+        if player.do_ideal:
+            player.ideal_to_do = np.random.choice(player.participant.vars['ideal'][8],
+                                                  player.participant.vars['ideal'][12])
+            player.participant.vars['ideal_to_do'] = player.ideal_to_do
 
 
 class Signal(Page):
@@ -753,7 +767,9 @@ class Signal(Page):
 
 
 class Work(Page):  # in period 5, we tell the participants the number of tasks they have to do here
-    pass  # TODO: only display this to the x percent in period 6 or in all periods but different text?
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number > 1
 
 
 class Task(Page):
