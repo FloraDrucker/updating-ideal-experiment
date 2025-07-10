@@ -203,6 +203,7 @@ td {
   const alphabet = genCharArray('A', 'Z');
   const legend_letters = alphabet;
   const word_letters = alphabet;
+  const required_tasks = {{required_tasks | safe}};
 
 document.addEventListener("DOMContentLoaded", (event) => {
     liveSend({});
@@ -234,6 +235,10 @@ function myFunction() {
         document.getElementById("performance-display").innerText = performance;
         liveSend({'performance': performance});
         document.getElementById("task_code_0").focus();
+
+        if (document.getElementById("performance").value == required_tasks) {
+        document.getElementById("next-button").click();
+        }
 
         let dict=genNewDict();
         shuffle(legend_letters);

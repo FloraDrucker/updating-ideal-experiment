@@ -41,8 +41,9 @@ class Player(BasePlayer):
     link_click_count = models.IntegerField(initial=0) # Added this to track the links clicked in the Task.html
     active_tab_seconds = models.IntegerField(initial=0) # Added this to track the time spend on the Tab
     do_ideal = models.BooleanField(initial=False) # whether the participant has to do the stated ideal number of tasks
-    ideal_to_do = models.IntegerField(blank=True)
-    ideal_index = models.IntegerField(blank=True)
+    ideal_to_do = models.IntegerField(default=999)
+    ideal_index = models.IntegerField(null=True, blank=True, default=None)
+
     # Ideal values
     ideal50 = models.IntegerField(
         blank=False,
@@ -804,7 +805,9 @@ class Task(Page):
             'legend_list': legend_list,
             'letters_per_word': letters_per_word,
             'task_list': task_list,
+            'required_tasks': player.ideal_to_do
         }
+
 
     @staticmethod
     def before_next_page(player, timeout_happened):
