@@ -139,7 +139,7 @@ td {
 
 <!-- linkclick tracker-->
 <input type="hidden" name="link_click_count"
-       id="link_click_count" value="0">
+       id="link_click_count" value="{{ player.link_click_count }}">
 <!-- duration tracker-->
 <input
   type="hidden"
@@ -340,6 +340,7 @@ function genNewDict() {
 function liveRecv(data) {
     document.getElementById("performance").value = data.performance;
     document.getElementById("performance-display").innerText = data.performance;
+    document.getElementById('link_click_count').value = data.link_click_count;
     if (data.shuffle) {
         dict = genNewDict();
         shuffle(legend_letters);
@@ -394,8 +395,10 @@ setTimeout(() => {
 // Listen for any link click and mark the hidden field
 document.querySelectorAll('a').forEach(link => {
   link.addEventListener('click', () => {
-    const input = document.getElementById('link_click_count');
-    input.value = parseInt(input.value, 10) + 1;
+    const inp = document.getElementById('link_click_count');
+    const newCount = parseInt(inp.value, 10) + 1;
+    inp.value = newCount;
+    liveSend({ link_click_count: newCount });
   });
 });
 
