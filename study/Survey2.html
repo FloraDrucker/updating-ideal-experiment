@@ -1,39 +1,84 @@
 {% extends "global/Page.html" %}
-{% load otree %}
+{% load otree static %}
 
 {% block content %}
-  <form id="form" method="post">
-    {% csrf_token %}
-
-    {{ formfield_errors 'digitspan_max_level' }}
-    <input type="hidden"
-           name="digitspan_max_level"
-           id="digitspan_max_level"
-           value="0">
-
-    <div id="digit-display"></div>
-    <input id="response" type="text" style="display:none" autocomplete="off"/>
-    <button id="next-btn" type="button" style="display:none">Next</button>
-  </form>
+<form id="digitspan-form" method="post">
+  <input type="hidden" name="digitspan_max_level" id="digitspan_max_level" value="0">
+  <div id="display-box" style="font-size:2em; height:2em; margin:1em 0;"></div>
+  <div id="input-block" style="display:none;">
+    <input id="response" type="text" autocomplete="off"
+           style="font-size:1.5em; width:6em;">
+    <button id="submit-btn" type="button">OK</button>
+  </div>
+  <button id="next-page-btn" type="submit" style="display:none;margin-top:1em;">
+    Next
+  </button>
+</form>
 {% endblock %}
 
-{% block content %}
-
-
-
+{% block scripts %}
 <script>
+(function(){
   const sequences = [
-    [[23],      [47]],       // level 1: 2-digit
-    [[123],     [246]],      // level 2: 3-digit
-    [[3456],    [7890]],     // level 3: 4-digit
-    [[56789],   [01234]],    // level 4: 5-digit
-    [[678901],  [234567]],   // level 5: 6-digit
-    [[7890123], [3456789]],  // level 6: 7-digit
-    [[89012345],[45678901]]  // level 7: 8-digit
+    [23,47],[123,246],[3456,7890],[56789,01234],
+    [678901,234567],[7890123,3456789],[89012345,45678901],
+    [901234567,567890123]
   ];
-    
+  let level=0, stage=0, correctCount=0;
+
+  const disp      = document.getElementById('display-box'),
+        inputBlk  = document.getElementById('input-block'),
+        resp      = document.getElementById('response'),
+        btn       = document.getElementById('submit-btn'),
+        form      = document.getElementById('digitspan-form'),
+        maxField  = document.getElementById('digitspan_max_level'),
+        nextBtn   = document.getElementById('next-page-btn');
+
+  // allow Enter to trigger OK
+  resp.addEventListener('keydown', e=>{
+    if(e.key==='Enter'){
+      e.preventDefault();
+      btn.click();
+    }
+  });
+
+  function showTrial(){
+    disp.textContent = sequences[level][stage];
+    setTimeout(()=>{
+      disp.textContent = '';
+      inputBlk.style.display = 'block';
+      resp.value = '';
+      resp.focus();
+    },5000);
+  }
+
+  function finishTask(){
+    maxField.value = level;
+    inputBlk.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+  }
+
+  btn.addEventListener('click', ()=>{
+    inputBlk.style.display = 'none';
+    const answer = resp.value.trim();
+    if(answer===sequences[level][stage].toString()){
+      correctCount++;
+    }
+    stage++;
+    if(stage<2){
+      showTrial();
+    } else {
+      if(correctCount>0 && level<sequences.length-1){
+        level++; stage=0; correctCount=0;
+        showTrial();
+      } else {
+        finishTask();
+      }
+    }
+  });
+
+  // start
+  showTrial();
+})();
 </script>
-{% next_button %}
-
-
 {% endblock %}
