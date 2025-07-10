@@ -21,7 +21,7 @@ class C(BaseConstants):
         6: 'Part Five',
     }
     USE_TIMEOUT = True
-    TIMEOUT_SECONDS = 20  # TODO: set this to 600 for the real experiment (10 minutes)
+    TIMEOUT_SECONDS = 60  # TODO: set this to 600 for the real experiment (10 minutes)
     TIMEOUT_MINUTES = round(TIMEOUT_SECONDS / 60)
     TASK_LENGTH = 4
     SIGNAL_TIMEOUT = 5  # seconds signal is shown
@@ -594,6 +594,7 @@ def creating_session(subsession: Subsession):
         p.participant.vars['predicted'] = {i+1: None for i in range(12)}
         p.participant.vars['do_ideal'] = False
         p.participant.vars['ideal_to_do'] = None
+        p.participant.vars['ideal_index'] = None
         p.participant.vars['link_click_count'] = {i: None for i in range(C.NUM_ROUNDS)}
         p.participant.vars['active_tab_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
         p.participant.vars['risk_choices'] = {i+1: None for i in range(21)}
@@ -751,15 +752,16 @@ class Belief(Page):
 
         if player.round_number == 6:
             prob_ideal = round(base_constants.PERCENT_IDEAL/100, 2)
-            player.do_ideal = np.random.choice([True, False],
-                                               p=[prob_ideal, 1-prob_ideal])
+            player.do_ideal = bool(np.random.choice([True, False],
+                                               p=[prob_ideal, 1-prob_ideal]))
             player.participant.vars['do_ideal'] = player.do_ideal
 
         # do either the ideal stated in the first round or in the last round:
             if player.do_ideal:
-                player.ideal_index = np.random.choice([8, 12])
+                player.ideal_index = int(np.random.choice([8, 12]))
                 player.ideal_to_do = player.participant.vars['ideal'][player.ideal_index]
                 player.participant.vars['ideal_to_do'] = player.ideal_to_do
+                player.participant.vars['ideal_index'] = player.ideal_index
         print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 

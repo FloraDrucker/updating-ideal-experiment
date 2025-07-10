@@ -15,7 +15,7 @@ class C(BaseConstants):
     SCALING_PAR = 25  # TODO: change this!! scaling parameter for the binarized quadratic scoring rule
     BENEFIT_RANGE_MIN = 50
     BENEFIT_RANGE_MAX = 150
-    PERCENT_IDEAL = 5  # percentage chance that they will have to do the ideal number of tasks
+    PERCENT_IDEAL = 80  # percentage chance that they will have to do the ideal number of tasks
 
 
 class Subsession(BaseSubsession):
@@ -34,7 +34,6 @@ def creating_session(subsession: Subsession):
     # define participant variables
     for p in subsession.get_players():
         p.participant.vars['consent'] = None
-        print(p.participant.vars)
 
 
 # PAGES
