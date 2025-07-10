@@ -2,18 +2,27 @@
 {% load otree static %}
 
 {% block content %}
-<form id="digitspan-form" method="post">
-  <input type="hidden" name="digitspan_max_level" id="digitspan_max_level" value="0">
-  <div id="display-box" style="font-size:2em; height:2em; margin:1em 0;"></div>
-  <div id="input-block" style="display:none;">
-    <input id="response" type="text" autocomplete="off"
-           style="font-size:1.5em; width:6em;">
-    <button id="submit-btn" type="button">OK</button>
+  <!-- INSTRUCTIONS -->
+  <div id="instructions" style="font-size:1.2em; line-height:1.4; margin-bottom:2em;">
+    <p><strong>This is a memory test.</strong></p>
+    <p>In the following you are going to be presented a sequence of numbers. After a few seconds the numbers will disappear. After the numbers disappear, please type in the exact sequence of numbers that was presented to you.</p>
+    <p>The sequences will get longer throughout the survey. After failing a sequence of the same length twice, you will proceed to the next round of encryption tasks.</p>
+    <button id="start-btn" type="button" style="padding:0.5em 1em;">Start Test</button>
   </div>
-  <button id="next-page-btn" type="submit" style="display:none;margin-top:1em;">
-    Next
-  </button>
-</form>
+
+  <!-- TASK FORM (always in DOM) -->
+  <form id="digitspan-form" method="post">
+    <input type="hidden" name="digitspan_max_level" id="digitspan_max_level" value="0">
+
+    <div id="display-box" style="display:none; font-size:2em; height:2em; margin:1.5em 0;"></div>
+
+    <div id="input-block" style="display:none; margin-bottom:1em;">
+      <input id="response" type="text" autocomplete="off" style="font-size:1.5em; width:6em;">
+      <button id="submit-btn" type="button" style="padding:0.5em 1em;">OK</button>
+    </div>
+
+    <button id="next-page-btn" type="submit" style="display:none; padding:0.5em 1em;">Next</button>
+  </form>
 {% endblock %}
 
 {% block scripts %}
@@ -26,30 +35,27 @@
   ];
   let level=0, stage=0, correctCount=0;
 
-  const disp      = document.getElementById('display-box'),
-        inputBlk  = document.getElementById('input-block'),
-        resp      = document.getElementById('response'),
-        btn       = document.getElementById('submit-btn'),
-        form      = document.getElementById('digitspan-form'),
-        maxField  = document.getElementById('digitspan_max_level'),
-        nextBtn   = document.getElementById('next-page-btn');
-
-  // allow Enter to trigger OK
-  resp.addEventListener('keydown', e=>{
-    if(e.key==='Enter'){
-      e.preventDefault();
-      btn.click();
-    }
-  });
+  const instr    = document.getElementById('instructions'),
+        startBtn = document.getElementById('start-btn'),
+        disp     = document.getElementById('display-box'),
+        inputBlk = document.getElementById('input-block'),
+        resp     = document.getElementById('response'),
+        okBtn    = document.getElementById('submit-btn'),
+        nextBtn  = document.getElementById('next-page-btn'),
+        maxField = document.getElementById('digitspan_max_level');
 
   function showTrial(){
+    // hide previous input
+    inputBlk.style.display = 'none';
+    // show the number
     disp.textContent = sequences[level][stage];
     setTimeout(()=>{
+      // after 5s, clear and show input
       disp.textContent = '';
       inputBlk.style.display = 'block';
       resp.value = '';
       resp.focus();
-    },5000);
+    }, 5000);
   }
 
   function finishTask(){
@@ -58,18 +64,25 @@
     nextBtn.style.display = 'inline-block';
   }
 
-  btn.addEventListener('click', ()=>{
+  // Enter → OK
+  resp.addEventListener('keydown', e => {
+    if (e.key==='Enter') {
+      e.preventDefault();
+      okBtn.click();
+    }
+  });
+
+  okBtn.addEventListener('click', ()=>{
     inputBlk.style.display = 'none';
-    const answer = resp.value.trim();
-    if(answer===sequences[level][stage].toString()){
+    if (resp.value.trim() === sequences[level][stage].toString()) {
       correctCount++;
     }
     stage++;
-    if(stage<2){
+    if (stage < 2) {
       showTrial();
     } else {
-      if(correctCount>0 && level<sequences.length-1){
-        level++; stage=0; correctCount=0;
+      if (correctCount > 0 && level < sequences.length - 1) {
+        level++; stage = 0; correctCount = 0;
         showTrial();
       } else {
         finishTask();
@@ -77,8 +90,12 @@
     }
   });
 
-  // start
-  showTrial();
+  startBtn.addEventListener('click', ()=>{
+    instr.style.display = 'none';
+    // show the display box immediately
+    disp.style.display = 'block';
+    showTrial();
+  });
 })();
 </script>
 {% endblock %}
