@@ -696,6 +696,13 @@ class Player(BasePlayer):
         blank=False
     )
 
+    #Wechsler Level
+    digitspan_max_level = models.IntegerField(
+        initial=0,
+        min=0,
+        max=8,
+        label="Max digit-span level reached"
+    )
 
 def belief_error_message(player, value):
     if not base_constants.BENEFIT_RANGE_MIN <= value <= base_constants.BENEFIT_RANGE_MAX:
@@ -729,7 +736,7 @@ def creating_session(subsession: Subsession):
 
     # TODO: select the 3 percent here?
 
-
+# This is the Live Send code, so that performance etc can be stored immediately
 def live_update_performance(player: Player, data):
     own_id = player.id_in_group
     if 'performance' in data:
@@ -740,7 +747,9 @@ def live_update_performance(player: Player, data):
     else:
         shuffle = True
         print('received nothing, shuffle?', shuffle)
-    answer = dict(performance=player.performance, shuffle=shuffle)
+    if 'link_click_count' in data:
+        player.link_click_count = data['link_click_count']
+    answer = dict(performance=player.performance, link_click_count=player.link_click_count, shuffle=shuffle)
     return {own_id: answer}
 
 
@@ -931,6 +940,8 @@ class Survey1(Page):
 
 
 class Survey2(Page):
+    form_model = 'player'
+    form_fields = ['digitspan_max_level']
     @staticmethod
     def is_displayed(player):
         return player.round_number == 3
