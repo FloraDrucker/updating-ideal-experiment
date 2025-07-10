@@ -42,6 +42,7 @@ class Player(BasePlayer):
     active_tab_seconds = models.IntegerField(initial=0) # Added this to track the time spend on the Tab
     do_ideal = models.BooleanField(initial=False) # whether the participant has to do the stated ideal number of tasks
     ideal_to_do = models.IntegerField(blank=True)
+    ideal_index = models.IntegerField(blank=True)
     # Ideal values
     ideal50 = models.IntegerField(
         blank=False,
@@ -748,14 +749,17 @@ class Belief(Page):
         # TODO: remind them here about the interval again?
 
         if player.round_number == 6:
-            player.do_ideal = np.random.choice([True, False], p=[0.03, 0.97])
+            prob_ideal = round(base_constants.PERCENT_IDEAL/100, 2)
+            player.do_ideal = np.random.choice([True, False],
+                                               p=[prob_ideal, 1-prob_ideal])
             player.participant.vars['do_ideal'] = player.do_ideal
 
         # do either the ideal stated in the first round or in the last round:
-        if player.do_ideal:
-            player.ideal_to_do = np.random.choice(player.participant.vars['ideal'][8],
-                                                  player.participant.vars['ideal'][12])
-            player.participant.vars['ideal_to_do'] = player.ideal_to_do
+            if player.do_ideal:
+                player.ideal_index = np.random.choice([8, 12])
+                player.ideal_to_do = player.participant.vars['ideal'][player.ideal_index]
+                player.participant.vars['ideal_to_do'] = player.ideal_to_do
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
 class Signal(Page):
@@ -770,6 +774,18 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
     @staticmethod
     def is_displayed(player):
         return player.round_number > 1
+
+    @staticmethod
+    def vars_for_template(player):
+        if player.do_ideal:
+            part_ideal_elicited = {8: 'first part', 12: 'last part'}
+            return {
+                'ideal_to_do': player.ideal_to_do,
+                'percent_ideal': base_constants.PERCENT_IDEAL,
+                'part_ideal_elicited': part_ideal_elicited[player.ideal_index]
+            }
+        else:
+            pass
 
 
 class Task(Page):
