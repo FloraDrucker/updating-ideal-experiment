@@ -568,7 +568,7 @@ class Player(BasePlayer):
         label='What is the average of the following five numbers? 123, 88, 147, 102, 95'
     )
 
-    ballsremembered = models.IntegerField(
+    ballsremembered1 = models.IntegerField(
         choices=[
             [0, '0'],
             [1, '1'],
@@ -584,14 +584,116 @@ class Player(BasePlayer):
             [11, 'I cannot remember how many times I have seen a ball with this number on it.'],
         ],
         blank=False,
-        label='How many times have you seen a ball with the number 135 on it over the course of the experiment?'
+        label='How many times have you seen a ball with the number 137 on it over the course of the experiment?'
+    )
+
+    ballsremembered2 = models.IntegerField(
+        choices=[
+            [0, '0'],
+            [1, '1'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7'],
+            [8, '8'],
+            [9, '9'],
+            [10, '10'],
+            [11, 'I cannot remember how many times I have seen a ball with this number on it.'],
+        ],
+        blank=False,
+        label='How many times have you seen a ball with the number 109 on it over the course of the experiment?'
+    )
+
+    ballsremembered3 = models.IntegerField(
+        choices=[
+            [0, '0'],
+            [1, '1'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7'],
+            [8, '8'],
+            [9, '9'],
+            [10, '10'],
+            [11, 'I cannot remember how many times I have seen a ball with this number on it.'],
+        ],
+        blank=False,
+        label='How many times have you seen a ball with the number 122 on it over the course of the experiment?'
     )
 
     screenshot = models.BooleanField(
         choices=[[True, 'Yes'], [False, 'No']],
         widget=widgets.RadioSelect,
         blank=False,
-        label='Did you make a screenshot or a photo of the balls shown to you?'
+        label='Did you make a screenshot/photo of the balls shown to you or wrote the numbers on them down?'
+    )
+
+    GPS_patience = models.IntegerField(
+        label="How willing are you to give up something that is beneficial for you today in order to benefit more from that in the future on a scale from 0 'Completely unwilling to do so' to 10 'Very willing to do so'?",
+        choices=[
+            [0, '0: Completely unwilling to do so'],
+            [1, '1'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7'],
+            [8, '8'],
+            [9, '9'],
+            [10, '10: Very willing to do so'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    GPS_altruism1 = models.IntegerField(
+        label="How willing are you to give to good causes without expecting anything in return on a scale from 0 'Completely unwilling to do so' to 10 'Very willing to do so'?",
+        choices=[
+            [0, '0: Completely unwilling to do so'],
+            [1, '1'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7'],
+            [8, '8'],
+            [9, '9'],
+            [10, '10: Very willing to do so'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    GPS_altruism2 = models.IntegerField(
+        min=0,
+        max=1600,
+        blank=False,
+        label='Imagine the following situation: Today you unexpectedly received 1,600 U.S. dollars. How much of this amount would you donate to a good cause? (Values between 0 and 1,600 are allowed)'
+    )
+
+    GPS_postpone = models.IntegerField(
+        label="Do you tend to postpone tasks even if you know it would be better to do them right away on a scale from 0 'Completely unwilling to do so' to 10 'Very willing to do so'?",
+        choices=[
+            [0, '0: Completely unwilling to do so'],
+            [1, '1'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7'],
+            [8, '8'],
+            [9, '9'],
+            [10, '10: Very willing to do so'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
     )
 
 
@@ -879,6 +981,9 @@ class Survey4(Page):
     def is_displayed(player):
         return player.round_number == 5
 
+    form_model = 'player'
+    form_fields = ['GPS_patience', 'GPS_altruism1', 'GPS_altruism2', 'GPS_postpone']
+
 
 class Survey5(Page):
     @staticmethod
@@ -886,7 +991,7 @@ class Survey5(Page):
         return player.round_number == 6
 
     form_model = 'player'
-    form_fields = ['BSCS_temptation', 'BSCS_badhabits', 'BSCS_lazy', 'BSCS_inappropriate', 'BSCS_dobadthings', 'BSCS_refusebad', 'BSCS_morediscipline', 'BSCS_irondiscipline', 'BSCS_pleasure', 'BSCS_concentrating', 'BSCS_work', 'BSCS_stop', 'BSCS_alternatives', 'averagetask', 'ballsremembered','screenshot']
+    form_fields = ['BSCS_temptation', 'BSCS_badhabits', 'BSCS_lazy', 'BSCS_inappropriate', 'BSCS_dobadthings', 'BSCS_refusebad', 'BSCS_morediscipline', 'BSCS_irondiscipline', 'BSCS_pleasure', 'BSCS_concentrating', 'BSCS_work', 'BSCS_stop', 'BSCS_alternatives', 'averagetask', 'ballsremembered1', 'ballsremembered2', 'ballsremembered3','screenshot']
 
 
 class FinalPage(Page):
