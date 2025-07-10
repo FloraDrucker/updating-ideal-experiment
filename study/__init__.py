@@ -762,6 +762,7 @@ class Belief(Page):
                 player.ideal_to_do = player.participant.vars['ideal'][player.ideal_index]
                 player.participant.vars['ideal_to_do'] = player.ideal_to_do
                 player.participant.vars['ideal_index'] = player.ideal_index
+                print("Ideal to do:", player.ideal_to_do)
         print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 

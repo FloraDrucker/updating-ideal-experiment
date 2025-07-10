@@ -113,6 +113,10 @@ td {
     grid-column-gap: 1vw
 }
 
+.otree-btn-next{
+    display: none;
+}
+
 </style>
 {% endblock %}
 
@@ -125,6 +129,7 @@ td {
 {% block content %}
 <input type="hidden" name="performance" id="performance"><span hidden>{{ form.performance.errors }}</span>
 <input type="hidden" name="mistakes" id="mistakes"> <span hidden>{{ form.mistakes.errors }}</span>
+<button class="otree-btn-next btn btn-primary" id="next-button">Next</button>
 
 <p>
     Your performance so far: <span id="performance-display">{{ player.performance }}</span>  tasks.
