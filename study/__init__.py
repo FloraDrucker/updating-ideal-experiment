@@ -143,7 +143,13 @@ class Player(BasePlayer):
         blank=False,
         label="What do you think is the true task payoff in cents?"
     )
-
+    #Wechsler Level
+    digitspan_max_level = models.IntegerField(
+        initial=0,
+        min=0,
+        max=8,
+        label="Max digit-span level reached"
+    )
 
 def belief_error_message(player, value):
     if not base_constants.BENEFIT_RANGE_MIN <= value <= base_constants.BENEFIT_RANGE_MAX:
@@ -375,9 +381,11 @@ class Survey1(Page):
 
 
 class Survey2(Page):
+    form_model = 'player'
+    form_fields = ['digitspan_max_level']
     @staticmethod
     def is_displayed(player):
-        return player.round_number == 3
+        return player.round_number == 1
 
 
 class Survey3(Page):
@@ -416,6 +424,7 @@ page_sequence = [
     PartStart,
     Interval,
     Ideal,
+    Survey2,
     Predicted,
     Performance,
     Belief,
@@ -424,7 +433,6 @@ page_sequence = [
     Task,
     Results,
     Survey1,
-    Survey2,
     Survey3,
     Survey4,
     Survey5,
