@@ -799,6 +799,8 @@ class Survey1(Page):
 
 
 class Survey2(Page):
+    form_model = 'player'
+    form_fields = ['digitspan_max_level']
     @staticmethod
     def is_displayed(player):
         return player.round_number == 3
