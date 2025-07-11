@@ -113,7 +113,7 @@ td {
     grid-column-gap: 1vw
 }
 
-.otree-btn-next{
+#next-button{
     display: none;
 }
 
@@ -129,7 +129,6 @@ td {
 {% block content %}
 <input type="hidden" name="performance" id="performance"><span hidden>{{ form.performance.errors }}</span>
 <input type="hidden" name="mistakes" id="mistakes"> <span hidden>{{ form.mistakes.errors }}</span>
-<button class="otree-btn-next btn btn-primary" id="next-button">Next</button>
 
 <p>
     Your performance so far: <span id="performance-display">{{ player.performance }}</span>  tasks.
@@ -176,11 +175,12 @@ td {
     </div>
 </div>
 
+
 <br><br>
 <div class="button-container">
-
-<input type="button" id= "submit-solution" onclick="myFunction()" value="Submit">
-<div class="otree-form-errors" id="error-form"></div>
+    <input type="button" id="submit-solution" onclick="myFunction()" value="Submit">
+    <div class="otree-form-errors" id="error-form"></div>
+    <input type="submit" id="next-button" name="next" value="Next">
 </div>
 
 <br><br>
@@ -242,7 +242,7 @@ function myFunction() {
         document.getElementById("task_code_0").focus();
 
         if (document.getElementById("performance").value == required_tasks) {
-        document.getElementById("next-button").click();
+            document.getElementById("next-button").click();
         }
 
         let dict=genNewDict();

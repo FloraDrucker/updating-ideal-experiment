@@ -811,7 +811,6 @@ class Task(Page):
             'required_tasks': player.ideal_to_do
         }
 
-
     @staticmethod
     def before_next_page(player, timeout_happened):
         player.participant.vars['actual'][player.round_number-1] = player.performance
