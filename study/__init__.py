@@ -395,11 +395,11 @@ class Player(BasePlayer):
     BSCS_temptation = models.IntegerField(
         label="I am good at resisting temptation.",
         choices=[
-            [1, '1: Not at all like me'],
+            [1, '1 - Not at all like me'],
             [2, '2'],
             [3, '3'],
             [4, '4'],
-            [5, '5: Very much like me'],
+            [5, '5 - Very much like me'],
         ],
         widget=widgets.RadioSelectHorizontal,
         blank=False
@@ -408,11 +408,11 @@ class Player(BasePlayer):
     BSCS_badhabits = models.IntegerField(
         label="I have a hard time breaking bad habits.",
         choices=[
-            [1, '1: Not at all like me'],
+            [1, '1 - Not at all like me'],
             [2, '2'],
             [3, '3'],
             [4, '4'],
-            [5, '5: Very much like me'],
+            [5, '5 - Very much like me'],
         ],
         widget=widgets.RadioSelectHorizontal,
         blank=False
@@ -421,11 +421,11 @@ class Player(BasePlayer):
     BSCS_lazy = models.IntegerField(
         label="I am lazy.",
         choices=[
-            [1, '1: Not at all like me'],
+            [1, '1 - Not at all like me'],
             [2, '2'],
             [3, '3'],
             [4, '4'],
-            [5, '5: Very much like me'],
+            [5, '5 - Very much like me'],
         ],
         widget=widgets.RadioSelectHorizontal,
         blank=False
@@ -435,11 +435,11 @@ class Player(BasePlayer):
     BSCS_inappropriate = models.IntegerField(
         label="I say inappropriate things.",
         choices=[
-            [1, '1: Not at all like me'],
+            [1, '1 - Not at all like me'],
             [2, '2'],
             [3, '3'],
             [4, '4'],
-            [5, '5: Very much like me'],
+            [5, '5 - Very much like me'],
         ],
         widget=widgets.RadioSelectHorizontal,
         blank=False
@@ -449,11 +449,11 @@ class Player(BasePlayer):
     BSCS_dobadthings = models.IntegerField(
         label="I do certain things that are bad for me, if they are fun.",
         choices=[
-            [1, '1: Not at all like me'],
+            [1, '1 - Not at all like me'],
             [2, '2'],
             [3, '3'],
             [4, '4'],
-            [5, '5: Very much like me'],
+            [5, '5 - Very much like me'],
         ],
         widget=widgets.RadioSelectHorizontal,
         blank=False
@@ -463,11 +463,11 @@ class Player(BasePlayer):
     BSCS_refusebad = models.IntegerField(
         label="I refuse things that are bad for me.",
         choices=[
-            [1, '1: Not at all like me'],
+            [1, '1 - Not at all like me'],
             [2, '2'],
             [3, '3'],
             [4, '4'],
-            [5, '5: Very much like me'],
+            [5, '5 - Very much like me'],
         ],
         widget=widgets.RadioSelectHorizontal,
         blank=False
@@ -476,11 +476,11 @@ class Player(BasePlayer):
     BSCS_morediscipline = models.IntegerField(
         label="I wish I had more self-discipline.",
         choices=[
-            [1, '1: Not at all like me'],
+            [1, '1 - Not at all like me'],
             [2, '2'],
             [3, '3'],
             [4, '4'],
-            [5, '5: Very much like me'],
+            [5, '5 - Very much like me'],
         ],
         widget=widgets.RadioSelectHorizontal,
         blank=False
@@ -489,11 +489,11 @@ class Player(BasePlayer):
     BSCS_irondiscipline = models.IntegerField(
         label="People would say that I have iron self-discipline.",
         choices=[
-            [1, '1: Not at all like me'],
+            [1, '1 - Not at all like me'],
             [2, '2'],
             [3, '3'],
             [4, '4'],
-            [5, '5: Very much like me'],
+            [5, '5 - Very much like me'],
         ],
         widget=widgets.RadioSelectHorizontal,
         blank=False
@@ -503,11 +503,11 @@ class Player(BasePlayer):
     BSCS_pleasure = models.IntegerField(
         label="Pleasure and fun sometimes keep me from getting work done.",
         choices=[
-            [1, '1: Not at all like me'],
+            [1, '1 - Not at all like me'],
             [2, '2'],
             [3, '3'],
             [4, '4'],
-            [5, '5: Very much like me'],
+            [5, '5 - Very much like me'],
         ],
         widget=widgets.RadioSelectHorizontal,
         blank=False
@@ -517,11 +517,11 @@ class Player(BasePlayer):
     BSCS_concentrating = models.IntegerField(
         label="I have trouble concentrating.",
         choices=[
-            [1, '1: Not at all like me'],
+            [1, '1 - Not at all like me'],
             [2, '2'],
             [3, '3'],
             [4, '4'],
-            [5, '5: Very much like me'],
+            [5, '5 - Very much like me'],
         ],
         widget=widgets.RadioSelectHorizontal,
         blank=False
@@ -530,11 +530,11 @@ class Player(BasePlayer):
     BSCS_work = models.IntegerField(
         label="I am able to work effectively toward long-term goals.",
         choices=[
-            [1, '1: Not at all like me'],
+            [1, '1 - Not at all like me'],
             [2, '2'],
             [3, '3'],
             [4, '4'],
-            [5, '5: Very much like me'],
+            [5, '5 - Very much like me'],
         ],
         widget=widgets.RadioSelectHorizontal,
         blank=False
@@ -543,11 +543,11 @@ class Player(BasePlayer):
     BSCS_stop = models.IntegerField(
         label="Sometimes I can't stop myself from doing something, even if I know it is wrong.",
         choices=[
-            [1, '1: Not at all like me'],
+            [1, '1 - Not at all like me'],
             [2, '2'],
             [3, '3'],
             [4, '4'],
-            [5, '5: Very much like me'],
+            [5, '5 - Very much like me'],
         ],
         widget=widgets.RadioSelectHorizontal,
         blank=False
@@ -556,16 +556,158 @@ class Player(BasePlayer):
     BSCS_alternatives = models.IntegerField(
         label="I often act without thinking through all the alternatives.",
         choices=[
-            [1, '1: Not at all like me'],
+            [1, '1 - Not at all like me'],
             [2, '2'],
             [3, '3'],
             [4, '4'],
-            [5, '5: Very much like me'],
+            [5, '5 - Very much like me'],
         ],
         widget=widgets.RadioSelectHorizontal,
         blank=False
     )
 
+    averagetask = models.FloatField(
+        min=0,
+        max=555,
+        blank=False,
+        label='What is the average of the following five numbers? 123, 88, 147, 102, 95'
+    )
+
+    ballsremembered1 = models.IntegerField(
+        choices=[
+            [0, '0'],
+            [1, '1'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7'],
+            [8, '8'],
+            [9, '9'],
+            [10, '10'],
+            [11, 'I cannot remember how many times I have seen a ball with this number on it.'],
+        ],
+        blank=False,
+        label='How many times have you seen a ball with the number 137 on it over the course of the experiment?'
+    )
+
+    ballsremembered2 = models.IntegerField(
+        choices=[
+            [0, '0'],
+            [1, '1'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7'],
+            [8, '8'],
+            [9, '9'],
+            [10, '10'],
+            [11, 'I cannot remember how many times I have seen a ball with this number on it.'],
+        ],
+        blank=False,
+        label='How many times have you seen a ball with the number 109 on it over the course of the experiment?'
+    )
+
+    ballsremembered3 = models.IntegerField(
+        choices=[
+            [0, '0'],
+            [1, '1'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7'],
+            [8, '8'],
+            [9, '9'],
+            [10, '10'],
+            [11, 'I cannot remember how many times I have seen a ball with this number on it.'],
+        ],
+        blank=False,
+        label='How many times have you seen a ball with the number 122 on it over the course of the experiment?'
+    )
+
+    screenshot = models.BooleanField(
+        choices=[[True, 'Yes'], [False, 'No']],
+        widget=widgets.RadioSelect,
+        blank=False,
+        label='Did you make a screenshot/photo of the balls shown to you or wrote the numbers on them down?'
+    )
+
+    GPS_patience = models.IntegerField(
+        label="How willing are you to give up something that is beneficial for you today in order to benefit more from that in the future on a scale from 0 'Completely unwilling to do so' to 10 'Very willing to do so'?",
+        choices=[
+            [0, '0'],
+            [1, '1'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7'],
+            [8, '8'],
+            [9, '9'],
+            [10, '10'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    GPS_altruism1 = models.IntegerField(
+        label="How willing are you to give to good causes without expecting anything in return on a scale from 0 'Completely unwilling to do so' to 10 'Very willing to do so'?",
+        choices=[
+            [0, '0'],
+            [1, '1'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7'],
+            [8, '8'],
+            [9, '9'],
+            [10, '10'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    GPS_altruism2 = models.IntegerField(
+        min=0,
+        max=1600,
+        blank=False,
+        label='Imagine the following situation: Today you unexpectedly received 1,600 U.S. dollars. How much of this amount would you donate to a good cause? (Values between 0 and 1,600 are allowed)'
+    )
+
+    GPS_postpone = models.IntegerField(
+        label="Do you tend to postpone tasks even if you know it would be better to do them right away on a scale from 0 'Completely unwilling to do so' to 10 'Very willing to do so'?",
+        choices=[
+            [0, '0'],
+            [1, '1'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7'],
+            [8, '8'],
+            [9, '9'],
+            [10, '10'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    #Wechsler Level
+    digitspan_max_level = models.IntegerField(
+        initial=0,
+        min=0,
+        max=8,
+        label="Max digit-span level reached"
+    )
 
 def belief_error_message(player, value):
     if not base_constants.BENEFIT_RANGE_MIN <= value <= base_constants.BENEFIT_RANGE_MAX:
@@ -601,6 +743,7 @@ def creating_session(subsession: Subsession):
         print("Participant:", p.participant.code, "Variables:", p.participant.vars)
 
 
+# This is the Live Send code, so that performance etc can be stored immediately
 def live_update_performance(player: Player, data):
     own_id = player.id_in_group
     if 'performance' in data:
@@ -611,7 +754,9 @@ def live_update_performance(player: Player, data):
     else:
         shuffle = True
         print('received nothing, shuffle?', shuffle)
-    answer = dict(performance=player.performance, shuffle=shuffle)
+    if 'link_click_count' in data:
+        player.link_click_count = data['link_click_count']
+    answer = dict(performance=player.performance, link_click_count=player.link_click_count, shuffle=shuffle)
     return {own_id: answer}
 
 
@@ -833,6 +978,8 @@ class Survey1(Page):
 
 
 class Survey2(Page):
+    form_model = 'player'
+    form_fields = ['digitspan_max_level']
     @staticmethod
     def is_displayed(player):
         return player.round_number == 3
@@ -883,6 +1030,9 @@ class Survey4(Page):
     def is_displayed(player):
         return player.round_number == 5
 
+    form_model = 'player'
+    form_fields = ['GPS_patience', 'GPS_altruism1', 'GPS_altruism2', 'GPS_postpone']
+
 
 class Survey5(Page):
     @staticmethod
@@ -890,7 +1040,7 @@ class Survey5(Page):
         return player.round_number == 6
 
     form_model = 'player'
-    form_fields = ['BSCS_temptation', 'BSCS_badhabits', 'BSCS_lazy', 'BSCS_inappropriate', 'BSCS_dobadthings', 'BSCS_refusebad', 'BSCS_morediscipline', 'BSCS_irondiscipline', 'BSCS_pleasure', 'BSCS_concentrating', 'BSCS_work', 'BSCS_stop', 'BSCS_alternatives']
+    form_fields = ['BSCS_temptation', 'BSCS_badhabits', 'BSCS_lazy', 'BSCS_inappropriate', 'BSCS_dobadthings', 'BSCS_refusebad', 'BSCS_morediscipline', 'BSCS_irondiscipline', 'BSCS_pleasure', 'BSCS_concentrating', 'BSCS_work', 'BSCS_stop', 'BSCS_alternatives', 'averagetask', 'ballsremembered1', 'ballsremembered2', 'ballsremembered3','screenshot']
 
 
 class FinalPage(Page):
