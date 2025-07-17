@@ -204,7 +204,7 @@ td {
 
 <script>
 
-  const letters_per_word = js_vars.letters_per_word;
+  const letters_per_word = {{letters_per_word| safe}};
   const alphabet = genCharArray('A', 'Z');
   const legend_letters = alphabet;
   const word_letters = alphabet;
@@ -378,32 +378,40 @@ document.getElementById("submit-solution")
             document.getElementById("submit-solution").click();
         }
     });
+
 const REMINDER_SECONDS = js_vars.timeout_seconds-5;
-setReminder(() => {
-    // Only remind if the tab is hidden
-    if (document.visibilityState === 'hidden') {
-        // 1) Blink the tab title
-        const originalTitle = document.title;
-        let toggle = false;
-        const blinkInterval = setInterval(() => {
-            document.title = toggle ? '⏰ Time’s up!' : originalTitle;
-            toggle = !toggle;
-        }, 1000);
+document.addEventListener('DOMContentLoaded', function () {
+    const reminderThreshold = js_vars.timeout_seconds - 5;
 
-        // 2) Play the alarm sound
-        const alarm = document.getElementById('alarm-sound');
-        if (alarm) alarm.play().catch(() => {});
+    let secondsElapsed = 0;
+    const interval = setInterval(() => {
+        secondsElapsed++;
 
-        // 3) Optional: when they return, stop blinking
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') {
-                clearInterval(blinkInterval);
-                document.title = originalTitle;
+        if (secondsElapsed === reminderThreshold) {
+            clearInterval(interval); // Stop checking
+
+            // Show the reminder
+            if (document.visibilityState === 'hidden') {
+                const originalTitle = document.title;
+                let toggle = false;
+                const blinkInterval = setInterval(() => {
+                    document.title = toggle ? '⏰ Time’s up!' : originalTitle;
+                    toggle = !toggle;
+                }, 1000);
+
+                const alarm = document.getElementById('alarm-sound');
+                if (alarm) alarm.play().catch(() => {});
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible') {
+                        clearInterval(blinkInterval);
+                        document.title = originalTitle;
+                    }
+                });
             }
-        });
-    }
-    // If the tab is visible at timeout, do nothing.
-}, REMINDER_SECONDS * 1000);
+        }
+    }, 1000);
+});
 
 // Listen for any link click and mark the hidden field
 document.querySelectorAll('a').forEach(link => {
