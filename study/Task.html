@@ -145,7 +145,7 @@ td {
   type="hidden"
   name="active_tab_seconds"
   id="active_tab_seconds"
-  value="0">
+  value="{{ player.active_tab_seconds }}">
 
 <!-- link fields -->
 <div style="margin-top: 20px;">
@@ -253,6 +253,7 @@ function myFunction() {
     else if (errors > 0) {
         let temp = Number(document.getElementById("mistakes").value) + 1
         document.getElementById("mistakes").value = temp;
+        liveSend({ mistakes: temp })
         <!-- TODO: change this to 1 mistake or x mistakes -->
         document.getElementById("error-form").innerText = "There are "+errors+" mistakes.";
         document.getElementById("error-form").style.display = "block";
@@ -341,6 +342,8 @@ function liveRecv(data) {
     document.getElementById("performance").value = data.performance;
     document.getElementById("performance-display").innerText = data.performance;
     document.getElementById('link_click_count').value = data.link_click_count;
+    document.getElementById('active_tab_seconds').value = data.active_tab_seconds;
+    document.getElementById('mistakes').value = data.mistakes
     if (data.shuffle) {
         dict = genNewDict();
         shuffle(legend_letters);
@@ -403,28 +406,21 @@ document.querySelectorAll('a').forEach(link => {
 });
 
 
-let activeTabSeconds = 0;
-let activeInterval = null;
+  // initialize from hidden input (or zero)
+  let activeTabSeconds = parseInt(
+    document.getElementById("active_tab_seconds").value,
+    10
+  ) || 0;
 
-function startTimer() {
-  if (activeInterval) return;              // ← do nothing if already running
-  activeInterval = setInterval(() => {
-    activeTabSeconds++;
-    document.getElementById('active_tab_seconds').value = activeTabSeconds;
+  // every second, if this tab is focused, increment + liveSend
+  setInterval(() => {
+    if (document.hasFocus()) {
+      activeTabSeconds++;
+      document.getElementById("active_tab_seconds").value = activeTabSeconds;
+      liveSend({ active_tab_seconds: activeTabSeconds });
+    }
   }, 1000);
-}
 
-function stopTimer() {
-  clearInterval(activeInterval);
-  activeInterval = null;                    // ← allow it to be restarted later
-}
-  window.addEventListener('focus', startTimer);
-  window.addEventListener('blur', stopTimer);
-
-  // If the tab is already focused on load, start counting immediately
-  if (document.hasFocus()) {
-    startTimer();
-  }
 </script>
 
 {% endblock %}
