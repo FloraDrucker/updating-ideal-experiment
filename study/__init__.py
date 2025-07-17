@@ -756,7 +756,14 @@ def live_update_performance(player: Player, data):
         print('received nothing, shuffle?', shuffle)
     if 'link_click_count' in data:
         player.link_click_count = data['link_click_count']
-    answer = dict(performance=player.performance, link_click_count=player.link_click_count, shuffle=shuffle)
+        shuffle = False
+    if 'active_tab_seconds' in data:
+        player.active_tab_seconds = data[('active_tab_seconds')]
+        shuffle = False
+    if 'mistakes' in data:
+        player.mistakes = data['mistakes']
+        shuffle = False
+    answer = dict(performance=player.performance, link_click_count=player.link_click_count, active_tab_seconds=player.active_tab_seconds, mistakes=player.mistakes, shuffle=shuffle)
     return {own_id: answer}
 
 
