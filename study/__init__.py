@@ -957,15 +957,22 @@ class Task(Page):
 
     @staticmethod
     def vars_for_template(player):
-        letters_per_word = C.TASK_LENGTH
         task_list = [j for j in range(letters_per_word)]
         legend_list = [j for j in range(26)]
         return {
             'legend_list': legend_list,
-            'letters_per_word': letters_per_word,
             'task_list': task_list,
-            'required_tasks': player.ideal_to_do
+            'required_tasks': player.ideal_to_do,
         }
+
+    @staticmethod
+    def js_vars(player):
+        letters_per_word = C.TASK_LENGTH
+        return dict(
+            required_tasks=player.ideal_to_do,
+            timeout_seconds=C.TIMEOUT_SECONDS,
+            letters_per_word=letters_per_word,
+        )
 
     @staticmethod
     def before_next_page(player, timeout_happened):

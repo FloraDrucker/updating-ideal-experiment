@@ -204,11 +204,11 @@ td {
 
 <script>
 
-  const letters_per_word = {{letters_per_word | safe}};
+  const letters_per_word = js_vars.letters_per_word;
   const alphabet = genCharArray('A', 'Z');
   const legend_letters = alphabet;
   const word_letters = alphabet;
-  const required_tasks = {{required_tasks | safe}};
+  const required_tasks = js_vars.required_tasks;
 
 document.addEventListener("DOMContentLoaded", (event) => {
     liveSend({});
@@ -378,8 +378,8 @@ document.getElementById("submit-solution")
             document.getElementById("submit-solution").click();
         }
     });
-const REMINDER_SECONDS = 15;
-setTimeout(() => {
+const REMINDER_SECONDS = js_vars.timeout_seconds-5;
+setReminder(() => {
     // Only remind if the tab is hidden
     if (document.visibilityState === 'hidden') {
         // 1) Blink the tab title
