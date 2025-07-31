@@ -701,6 +701,246 @@ class Player(BasePlayer):
         blank=False
     )
 
+    big5_openness1 = models.IntegerField(
+        label = "I see myself as someone who is original, comes up with new ideas.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_openness2 = models.IntegerField(
+        label = "I see myself as someone who values artistic, aesthetic experiences.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_openness3 = models.IntegerField(
+        label="I see myself as someone who has an active imagination.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_openness4 = models.IntegerField(
+        label="I see myself as someone who is eager for knowledge.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_conscientious1 = models.IntegerField(
+        label="I see myself as someone who does a thorough job.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_conscientious2 = models.IntegerField(
+        label="I see myself as someone who tends to be lazy.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_conscientious3 = models.IntegerField(
+        label="I see myself as someone who does things effectively and efficiently.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_extraversion1 = models.IntegerField(
+        label="I see myself as someone who is communicative, talkative.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_extraversion2 = models.IntegerField(
+        label="I see myself as someone who is outgoing, sociable.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_extraversion3 = models.IntegerField(
+        label="I see myself as someone who is reserved.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_agreeable1 = models.IntegerField(
+        label="I see myself as someone who is sometimes somewhat rude to others.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_agreeable2 = models.IntegerField(
+        label="I see myself as someone who has a forgiving nature.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_agreeable3 = models.IntegerField(
+        label="I see myself as someone who is considerate and kind to others.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_neuroticism1 = models.IntegerField(
+        label="I see myself as someone who worries a lot.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_neuroticism2 = models.IntegerField(
+        label="I see myself as someone who gets nervous easily.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    big5_neuroticism3 = models.IntegerField(
+        label="I see myself as someone who is relaxed, handles stress well.",
+        choices=[
+            [1, '1 - Not at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - Absolutely'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
     #Wechsler Level
     digitspan_max_level = models.IntegerField(
         initial=0,
@@ -988,7 +1228,10 @@ class Survey1(Page):
         return player.round_number == 2
 
     form_model = 'player'
-    form_fields = ['gender', 'age', 'employment', 'education', 'socialclass', 'children', 'mathgrade']
+    form_fields = [
+        'gender', 'age', 'employment', 'education', 'socialclass', 'children', 'mathgrade',
+        'big5_openness1', 'big5_openness2', 'big5_openness3', 'big5_openness4'
+    ]
 
 
 class Survey2(Page):
@@ -1010,7 +1253,9 @@ class Survey3(Page):
         'risk_250', 'risk_300', 'risk_350', 'risk_400', 'risk_450',
         'risk_500', 'risk_550', 'risk_600', 'risk_650', 'risk_700',
         'risk_750', 'risk_800', 'risk_850', 'risk_900', 'risk_950',
-        'risk_1000'
+        'risk_1000',
+        'big5_conscientious1', 'big5_conscientious2', 'big5_conscientious3',
+        'big5_extraversion1', 'big5_extraversion2', 'big5_extraversion3'
     ]
 
     @staticmethod
@@ -1045,7 +1290,11 @@ class Survey4(Page):
         return player.round_number == 5
 
     form_model = 'player'
-    form_fields = ['GPS_patience', 'GPS_altruism1', 'GPS_altruism2', 'GPS_postpone']
+    form_fields = [
+        'GPS_patience', 'GPS_altruism1', 'GPS_altruism2', 'GPS_postpone',
+        'big5_agreeable1', 'big5_agreeable2', 'big5_agreeable3',
+        'big5_neuroticism1', 'big5_neuroticism2', 'big5_neuroticism3'
+    ]
 
 
 class Survey5(Page):
@@ -1054,7 +1303,13 @@ class Survey5(Page):
         return player.round_number == 6
 
     form_model = 'player'
-    form_fields = ['BSCS_temptation', 'BSCS_badhabits', 'BSCS_lazy', 'BSCS_inappropriate', 'BSCS_dobadthings', 'BSCS_refusebad', 'BSCS_morediscipline', 'BSCS_irondiscipline', 'BSCS_pleasure', 'BSCS_concentrating', 'BSCS_work', 'BSCS_stop', 'BSCS_alternatives', 'averagetask', 'ballsremembered1', 'ballsremembered2', 'ballsremembered3','screenshot']
+    form_fields = [
+        'BSCS_temptation', 'BSCS_badhabits', 'BSCS_lazy', 'BSCS_inappropriate',
+        'BSCS_dobadthings', 'BSCS_refusebad', 'BSCS_morediscipline', 'BSCS_irondiscipline',
+        'BSCS_pleasure', 'BSCS_concentrating', 'BSCS_work', 'BSCS_stop',
+        'BSCS_alternatives', 'averagetask', 'ballsremembered1', 'ballsremembered2',
+        'ballsremembered3','screenshot'
+    ]
 
 
 class FinalPage(Page):
