@@ -1259,6 +1259,13 @@ class Survey3(Page):
     ]
 
     @staticmethod
+    def vars_for_template(player):
+        return dict(
+            risk_prefix='risk_',
+            big5_prefix='big5_'
+        )
+
+    @staticmethod
     def before_next_page(player, timeout_happened):
         player.participant.vars['risk_choices'][1] = player.risk_0
         player.participant.vars['risk_choices'][2] = player.risk_50

@@ -37,18 +37,29 @@
     </thead>
     <tbody>
         {% for field in form %}
-            <tr>
-                {% for choice in field %}
-                    <td class="buttonGroup">
-                        <label class="buttonWrap">
-                            {{ choice }} {{ choice.label }}
-                        </label>
-                    </td>
-                {% endfor %}
-            </tr>
+            {% if risk_prefix in field.name %}
+                <tr>
+                    {% for choice in field %}
+                        <td class="buttonGroup">
+                            <label class="buttonWrap">
+                                {{ choice }} {{ choice.label }}
+                            </label>
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endif %}
         {% endfor %}
     </tbody>
 </table>
+
+<hr>
+
+<h6>Please answer the following questions.</h6>
+{% for field in form %}
+    {% if big5_prefix in field.name %}
+        {% formfield field %}
+    {% endif %}
+{% endfor %}
 
 {% next_button %}
 
