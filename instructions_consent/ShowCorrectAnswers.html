@@ -1,0 +1,18 @@
+{% extends "global/Page.html" %}
+{% block content %}
+
+<h3>Correct Answers</h3>
+<p>You answered incorrectly twice. Below are the correct answers. Please read them carefully before moving on.</p>
+
+<table class="table">
+    <tr><th>Question</th><th>Correct Answer</th></tr>
+    <tr><td>Q1</td><td>{{ solutions.q1 }}</td></tr>
+    <tr><td>Q2</td><td>{{ solutions.q2 }}</td></tr>
+    <tr><td>Q3</td><td>{{ solutions.q3 }}</td></tr>
+    <tr><td>Q4</td><td>{{ solutions.q4 }}</td></tr>
+    <tr><td>Q5</td><td>{{ solutions.q5 }}</td></tr>
+</table>
+
+{% next_button %}
+
+{% endblock %}
