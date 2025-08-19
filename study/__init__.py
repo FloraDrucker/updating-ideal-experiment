@@ -949,6 +949,7 @@ class Player(BasePlayer):
         label="Max digit-span level reached"
     )
 
+
 def belief_error_message(player, value):
     if not base_constants.BENEFIT_RANGE_MIN <= value <= base_constants.BENEFIT_RANGE_MAX:
         return f"Please enter a number between {base_constants.BENEFIT_RANGE_MIN} and {base_constants.BENEFIT_RANGE_MAX}."

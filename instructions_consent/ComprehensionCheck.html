@@ -4,10 +4,53 @@
 
 <h3>Comprehension Check</h3>
 <p>Please answer the following questions. You can try up to 2 times. If you answer a question incorrectly, the question will be highlighted for a second attempt.</p>
+<p> You can review the instructions by clicking the "Show instructions" button below. When the instructions are shown, you can hide them by clicking the button again. </p>
+
+<script>
+    function toggleInstructions() {
+        const section = document.getElementById('Instructions');
+        const button = event.target;
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            button.textContent = 'Hide instructions';
+        } else {
+            section.style.display = 'none';
+            button.textContent = 'Show instructions';
+        }
+    }
+
+    $(document).ready(function (e) {
+        labels = document.getElementsByTagName("label");
+        for (var i = 0; i < labels.length; i++) {
+            labels[i].innerHTML = labels[i].innerHTML.replaceAll("&lt;", "<").
+            replaceAll("&gt;", ">");
+        }
+    });
+</script>
+
+<button type="button" onclick="toggleInstructions()" style="
+    background-color: #f0f0f0;
+    color: black;
+    font-size: 1rem;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+">Show instructions
+</button>
+
+<br>
+
+<div id="Instructions" class="border rounded p-3 mt-3 mx-auto" style="display: none; width: 80%; background-color: #f9f9f9;">
+    {% include 'instructions_consent/instructionsnippet.html' %}
+</div>
+
+<br>
 
 {% for field in form %}
     <div style="margin-bottom: 1em;">
-        <label>{{ field.label }}</label>
+        <label>{{ field.label|safe }}</label>
         {{ field }}
 
         {% if attempt_number > 0 and field.name in wrong_questions_list %}
