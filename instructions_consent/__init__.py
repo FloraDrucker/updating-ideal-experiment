@@ -85,8 +85,8 @@ class Player(BasePlayer):
 
     attempt_number = models.IntegerField(initial=0)
     num_wrong = models.IntegerField(initial=0)
-    wrong_questions = models.StringField(blank=True)
-    success_attempt = models.IntegerField(initial=None)  # which try got correct
+    wrong_questions = models.StringField(initial="")
+    success_attempt = models.IntegerField(initial=None)
     excluded = models.BooleanField(initial=False)
 
 
@@ -113,6 +113,15 @@ class ComprehensionCheck(Page):
     form_fields = ['q1', 'q2', 'q3', 'q4', 'q5']
 
     @staticmethod
+    def vars_for_template(player):
+        # split wrong_questions into a list, handle None
+        wrong_questions_list = player.wrong_questions.split(',') if player.wrong_questions else []
+        return dict(
+            attempt_number=player.attempt_number,
+            wrong_questions_list=wrong_questions_list
+        )
+
+    @staticmethod
     def before_next_page(player, timeout_happened):
         player.attempt_number += 1
 
@@ -137,23 +146,12 @@ class ComprehensionCheck(Page):
             player.excluded = True
         elif player.num_wrong == 0:
             player.success_attempt = player.attempt_number
-        # Else, leave success_attempt=0 to allow second attempt
-
-class ShowWrongAnswers(Page):
-    @staticmethod
-    def is_displayed(player):
-        return player.attempt_number == 1 and 0 < player.num_wrong <= 3
-
-    @staticmethod
-    def vars_for_template(player):
-        return dict(
-            wrong_questions_list=player.wrong_questions.split(',') if player.wrong_questions else []
-        )
 
 class ShowCorrectAnswers(Page):
     @staticmethod
     def is_displayed(player):
-        return player.attempt_number == 2 and player.success_attempt == 0 and not player.excluded
+        success = player.field_maybe_none('success_attempt')
+        return player.attempt_number == 2 and (success is None or success == 0) and not player.excluded
 
     @staticmethod
     def vars_for_template(player):
@@ -183,6 +181,7 @@ page_sequence = [
     Welcome,
     EncryptionTask,
     Instructions,
+    ComprehensionCheck,
     ComprehensionCheck,
     ShowCorrectAnswers,
     Excluded,

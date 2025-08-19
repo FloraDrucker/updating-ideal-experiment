@@ -1,10 +1,20 @@
 {% extends "global/Page.html" %}
+
 {% block content %}
 
 <h3>Comprehension Check</h3>
-<p>Please answer the following questions. You can try up to 2 times. If you fail, you will see the correct answers.</p>
+<p>Please answer the following questions. You can try up to 2 times. If you answer a question incorrectly, the question will be highlighted for a second attempt.</p>
 
-{{ formfields }}
+{% for field in form %}
+    <div style="margin-bottom: 1em;">
+        <label>{{ field.label }}</label>
+        {{ field }}
+
+        {% if attempt_number > 0 and field.name in wrong_questions_list %}
+            <p style="color: red; margin: 0;">Incorrect on previous attempt, please try again.</p>
+        {% endif %}
+    </div>
+{% endfor %}
 
 {% next_button %}
 
