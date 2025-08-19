@@ -26,6 +26,7 @@ solutions = dict(
     q5='It is the average of 120 numbers between 50¢ and 150¢'
 )
 
+
 class Subsession(BaseSubsession):
     pass
 
@@ -94,6 +95,8 @@ def creating_session(subsession: Subsession):
     # define participant variables
     for p in subsession.get_players():
         p.participant.vars['consent'] = None
+        p.participant.vars['num_wrong'] = None
+        p.participant.vars['attempt_number'] = None
 
 
 # PAGES
@@ -107,6 +110,7 @@ class EncryptionTask(Page):
 
 class Instructions(Page):
     pass
+
 
 class ComprehensionCheck(Page):
     form_model = 'player'
@@ -156,6 +160,10 @@ class ComprehensionCheck(Page):
         else:
             player.success_attempt = 0  # allow second attempt
 
+        player.participant.vars['num_wrong'] = player.num_wrong
+        player.participant.vars['attempt_number'] = player.attempt_number
+
+
 class ShowCorrectAnswers(Page):
     @staticmethod
     def is_displayed(player):
@@ -181,10 +189,12 @@ class Consent(Page):
         player.participant.vars['consent'] = player.consent
         print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
+
 class NoConsent(Page):
     @staticmethod
     def is_displayed(player):
         return player.consent is not None and player.consent is False
+
 
 page_sequence = [
     Welcome,
