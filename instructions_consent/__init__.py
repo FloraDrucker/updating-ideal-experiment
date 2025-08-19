@@ -113,6 +113,11 @@ class ComprehensionCheck(Page):
     form_fields = ['q1', 'q2', 'q3', 'q4', 'q5']
 
     @staticmethod
+    def is_displayed(player):
+        success = player.field_maybe_none('success_attempt')
+        return (not player.excluded) and (success is None or success == 0)
+
+    @staticmethod
     def vars_for_template(player):
         # split wrong_questions into a list, handle None
         wrong_questions_list = player.wrong_questions.split(',') if player.wrong_questions else []
@@ -123,6 +128,7 @@ class ComprehensionCheck(Page):
 
     @staticmethod
     def before_next_page(player, timeout_happened):
+        # Increment attempt number
         player.attempt_number += 1
 
         # Check which questions are wrong
@@ -141,17 +147,20 @@ class ComprehensionCheck(Page):
         player.num_wrong = len(wrong_list)
         player.wrong_questions = ','.join(wrong_list)
 
-        # Exclusion logic
+        # Exclusion / success logic
         if player.num_wrong >= 4:
-            player.excluded = True
+            player.excluded = True  # immediately exclude
+            player.success_attempt = None
         elif player.num_wrong == 0:
             player.success_attempt = player.attempt_number
+        else:
+            player.success_attempt = 0  # allow second attempt
 
 class ShowCorrectAnswers(Page):
     @staticmethod
     def is_displayed(player):
-        success = player.field_maybe_none('success_attempt')
-        return player.attempt_number == 2 and (success is None or success == 0) and not player.excluded
+        # Show correct answers only if they failed twice but are not excluded
+        return player.attempt_number == 2 and player.success_attempt == 0 and not player.excluded
 
     @staticmethod
     def vars_for_template(player):
