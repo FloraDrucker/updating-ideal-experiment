@@ -5,7 +5,7 @@
 {{ block content }}
 
 <p>
-    In all five parts, you will work on the task you just saw for at most 10 minutes. You will receive a fixed payoff for each correctly solved encryption task in the part that will be randomly chosen for payment. The payoff is between 25 cents and 75 cents per task. Every part will have the following stages:
+    In all five parts, you will work on the task you just saw for at most 10 minutes. You will receive a fixed payoff for each correctly solved encryption task in the part that will be randomly chosen for payment. The payoff is between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points per task. Every part will have the following stages:
 </p>
 
 <br>
@@ -59,7 +59,7 @@
 <h5> 2. Further information about the true payoff per task </h5>
 
 <p>
-    During the course of the experiment, you will get more and more information that will allow you to obtain more precise knowledge of this fixed payoff. This will work in the following way: The fixed payoff is the average of 120 numbers that lie between 25 cents and 75 cents. The same number can occur several times. At the beginning of parts 1 to 4, we will briefly display 30 of these 120 numbers (represented by balls) on the screen. Each of the 120 balls will be displayed only once, so you will have seen all the balls after part 4.
+    During the course of the experiment, you will get more and more information that will allow you to obtain more precise knowledge of this fixed payoff. This will work in the following way: The fixed payoff is the average of 120 numbers that lie between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }}. The same number can occur several times. At the beginning of parts 1 to 4, we will briefly display 30 of these 120 numbers (represented by balls) on the screen. Each of the 120 balls will be displayed only once, so you will have seen all the balls after part 4.
 </p>
 
 <script>

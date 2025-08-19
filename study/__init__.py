@@ -47,47 +47,47 @@ class Player(BasePlayer):
     # Ideal values
     ideal50 = models.IntegerField(
         blank=False,
-        label="How many tasks do you ideally want to do for 50 cents per task?"
+        label="How many tasks do you ideally want to do for 50 points per task?"
     )
     ideal60 = models.IntegerField(
         blank=False,
-        label="How many tasks do you ideally want to do for 60 cents per task?"
+        label="How many tasks do you ideally want to do for 60 points per task?"
     )
     ideal70 = models.IntegerField(
         blank=False,
-        label="How many tasks do you ideally want to do for 70 cents per task?"
+        label="How many tasks do you ideally want to do for 70 points per task?"
     )
     ideal80 = models.IntegerField(
         blank=False,
-        label="How many tasks do you ideally want to do for 80 cents per task?"
+        label="How many tasks do you ideally want to do for 80 points per task?"
     )
     ideal90 = models.IntegerField(
         blank=False,
-        label="How many tasks do you ideally want to do for 90 cents per task?"
+        label="How many tasks do you ideally want to do for 90 points per task?"
     )
     ideal100 = models.IntegerField(
         blank=False,
-        label="How many tasks do you ideally want to do for 100 cents per task?"
+        label="How many tasks do you ideally want to do for 100 points per task?"
     )
     ideal110 = models.IntegerField(
         blank=False,
-        label="How many tasks do you ideally want to do for 110 cents per task?"
+        label="How many tasks do you ideally want to do for 110 points per task?"
     )
     ideal120 = models.IntegerField(
         blank=False,
-        label="How many tasks do you ideally want to do for 120 cents per task?"
+        label="How many tasks do you ideally want to do for 120 points per task?"
     )
     ideal130 = models.IntegerField(
         blank=False,
-        label="How many tasks do you ideally want to do for 130 cents per task?"
+        label="How many tasks do you ideally want to do for 130 points per task?"
     )
     ideal140 = models.IntegerField(
         blank=False,
-        label="How many tasks do you ideally want to do for 140 cents per task?"
+        label="How many tasks do you ideally want to do for 140 points per task?"
     )
     ideal150 = models.IntegerField(
         blank=False,
-        label="How many tasks do you ideally want to do for 150 cents per task?"
+        label="How many tasks do you ideally want to do for 150 points per task?"
     )
     lastideal = models.IntegerField(
         blank=False,
@@ -97,47 +97,47 @@ class Player(BasePlayer):
     # Predicted values
     predicted50 = models.IntegerField(
         blank=False,
-        label="How many tasks do you predict you will do for 50 cents per task?"
+        label="How many tasks do you predict you will do for 50 points per task?"
     )
     predicted60 = models.IntegerField(
         blank=False,
-        label="How many tasks do you predict you will do for 60 cents per task?"
+        label="How many tasks do you predict you will do for 60 points per task?"
     )
     predicted70 = models.IntegerField(
         blank=False,
-        label="How many tasks do you predict you will do for 70 cents per task?"
+        label="How many tasks do you predict you will do for 70 points per task?"
     )
     predicted80 = models.IntegerField(
         blank=False,
-        label="How many tasks do you predict you will do for 80 cents per task?"
+        label="How many tasks do you predict you will do for 80 points per task?"
     )
     predicted90 = models.IntegerField(
         blank=False,
-        label="How many tasks do you predict you will do for 90 cents per task?"
+        label="How many tasks do you predict you will do for 90 points per task?"
     )
     predicted100 = models.IntegerField(
         blank=False,
-        label="How many tasks do you predict you will do for 100 cents per task?"
+        label="How many tasks do you predict you will do for 100 points per task?"
     )
     predicted110 = models.IntegerField(
         blank=False,
-        label="How many tasks do you predict you will do for 110 cents per task?"
+        label="How many tasks do you predict you will do for 110 points per task?"
     )
     predicted120 = models.IntegerField(
         blank=False,
-        label="How many tasks do you predict you will do for 120 cents per task?"
+        label="How many tasks do you predict you will do for 120 points per task?"
     )
     predicted130 = models.IntegerField(
         blank=False,
-        label="How many tasks do you predict you will do for 130 cents per task?"
+        label="How many tasks do you predict you will do for 130 points per task?"
     )
     predicted140 = models.IntegerField(
         blank=False,
-        label="How many tasks do you predict you will do for 140 cents per task?"
+        label="How many tasks do you predict you will do for 140 points per task?"
     )
     predicted150 = models.IntegerField(
         blank=False,
-        label="How many tasks do you predict you will do for 150 cents per task?"
+        label="How many tasks do you predict you will do for 150 points per task?"
     )
     lastpredicted = models.IntegerField(
         blank=False,
@@ -146,7 +146,7 @@ class Player(BasePlayer):
 
     belief = models.IntegerField(
         blank=False,
-        label="What do you think is the true task payoff in cents?"
+        label="What do you think is the true task payoff in points?"
     )
 
     risk_0 = models.IntegerField(

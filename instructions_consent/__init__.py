@@ -22,8 +22,8 @@ solutions = dict(
     q1='Yes, because each ball is shown only once, and by part 4 all 120 have been shown',
     q2='It will be based on your performance in a randomly chosen part (trial or one of the five main parts)',
     q3=30,
-    q4='State your actual belief about the true payoff, because the closer your guess is to the real value (between 50¢ and 150¢), the higher your probability of winning',
-    q5='It is the average of 120 numbers between 50¢ and 150¢'
+    q4='State your actual belief about the true payoff, because the closer your guess is to the real value (between 50 points and 150 points), the higher your probability of winning',
+    q5='It is the average of 120 numbers between 50 points and 150 points'
 )
 
 
@@ -68,7 +68,7 @@ class Player(BasePlayer):
         label='When guessing the fixed payoff per task, how should you choose your guess to maximize your chance of winning the extra payment?',
         choices=[
             'Always guess a very high number',
-            'State your actual belief about the true payoff, because the closer your guess is to the real value (between 50¢ and 150¢), the higher your probability of winning',
+            'State your actual belief about the true payoff, because the closer your guess is to the real value (between 50 points and 150 points), the higher your probability of winning',
             'Always guess the middle value between 50¢ and 150¢',
         ],
         widget=widgets.RadioSelect,
@@ -77,9 +77,9 @@ class Player(BasePlayer):
     q5 = models.StringField(
         label='How is the fixed payoff per correctly solved task calculated?',
         choices=[
-            'It is the average of 120 numbers between 50¢ and 150¢',
+            'It is the average of 120 numbers between 50 and 150',
             'It is the highest number out of the 120 balls shown',
-            'It is a random number chosen between 50¢ and 150¢ each round',
+            'It is a random number chosen between 50 and 150 each round',
         ],
         widget=widgets.RadioSelect,
     )
