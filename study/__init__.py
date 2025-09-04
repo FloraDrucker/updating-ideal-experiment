@@ -634,7 +634,7 @@ class Player(BasePlayer):
         choices=[[True, 'Yes'], [False, 'No']],
         widget=widgets.RadioSelect,
         blank=False,
-        label='Did you make a screenshot/photo of the balls shown to you or wrote the numbers on them down?'
+        label='Did you make a screenshot/photo of the balls shown to you or write the numbers on them down?'
     )
 
     GPS_patience = models.IntegerField(
@@ -971,17 +971,78 @@ def creating_session(subsession: Subsession):
 
     # define participant variables
     for p in subsession.get_players():
-        p.participant.vars['actual'] = {i: None for i in range(C.NUM_ROUNDS)}
-        p.participant.vars['belief'] = {i+1: None for i in range(C.NUM_ROUNDS-1)}
-        p.participant.vars['ideal'] = {i+1: None for i in range(12)}
-        p.participant.vars['predicted'] = {i+1: None for i in range(12)}
-        p.participant.vars['do_ideal'] = False
-        p.participant.vars['ideal_to_do'] = None
-        p.participant.vars['ideal_index'] = None
-        p.participant.vars['link_click_count'] = {i: None for i in range(C.NUM_ROUNDS)}
-        p.participant.vars['active_tab_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
-        p.participant.vars['risk_choices'] = {i+1: None for i in range(21)}
-        print("Participant:", p.participant.code, "Variables:", p.participant.vars)
+        ppvars = p.participant.vars
+
+        # Task
+        ppvars['actual'] = {i: None for i in range(C.NUM_ROUNDS)}
+        ppvars['mistakes'] = {i: None for i in range(C.NUM_ROUNDS)}
+        ppvars['belief'] = {i+1: None for i in range(C.NUM_ROUNDS-1)}
+        ppvars['ideal'] = {i+1: None for i in range(12)}
+        ppvars['predicted'] = {i+1: None for i in range(12)}
+        ppvars['do_ideal'] = False
+        ppvars['ideal_to_do'] = None
+        ppvars['ideal_index'] = None
+        ppvars['link_click_count'] = {i: None for i in range(C.NUM_ROUNDS)}
+        ppvars['active_tab_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
+
+        # Risk preferences
+        ppvars['risk_choices'] = {i+1: None for i in range(21)}
+
+        # Demographics
+        ppvars['gender'] = None
+        ppvars['age'] = None
+        ppvars['employment'] = None
+        ppvars['education'] = None
+        ppvars['socialclass'] = None
+        ppvars['children'] = None
+        ppvars['mathgrade'] = None
+
+        # BSCS
+        ppvars['BSCS_temptation'] = None
+        ppvars['BSCS_badhabits'] = None
+        ppvars['BSCS_lazy'] = None
+        ppvars['BSCS_inappropriate'] = None
+        ppvars['BSCS_dobadthings'] = None
+        ppvars['BSCS_refusebad'] = None
+        ppvars['BSCS_morediscipline'] = None
+        ppvars['BSCS_irondiscipline'] = None
+        ppvars['BSCS_pleasure'] = None
+        ppvars['BSCS_concentrating'] = None
+        ppvars['BSCS_work'] = None
+        ppvars['BSCS_stop'] = None
+        ppvars['BSCS_alternatives'] = None
+
+        # Memory and averaging skills
+        ppvars['digitspan_max_level'] = None
+        ppvars['averagetask'] = None
+        ppvars['ballsremembered1'] = None
+        ppvars['ballsremembered2'] = None
+        ppvars['ballsremembered3'] = None
+        ppvars['screenshot'] = None
+
+        # GPS
+        ppvars['GPS_patience'] = None
+        ppvars['GPS_altruism1'] = None
+        ppvars['GPS_altruism2'] = None
+        ppvars['GPS_postpone'] = None
+
+        # Big five
+        ppvars['big5_openness1'] = None
+        ppvars['big5_openness2'] = None
+        ppvars['big5_openness3'] = None
+        ppvars['big5_openness4'] = None
+        ppvars['big5_conscientious1'] = None
+        ppvars['big5_conscientious2'] = None
+        ppvars['big5_conscientious3'] = None
+        ppvars['big5_extraversion1'] = None
+        ppvars['big5_extraversion2'] = None
+        ppvars['big5_extraversion3'] = None
+        ppvars['big5_agreeable1'] = None
+        ppvars['big5_agreeable2'] = None
+        ppvars['big5_agreeable3'] = None
+        ppvars['big5_neuroticism1'] = None
+        ppvars['big5_neuroticism2'] = None
+        ppvars['big5_neuroticism3'] = None
 
 
 # This is the Live Send code, so that performance etc can be stored immediately
@@ -1004,7 +1065,11 @@ def live_update_performance(player: Player, data):
     if 'mistakes' in data:
         player.mistakes = data['mistakes']
         shuffle = False
-    answer = dict(performance=player.performance, link_click_count=player.link_click_count, active_tab_seconds=player.active_tab_seconds, mistakes=player.mistakes, shuffle=shuffle)
+    answer = dict(performance=player.performance,
+                  link_click_count=player.link_click_count,
+                  active_tab_seconds=player.active_tab_seconds,
+                  mistakes=player.mistakes,
+                  shuffle=shuffle)
     return {own_id: answer}
 
 
@@ -1214,6 +1279,7 @@ class Task(Page):
     @staticmethod
     def before_next_page(player, timeout_happened):
         player.participant.vars['actual'][player.round_number-1] = player.performance
+        player.participant.vars['mistakes'][player.round_number-1] = player.mistakes
         player.participant.vars['link_click_count'][player.round_number-1] = player.link_click_count
         player.participant.vars['active_tab_seconds'][player.round_number-1] = player.active_tab_seconds
         print("Participant:", player.participant.code, "Variables:", player.participant.vars)
