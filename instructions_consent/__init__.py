@@ -37,7 +37,7 @@ class Group(BaseGroup):
 
 class Player(BasePlayer):
     # Consent
-    consent = models.BooleanField(label="Do you wish to participate in the study?")
+    consent = models.BooleanField(label="Do you wish to participate in the study?", initial=False)
 
     # comprehension check answers
     q1 = models.StringField(
@@ -94,9 +94,11 @@ class Player(BasePlayer):
 def creating_session(subsession: Subsession):
     # define participant variables
     for p in subsession.get_players():
-        p.participant.vars['consent'] = None
-        p.participant.vars['num_wrong'] = None
-        p.participant.vars['attempt_number'] = None
+        p.participant.vars['consent'] = False
+        p.participant.vars['num_wrong'] = 0
+        p.participant.vars['success_attempt'] = None
+        p.participant.vars['attempt_number'] = 0
+        p.participant.vars['excluded'] = False
 
 
 # PAGES
@@ -161,7 +163,9 @@ class ComprehensionCheck(Page):
             player.success_attempt = 0  # allow second attempt
 
         player.participant.vars['num_wrong'] = player.num_wrong
+        player.participant.vars['success_attempt'] = player.success_attempt
         player.participant.vars['attempt_number'] = player.attempt_number
+        player.participant.vars['excluded'] = player.excluded
 
 
 class ShowCorrectAnswers(Page):
@@ -179,6 +183,7 @@ class Excluded(Page):
     @staticmethod
     def is_displayed(player):
         return player.excluded
+
 
 class Consent(Page):
     form_model = 'player'
