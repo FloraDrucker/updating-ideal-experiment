@@ -28,12 +28,14 @@
 {% block scripts %}
 <script>
 (function(){
+  // keep sequences as STRINGS (preserves leading zeros)
   const sequences = [
-    [23,47],[123,246],[3456,7890],[56789,01234],
-    [678901,234567],[7890123,3456789],[89012345,45678901],
-    [901234567,567890123]
+    ['23','47'], ['123','246'], ['3456','7890'], ['56789','01234'],
+    ['678901','234567'], ['7890123','3456789'], ['89012345','45678901'],
+    ['901234567','567890123']
   ];
-  let level=0, stage=0, correctCount=0;
+
+  let level=0, stage=0, correctCount=0, phase='idle';
 
   const instr    = document.getElementById('instructions'),
         startBtn = document.getElementById('start-btn'),
@@ -44,29 +46,59 @@
         nextBtn  = document.getElementById('next-page-btn'),
         maxField = document.getElementById('digitspan_max_level');
 
+  function saveState(){
+    sessionStorage.setItem('ds_state', JSON.stringify({ level, stage, correctCount, phase }));
+  }
+  function clearState(){ sessionStorage.removeItem('ds_state'); }
+
   function showTrial(){
-    // hide previous input
     inputBlk.style.display = 'none';
-    // show the number
     disp.textContent = sequences[level][stage];
+    phase = 'show'; saveState();
+
     setTimeout(()=>{
-      // after 5s, clear and show input
       disp.textContent = '';
       inputBlk.style.display = 'block';
       resp.value = '';
       resp.focus();
+      phase = 'input'; saveState();
     }, 5000);
   }
 
   function finishTask(){
-    maxField.value = level;
+    // store 1-based max level reached
+    maxField.value = (level + 1);
     inputBlk.style.display = 'none';
     nextBtn.style.display = 'inline-block';
+    clearState();
   }
+
+  // restore if page was refreshed mid-task
+  (function restoreIfAny(){
+    const st = sessionStorage.getItem('ds_state');
+    if (!st) return;
+    const s = JSON.parse(st);
+    level = s.level ?? 0;
+    stage = s.stage ?? 0;
+    correctCount = s.correctCount ?? 0;
+    phase = s.phase ?? 'show';
+
+    instr.style.display = 'none';
+    disp.style.display = 'block';
+
+    if (phase === 'input') {
+      disp.textContent = '';
+      inputBlk.style.display = 'block';
+      resp.value = '';
+      resp.focus();
+    } else {
+      showTrial();
+    }
+  })();
 
   // Enter → OK
   resp.addEventListener('keydown', e => {
-    if (e.key==='Enter') {
+    if (e.key === 'Enter') {
       e.preventDefault();
       okBtn.click();
     }
@@ -74,15 +106,18 @@
 
   okBtn.addEventListener('click', ()=>{
     inputBlk.style.display = 'none';
-    if (resp.value.trim() === sequences[level][stage].toString()) {
+    if (resp.value.trim() === sequences[level][stage]) {
       correctCount++;
     }
     stage++;
+
     if (stage < 2) {
+      phase = 'show'; saveState();
       showTrial();
     } else {
       if (correctCount > 0 && level < sequences.length - 1) {
         level++; stage = 0; correctCount = 0;
+        phase = 'show'; saveState();
         showTrial();
       } else {
         finishTask();
@@ -92,10 +127,12 @@
 
   startBtn.addEventListener('click', ()=>{
     instr.style.display = 'none';
-    // show the display box immediately
     disp.style.display = 'block';
+    // fresh start
+    level=0; stage=0; correctCount=0; phase='show'; saveState();
     showTrial();
   });
 })();
 </script>
+
 {% endblock %}
