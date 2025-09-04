@@ -1013,12 +1013,14 @@ def creating_session(subsession: Subsession):
         ppvars['BSCS_alternatives'] = None
 
         # Memory and averaging skills
-        ppvars['digitspan_max_level'] = None
         ppvars['averagetask'] = None
         ppvars['ballsremembered1'] = None
         ppvars['ballsremembered2'] = None
         ppvars['ballsremembered3'] = None
         ppvars['screenshot'] = None
+
+        # Wechsler
+        ppvars['digitspan_max_level'] = None
 
         # GPS
         ppvars['GPS_patience'] = None
@@ -1300,13 +1302,34 @@ class Survey1(Page):
         'big5_openness1', 'big5_openness2', 'big5_openness3', 'big5_openness4'
     ]
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        ppvars = player.participant.vars
+        ppvars['gender'] = player.gender
+        ppvars['age'] = player.age
+        ppvars['employment'] = player.employment
+        ppvars['education'] = player.education
+        ppvars['socialclass'] = player.socialclass
+        ppvars['children'] = player.children
+        ppvars['mathgrade'] = player.mathgrade
+        ppvars['big5_openness1'] = player.big5_openness1
+        ppvars['big5_openness2'] = player.big5_openness2
+        ppvars['big5_openness3'] = player.big5_openness3
+        ppvars['big5_openness4'] = player.big5_openness4
+
 
 class Survey2(Page):
     form_model = 'player'
     form_fields = ['digitspan_max_level']
+
     @staticmethod
     def is_displayed(player):
         return player.round_number == 3
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        ppvars = player.participant.vars
+        ppvars['digitspan_max_level'] = player.digitspan_max_level
 
 
 class Survey3(Page):
@@ -1355,6 +1378,13 @@ class Survey3(Page):
         player.participant.vars['risk_choices'][19] = player.risk_900
         player.participant.vars['risk_choices'][20] = player.risk_950
         player.participant.vars['risk_choices'][21] = player.risk_1000
+        player.participant.vars['big5_conscientious1'] = player.big5_conscientious1
+        player.participant.vars['big5_conscientious2'] = player.big5_conscientious2
+        player.participant.vars['big5_conscientious3'] = player.big5_conscientious3
+        player.participant.vars['big5_extraversion1'] = player.big5_extraversion1
+        player.participant.vars['big5_extraversion2'] = player.big5_extraversion2
+        player.participant.vars['big5_extraversion3'] = player.big5_extraversion3
+
         print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
@@ -1370,6 +1400,20 @@ class Survey4(Page):
         'big5_neuroticism1', 'big5_neuroticism2', 'big5_neuroticism3'
     ]
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        ppvars = player.participant.vars
+        ppvars['GPS_patience'] = player.GPS_patience
+        ppvars['GPS_altruism1'] = player.GPS_altruism1
+        ppvars['GPS_altruism2'] = player.GPS_altruism2
+        ppvars['GPS_postpone'] = player.GPS_postpone
+        ppvars['big5_agreeable1'] = player.big5_agreeable1
+        ppvars['big5_agreeable2'] = player.big5_agreeable2
+        ppvars['big5_agreeable3'] = player.big5_agreeable3
+        ppvars['big5_neuroticism1'] = player.big5_neuroticism1
+        ppvars['big5_neuroticism2'] = player.big5_neuroticism2
+        ppvars['big5_neuroticism3'] = player.big5_neuroticism3
+
 
 class Survey5(Page):
     @staticmethod
@@ -1384,6 +1428,28 @@ class Survey5(Page):
         'BSCS_alternatives', 'averagetask', 'ballsremembered1', 'ballsremembered2',
         'ballsremembered3','screenshot'
     ]
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        ppvars = player.participant.vars
+        ppvars['BSCS_temptation'] = player.BSCS_temptation
+        ppvars['BSCS_badhabits'] = player.BSCS_badhabits
+        ppvars['BSCS_lazy'] = player.BSCS_lazy
+        ppvars['BSCS_inappropriate'] = player.BSCS_inappropriate
+        ppvars['BSCS_dobadthings'] = player.BSCS_dobadthings
+        ppvars['BSCS_refusebad'] = player.BSCS_refusebad
+        ppvars['BSCS_morediscipline'] = player.BSCS_morediscipline
+        ppvars['BSCS_irondiscipline'] = player.BSCS_irondiscipline
+        ppvars['BSCS_pleasure'] = player.BSCS_pleasure
+        ppvars['BSCS_concentrating'] = player.BSCS_concentrating
+        ppvars['BSCS_work'] = player.BSCS_work
+        ppvars['BSCS_stop'] = player.BSCS_stop
+        ppvars['BSCS_alternatives'] = player.BSCS_alternatives
+        ppvars['averagetask'] = player.averagetask
+        ppvars['ballsremembered1'] = player.ballsremembered1
+        ppvars['ballsremembered2'] = player.ballsremembered2
+        ppvars['ballsremembered3'] = player.ballsremembered3
+        ppvars['screenshot'] = player.screenshot
 
 
 class FinalPage(Page):
