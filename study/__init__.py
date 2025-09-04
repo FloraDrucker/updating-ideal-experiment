@@ -634,7 +634,7 @@ class Player(BasePlayer):
         choices=[[True, 'Yes'], [False, 'No']],
         widget=widgets.RadioSelect,
         blank=False,
-        label='Did you make a screenshot/photo of the balls shown to you or wrote the numbers on them down?'
+        label='Did you make a screenshot/photo of the balls shown to you or write the numbers on them down?'
     )
 
     GPS_patience = models.IntegerField(
@@ -971,17 +971,80 @@ def creating_session(subsession: Subsession):
 
     # define participant variables
     for p in subsession.get_players():
-        p.participant.vars['actual'] = {i: None for i in range(C.NUM_ROUNDS)}
-        p.participant.vars['belief'] = {i+1: None for i in range(C.NUM_ROUNDS-1)}
-        p.participant.vars['ideal'] = {i+1: None for i in range(12)}
-        p.participant.vars['predicted'] = {i+1: None for i in range(12)}
-        p.participant.vars['do_ideal'] = False
-        p.participant.vars['ideal_to_do'] = None
-        p.participant.vars['ideal_index'] = None
-        p.participant.vars['link_click_count'] = {i: None for i in range(C.NUM_ROUNDS)}
-        p.participant.vars['active_tab_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
-        p.participant.vars['risk_choices'] = {i+1: None for i in range(21)}
-        print("Participant:", p.participant.code, "Variables:", p.participant.vars)
+        ppvars = p.participant.vars
+
+        # Task
+        ppvars['actual'] = {i: None for i in range(C.NUM_ROUNDS)}
+        ppvars['mistakes'] = {i: None for i in range(C.NUM_ROUNDS)}
+        ppvars['belief'] = {i+1: None for i in range(C.NUM_ROUNDS-1)}
+        ppvars['ideal'] = {i+1: None for i in range(12)}
+        ppvars['predicted'] = {i+1: None for i in range(12)}
+        ppvars['do_ideal'] = False
+        ppvars['ideal_to_do'] = None
+        ppvars['ideal_index'] = None
+        ppvars['link_click_count'] = {i: None for i in range(C.NUM_ROUNDS)}
+        ppvars['active_tab_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
+
+        # Risk preferences
+        ppvars['risk_choices'] = {i+1: None for i in range(21)}
+
+        # Demographics
+        ppvars['gender'] = None
+        ppvars['age'] = None
+        ppvars['employment'] = None
+        ppvars['education'] = None
+        ppvars['socialclass'] = None
+        ppvars['children'] = None
+        ppvars['mathgrade'] = None
+
+        # BSCS
+        ppvars['BSCS_temptation'] = None
+        ppvars['BSCS_badhabits'] = None
+        ppvars['BSCS_lazy'] = None
+        ppvars['BSCS_inappropriate'] = None
+        ppvars['BSCS_dobadthings'] = None
+        ppvars['BSCS_refusebad'] = None
+        ppvars['BSCS_morediscipline'] = None
+        ppvars['BSCS_irondiscipline'] = None
+        ppvars['BSCS_pleasure'] = None
+        ppvars['BSCS_concentrating'] = None
+        ppvars['BSCS_work'] = None
+        ppvars['BSCS_stop'] = None
+        ppvars['BSCS_alternatives'] = None
+
+        # Memory and averaging skills
+        ppvars['averagetask'] = None
+        ppvars['ballsremembered1'] = None
+        ppvars['ballsremembered2'] = None
+        ppvars['ballsremembered3'] = None
+        ppvars['screenshot'] = None
+
+        # Wechsler
+        ppvars['digitspan_max_level'] = None
+
+        # GPS
+        ppvars['GPS_patience'] = None
+        ppvars['GPS_altruism1'] = None
+        ppvars['GPS_altruism2'] = None
+        ppvars['GPS_postpone'] = None
+
+        # Big five
+        ppvars['big5_openness1'] = None
+        ppvars['big5_openness2'] = None
+        ppvars['big5_openness3'] = None
+        ppvars['big5_openness4'] = None
+        ppvars['big5_conscientious1'] = None
+        ppvars['big5_conscientious2'] = None
+        ppvars['big5_conscientious3'] = None
+        ppvars['big5_extraversion1'] = None
+        ppvars['big5_extraversion2'] = None
+        ppvars['big5_extraversion3'] = None
+        ppvars['big5_agreeable1'] = None
+        ppvars['big5_agreeable2'] = None
+        ppvars['big5_agreeable3'] = None
+        ppvars['big5_neuroticism1'] = None
+        ppvars['big5_neuroticism2'] = None
+        ppvars['big5_neuroticism3'] = None
 
 
 # This is the Live Send code, so that performance etc can be stored immediately
@@ -1004,7 +1067,11 @@ def live_update_performance(player: Player, data):
     if 'mistakes' in data:
         player.mistakes = data['mistakes']
         shuffle = False
-    answer = dict(performance=player.performance, link_click_count=player.link_click_count, active_tab_seconds=player.active_tab_seconds, mistakes=player.mistakes, shuffle=shuffle)
+    answer = dict(performance=player.performance,
+                  link_click_count=player.link_click_count,
+                  active_tab_seconds=player.active_tab_seconds,
+                  mistakes=player.mistakes,
+                  shuffle=shuffle)
     return {own_id: answer}
 
 
@@ -1140,7 +1207,6 @@ class Belief(Page):
     def before_next_page(player, timeout_happened):
         if player.round_number > 1:
             player.participant.vars['belief'][player.round_number-1] = player.belief
-        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
         # TODO: remind them here about the interval again?
 
         if player.round_number == 6:
@@ -1156,6 +1222,7 @@ class Belief(Page):
                 player.participant.vars['ideal_to_do'] = player.ideal_to_do
                 player.participant.vars['ideal_index'] = player.ideal_index
                 print("Ideal to do:", player.ideal_to_do)
+
         print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
@@ -1214,6 +1281,7 @@ class Task(Page):
     @staticmethod
     def before_next_page(player, timeout_happened):
         player.participant.vars['actual'][player.round_number-1] = player.performance
+        player.participant.vars['mistakes'][player.round_number-1] = player.mistakes
         player.participant.vars['link_click_count'][player.round_number-1] = player.link_click_count
         player.participant.vars['active_tab_seconds'][player.round_number-1] = player.active_tab_seconds
         print("Participant:", player.participant.code, "Variables:", player.participant.vars)
@@ -1234,14 +1302,35 @@ class Survey1(Page):
         'big5_openness1', 'big5_openness2', 'big5_openness3', 'big5_openness4'
     ]
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        ppvars = player.participant.vars
+        ppvars['gender'] = player.gender
+        ppvars['age'] = player.age
+        ppvars['employment'] = player.employment
+        ppvars['education'] = player.education
+        ppvars['socialclass'] = player.socialclass
+        ppvars['children'] = player.children
+        ppvars['mathgrade'] = player.mathgrade
+        ppvars['big5_openness1'] = player.big5_openness1
+        ppvars['big5_openness2'] = player.big5_openness2
+        ppvars['big5_openness3'] = player.big5_openness3
+        ppvars['big5_openness4'] = player.big5_openness4
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 class Survey2(Page):
     form_model = 'player'
     form_fields = ['digitspan_max_level']
+
     @staticmethod
     def is_displayed(player):
         return player.round_number == 3
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        ppvars = player.participant.vars
+        ppvars['digitspan_max_level'] = player.digitspan_max_level
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 class Survey3(Page):
     @staticmethod
@@ -1289,6 +1378,13 @@ class Survey3(Page):
         player.participant.vars['risk_choices'][19] = player.risk_900
         player.participant.vars['risk_choices'][20] = player.risk_950
         player.participant.vars['risk_choices'][21] = player.risk_1000
+        player.participant.vars['big5_conscientious1'] = player.big5_conscientious1
+        player.participant.vars['big5_conscientious2'] = player.big5_conscientious2
+        player.participant.vars['big5_conscientious3'] = player.big5_conscientious3
+        player.participant.vars['big5_extraversion1'] = player.big5_extraversion1
+        player.participant.vars['big5_extraversion2'] = player.big5_extraversion2
+        player.participant.vars['big5_extraversion3'] = player.big5_extraversion3
+
         print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
@@ -1304,6 +1400,21 @@ class Survey4(Page):
         'big5_neuroticism1', 'big5_neuroticism2', 'big5_neuroticism3'
     ]
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        ppvars = player.participant.vars
+        ppvars['GPS_patience'] = player.GPS_patience
+        ppvars['GPS_altruism1'] = player.GPS_altruism1
+        ppvars['GPS_altruism2'] = player.GPS_altruism2
+        ppvars['GPS_postpone'] = player.GPS_postpone
+        ppvars['big5_agreeable1'] = player.big5_agreeable1
+        ppvars['big5_agreeable2'] = player.big5_agreeable2
+        ppvars['big5_agreeable3'] = player.big5_agreeable3
+        ppvars['big5_neuroticism1'] = player.big5_neuroticism1
+        ppvars['big5_neuroticism2'] = player.big5_neuroticism2
+        ppvars['big5_neuroticism3'] = player.big5_neuroticism3
+
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 class Survey5(Page):
     @staticmethod
@@ -1319,6 +1430,29 @@ class Survey5(Page):
         'ballsremembered3','screenshot'
     ]
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        ppvars = player.participant.vars
+        ppvars['BSCS_temptation'] = player.BSCS_temptation
+        ppvars['BSCS_badhabits'] = player.BSCS_badhabits
+        ppvars['BSCS_lazy'] = player.BSCS_lazy
+        ppvars['BSCS_inappropriate'] = player.BSCS_inappropriate
+        ppvars['BSCS_dobadthings'] = player.BSCS_dobadthings
+        ppvars['BSCS_refusebad'] = player.BSCS_refusebad
+        ppvars['BSCS_morediscipline'] = player.BSCS_morediscipline
+        ppvars['BSCS_irondiscipline'] = player.BSCS_irondiscipline
+        ppvars['BSCS_pleasure'] = player.BSCS_pleasure
+        ppvars['BSCS_concentrating'] = player.BSCS_concentrating
+        ppvars['BSCS_work'] = player.BSCS_work
+        ppvars['BSCS_stop'] = player.BSCS_stop
+        ppvars['BSCS_alternatives'] = player.BSCS_alternatives
+        ppvars['averagetask'] = player.averagetask
+        ppvars['ballsremembered1'] = player.ballsremembered1
+        ppvars['ballsremembered2'] = player.ballsremembered2
+        ppvars['ballsremembered3'] = player.ballsremembered3
+        ppvars['screenshot'] = player.screenshot
+
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 class FinalPage(Page):
     @staticmethod
