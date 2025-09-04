@@ -77,7 +77,7 @@ class Player(BasePlayer):
     q5 = models.StringField(
         label='<b>Question 5</b> <br> How is the fixed payoff per correctly solved task calculated?',
         choices=[
-            'It is the average of 120 numbers between 50 and 150',
+            'It is the average of 120 numbers between 50 points and 150 points',
             'It is the highest number out of the 120 balls shown',
             'It is a random number chosen between 50 and 150 each round',
         ],
