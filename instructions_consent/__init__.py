@@ -10,20 +10,22 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 1
     TOTAL_DURATION = 80
-    AVG_ADD_INCOME = cu(5.0)  # average extra income they can earn from the tasks
-    BELIEF_BONUS = cu(2.0)  # bonus for correct beliefs
+    AVG_ADD_INCOME = cu(5.0)  # TODO: change this!! average extra income they can earn from the tasks
+    BELIEF_BONUS = cu(2.0)  # TODO: change this!! bonus for correct beliefs
     SCALING_PAR = 25  # TODO: change this!! scaling parameter for the binarized quadratic scoring rule
+    FLAT_LEISURE_FEE = cu(0.1)  # TODO: change this!! flat fee per minute of leisure
     BENEFIT_RANGE_MIN = 50
     BENEFIT_RANGE_MAX = 150
     PERCENT_IDEAL = 3  # percentage chance that they will have to do the ideal number of tasks
 
+
 # Solutions for comprehension check
 solutions = dict(
-    q1='Yes, because each ball is shown only once, and by part 4 all 120 have been shown',
-    q2='It will be based on your performance in a randomly chosen part (trial or one of the five main parts)',
+    q1='Yes, because each ball is shown only once, and by part 4 all 120 have been shown.',
+    q2='It will be based on your performance in a randomly chosen part (trial or one of the five main parts).',
     q3=30,
-    q4='State your actual belief about the true payoff, because the closer your guess is to the real value (between 50 points and 150 points), the higher your probability of winning',
-    q5='It is the average of 120 numbers between 50 points and 150 points'
+    q4='State your actual belief about the true payoff, because the closer your guess is to the real value (between 50 points and 150 points), the higher your probability of winning.',
+    q5='It is the average of 120 numbers between 50 points and 150 points.'
 )
 
 
@@ -43,9 +45,9 @@ class Player(BasePlayer):
     q1 = models.StringField(
         label='<b>Question 1</b> <br> At the end of part 4, will you have seen all the numbers (“balls”) from the underlying distribution?',
         choices=[
-            'Yes, because the same 120 balls are shown repeatedly in every part',
-            'Yes, because each ball is shown only once, and by part 4 all 120 have been shown',
-            'No, because some balls are never shown',
+            'Yes, because the same 120 balls are shown repeatedly in every part.',
+            'Yes, because each ball is shown only once, and by part 4 all 120 have been shown.',
+            'No, because some balls are never shown.',
         ],
         widget=widgets.RadioSelect,
     )
@@ -53,9 +55,9 @@ class Player(BasePlayer):
     q2 = models.StringField(
         label='<b>Question 2</b> <br> Which of the following correctly describes how your payoff from the encryption task will be determined?',
         choices=[
-            'It will always be based on your performance in the final part of the study',
-            'It will be based on your performance in a randomly chosen part (trial or one of the five main parts)',
-            'It will be based on your average performance across all parts',
+            'It will always be based on your performance in the final part of the study.',
+            'It will be based on your performance in a randomly chosen part (trial or one of the five main parts).',
+            'It will be based on your average performance across all parts.',
         ],
         widget=widgets.RadioSelect,
     )
@@ -67,9 +69,9 @@ class Player(BasePlayer):
     q4 = models.StringField(
         label='<b>Question 4</b> <br> When guessing the fixed payoff per task, how should you choose your guess to maximize your chance of winning the extra payment?',
         choices=[
-            'Always guess a very high number',
-            'State your actual belief about the true payoff, because the closer your guess is to the real value (between 50 points and 150 points), the higher your probability of winning',
-            'Always guess the middle value between 50¢ and 150¢',
+            'Always guess a very high number.',
+            'State your actual belief about the true payoff, because the closer your guess is to the real value (between 50 points and 150 points), the higher your probability of winning.',
+            'Always guess the middle value between 50 points and 150 points.',
         ],
         widget=widgets.RadioSelect,
     )
@@ -77,9 +79,9 @@ class Player(BasePlayer):
     q5 = models.StringField(
         label='<b>Question 5</b> <br> How is the fixed payoff per correctly solved task calculated?',
         choices=[
-            'It is the average of 120 numbers between 50 points and 150 points',
-            'It is the highest number out of the 120 balls shown',
-            'It is a random number chosen between 50 and 150 each round',
+            'It is the average of 120 numbers between 50 points and 150 points.',
+            'It is the highest number out of the 120 balls shown.',
+            'It is a random number chosen between 50 and 150 each round.',
         ],
         widget=widgets.RadioSelect,
     )
@@ -95,10 +97,12 @@ def creating_session(subsession: Subsession):
     # define participant variables
     for p in subsession.get_players():
         p.participant.vars['consent'] = False
-        p.participant.vars['num_wrong'] = 0
+        p.participant.vars['total_wrong'] = None
         p.participant.vars['success_attempt'] = None
         p.participant.vars['attempt_number'] = 0
         p.participant.vars['excluded'] = False
+
+        print('Participant variables are', p.participant.vars)
 
 
 # PAGES
@@ -111,7 +115,12 @@ class EncryptionTask(Page):
 
 
 class Instructions(Page):
-    pass
+    @staticmethod
+    def vars_for_template(player: Player):
+        participation_fee = player.session.config['participation_fee']
+        return dict(
+            participation_fee=participation_fee
+        )
 
 
 class ComprehensionCheck(Page):
@@ -127,9 +136,11 @@ class ComprehensionCheck(Page):
     def vars_for_template(player):
         # split wrong_questions into a list, handle None
         wrong_questions_list = player.wrong_questions.split(',') if player.wrong_questions else []
+        participation_fee = player.session.config['participation_fee']
         return dict(
             attempt_number=player.attempt_number,
-            wrong_questions_list=wrong_questions_list
+            wrong_questions_list=wrong_questions_list,
+            participation_fee=participation_fee
         )
 
     @staticmethod
@@ -162,10 +173,13 @@ class ComprehensionCheck(Page):
         else:
             player.success_attempt = 0  # allow second attempt
 
-        player.participant.vars['num_wrong'] = player.num_wrong
         player.participant.vars['success_attempt'] = player.success_attempt
         player.participant.vars['attempt_number'] = player.attempt_number
         player.participant.vars['excluded'] = player.excluded
+
+        if player.participant.vars['total_wrong'] is None:
+            player.participant.vars['total_wrong'] = 0
+        player.participant.vars['total_wrong'] += player.num_wrong
 
 
 class ShowCorrectAnswers(Page):

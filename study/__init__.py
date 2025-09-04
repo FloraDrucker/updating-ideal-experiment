@@ -1207,7 +1207,6 @@ class Belief(Page):
     def before_next_page(player, timeout_happened):
         if player.round_number > 1:
             player.participant.vars['belief'][player.round_number-1] = player.belief
-        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
         # TODO: remind them here about the interval again?
 
         if player.round_number == 6:
@@ -1223,6 +1222,7 @@ class Belief(Page):
                 player.participant.vars['ideal_to_do'] = player.ideal_to_do
                 player.participant.vars['ideal_index'] = player.ideal_index
                 print("Ideal to do:", player.ideal_to_do)
+
         print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
@@ -1316,7 +1316,7 @@ class Survey1(Page):
         ppvars['big5_openness2'] = player.big5_openness2
         ppvars['big5_openness3'] = player.big5_openness3
         ppvars['big5_openness4'] = player.big5_openness4
-
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 class Survey2(Page):
     form_model = 'player'
@@ -1330,7 +1330,7 @@ class Survey2(Page):
     def before_next_page(player, timeout_happened):
         ppvars = player.participant.vars
         ppvars['digitspan_max_level'] = player.digitspan_max_level
-
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 class Survey3(Page):
     @staticmethod
@@ -1414,6 +1414,7 @@ class Survey4(Page):
         ppvars['big5_neuroticism2'] = player.big5_neuroticism2
         ppvars['big5_neuroticism3'] = player.big5_neuroticism3
 
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 class Survey5(Page):
     @staticmethod
@@ -1451,6 +1452,7 @@ class Survey5(Page):
         ppvars['ballsremembered3'] = player.ballsremembered3
         ppvars['screenshot'] = player.screenshot
 
+        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 class FinalPage(Page):
     @staticmethod
