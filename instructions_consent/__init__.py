@@ -16,6 +16,7 @@ class C(BaseConstants):
     FLAT_LEISURE_FEE = cu(0.1)  # TODO: change this!! flat fee per minute of leisure
     BENEFIT_RANGE_MIN = 50
     BENEFIT_RANGE_MAX = 150
+    TRUE_PAYOFF = 120
     PERCENT_IDEAL = 3  # percentage chance that they will have to do the ideal number of tasks
 
 

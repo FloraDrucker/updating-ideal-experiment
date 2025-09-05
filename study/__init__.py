@@ -1416,6 +1416,7 @@ class Survey4(Page):
 
         print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
+
 class Survey5(Page):
     @staticmethod
     def is_displayed(player):
@@ -1454,6 +1455,10 @@ class Survey5(Page):
 
         print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
+        # Randomize and calculate final payment
+        # TODO
+
+
 class FinalPage(Page):
     @staticmethod
     def is_displayed(player: Player):
@@ -1465,6 +1470,20 @@ class FinalPage(Page):
         return {
             'completion_url': config.get('prolific_completion_url', ''),
             'completion_code': config.get('prolific_completion_code', ''),
+            'completion_fee': config.get('participation_fee', ''),
+            'task_chosen_part': 1,
+            'performance_in_chosen_part': 2,
+            'true_payoff': base_constants.TRUE_PAYOFF,
+            'payoff_for_work': 3,
+            'payoff_for_work_usd': 4,
+            'leisure_minutes': 5,
+            'leisure_payoff': 6,
+            'belief_chosen_part': 6,
+            'belief_in_chosen_part': 7,
+            'payment_for_belief': 8,
+            'payment_for_risk': 9,
+            'chosen_risk_question': 10,
+            'choice_in_risk_question': 11
         }
 
 
