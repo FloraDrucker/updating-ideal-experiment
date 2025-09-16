@@ -1474,17 +1474,17 @@ class Survey5(Page):
 
         # Payment for belief:
         belief_in_part = player.participant.vars['belief'][player.belief_chosen_part]
-        player.prob = 1-(belief_in_part - base_constants.TRUE_PAYOFF)^2/base_constants.SCALING_PAR
-        player.payment_for_belief = random.choice([base_constants.BELIEF_BONUS, 0], p=[player.prob, 1-player.prob])
+        player.prob = 1-((belief_in_part - base_constants.TRUE_PAYOFF)**2/base_constants.SCALING_PAR)
+        player.payment_for_belief = np.random.choice([base_constants.BELIEF_BONUS, 0], p=[player.prob, 1-player.prob])
 
         # Payment for risk:
         risk_choices = [i for i in player.participant.vars['risk_choices'].keys()]
         player.risk_chosen = random.choice(risk_choices)
-        player.choice_in_risk_chosen = player.participant.vars['risk_chosen'][player.risk_chosen]
+        player.choice_in_risk_chosen = player.participant.vars['risk_choices'][player.risk_chosen]
         if player.choice_in_risk_chosen == 0:
             player.risk_payment = C.RISK_FIXED[player.risk_chosen]
         else:
-            player.risk_payment = random.choice([0,C.RISK_LARGE])
+            player.risk_payment = random.choice([0, C.RISK_LARGE])
 
 
 class FinalPage(Page):
@@ -1498,8 +1498,8 @@ class FinalPage(Page):
         chosen_part = C.PARTS[player.task_chosen_part]
         performance_in_part = player.participant.vars['actual'][player.task_chosen_part]
         payoff_for_work = base_constants.TRUE_PAYOFF*performance_in_part
-        payoff_in_usd = config.real_world_currency_per_point*payoff_for_work
-        leisure_minutes = (C.TIMEOUT_SECONDS - player.participant.vars['active_tab_seconds'][chosen_part])/60
+        payoff_in_usd = config['real_world_currency_per_point']*payoff_for_work
+        leisure_minutes = (C.TIMEOUT_SECONDS - player.participant.vars['active_tab_seconds'][player.task_chosen_part])/60
         leisure_payoff = leisure_minutes * base_constants.FLAT_LEISURE_FEE
         belief_chosen_part = C.PARTS[player.belief_chosen_part]
         belief_in_part = player.participant.vars['belief'][player.belief_chosen_part]
