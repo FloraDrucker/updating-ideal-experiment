@@ -27,7 +27,7 @@ class C(BaseConstants):
     SIGNAL_TIMEOUT = 5  # seconds signal is shown
     RISK_LARGE = 1000
     RISK_STEP = 50
-    RISK_FIXED = 50*[i for i in range(round(RISK_LARGE/RISK_STEP)+1)]
+    RISK_FIXED = {i: i*RISK_STEP for i in range(round(RISK_LARGE/RISK_STEP)+1)}
 
 
 class Subsession(BaseSubsession):
@@ -51,6 +51,9 @@ class Player(BasePlayer):
     prob = models.FloatField(blank=False)
     belief_chosen_part = models.IntegerField(blank=False)
     payment_for_belief = models.CurrencyField(blank=False)
+    risk_chosen = models.IntegerField(blank=False)
+    risk_payment = models.CurrencyField(blank=False)
+    choice_in_risk_chosen = models.IntegerField(blank=False)
 
     # Ideal values
     ideal50 = models.IntegerField(
@@ -994,7 +997,7 @@ def creating_session(subsession: Subsession):
         ppvars['active_tab_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
 
         # Risk preferences
-        ppvars['risk_choices'] = {i+1: None for i in range(21)}
+        ppvars['risk_choices'] = {i: None for i in range(21)}
 
         # Demographics
         ppvars['gender'] = None
@@ -1365,27 +1368,27 @@ class Survey3(Page):
 
     @staticmethod
     def before_next_page(player, timeout_happened):
-        player.participant.vars['risk_choices'][1] = player.risk_0
-        player.participant.vars['risk_choices'][2] = player.risk_50
-        player.participant.vars['risk_choices'][3] = player.risk_100
-        player.participant.vars['risk_choices'][4] = player.risk_150
-        player.participant.vars['risk_choices'][5] = player.risk_200
-        player.participant.vars['risk_choices'][6] = player.risk_250
-        player.participant.vars['risk_choices'][7] = player.risk_300
-        player.participant.vars['risk_choices'][8] = player.risk_350
-        player.participant.vars['risk_choices'][9] = player.risk_400
-        player.participant.vars['risk_choices'][10] = player.risk_450
-        player.participant.vars['risk_choices'][11] = player.risk_500
-        player.participant.vars['risk_choices'][12] = player.risk_550
-        player.participant.vars['risk_choices'][13] = player.risk_600
-        player.participant.vars['risk_choices'][14] = player.risk_650
-        player.participant.vars['risk_choices'][15] = player.risk_700
-        player.participant.vars['risk_choices'][16] = player.risk_750
-        player.participant.vars['risk_choices'][17] = player.risk_800
-        player.participant.vars['risk_choices'][18] = player.risk_850
-        player.participant.vars['risk_choices'][19] = player.risk_900
-        player.participant.vars['risk_choices'][20] = player.risk_950
-        player.participant.vars['risk_choices'][21] = player.risk_1000
+        player.participant.vars['risk_choices'][0] = player.risk_0
+        player.participant.vars['risk_choices'][1] = player.risk_50
+        player.participant.vars['risk_choices'][2] = player.risk_100
+        player.participant.vars['risk_choices'][3] = player.risk_150
+        player.participant.vars['risk_choices'][4] = player.risk_200
+        player.participant.vars['risk_choices'][5] = player.risk_250
+        player.participant.vars['risk_choices'][6] = player.risk_300
+        player.participant.vars['risk_choices'][7] = player.risk_350
+        player.participant.vars['risk_choices'][8] = player.risk_400
+        player.participant.vars['risk_choices'][9] = player.risk_450
+        player.participant.vars['risk_choices'][10] = player.risk_500
+        player.participant.vars['risk_choices'][11] = player.risk_550
+        player.participant.vars['risk_choices'][12] = player.risk_600
+        player.participant.vars['risk_choices'][13] = player.risk_650
+        player.participant.vars['risk_choices'][14] = player.risk_700
+        player.participant.vars['risk_choices'][15] = player.risk_750
+        player.participant.vars['risk_choices'][16] = player.risk_800
+        player.participant.vars['risk_choices'][17] = player.risk_850
+        player.participant.vars['risk_choices'][18] = player.risk_900
+        player.participant.vars['risk_choices'][19] = player.risk_950
+        player.participant.vars['risk_choices'][20] = player.risk_1000
         player.participant.vars['big5_conscientious1'] = player.big5_conscientious1
         player.participant.vars['big5_conscientious2'] = player.big5_conscientious2
         player.participant.vars['big5_conscientious3'] = player.big5_conscientious3
@@ -1475,6 +1478,15 @@ class Survey5(Page):
         player.prob = 1-(belief_in_part - base_constants.TRUE_PAYOFF)^2/base_constants.SCALING_PAR
         player.payment_for_belief = random.choice([base_constants.BELIEF_BONUS, 0], p=[player.prob, 1-player.prob])
 
+        # Payment for risk:
+        risk_choices = [i for i in player.participant.vars['risk_choices'].keys()]
+        player.risk_chosen = random.choice(risk_choices)
+        player.choice_in_risk_chosen = player.participant.vars['risk_chosen'][player.risk_chosen]
+        if player.choice_in_risk_chosen == 0:
+            player.risk_payment = C.RISK_FIXED[player.risk_chosen]
+        else:
+            player.risk_payment = random.choice([0,C.RISK_LARGE])
+
 
 class FinalPage(Page):
     @staticmethod
@@ -1492,7 +1504,7 @@ class FinalPage(Page):
         leisure_payoff = leisure_minutes * base_constants.FLAT_LEISURE_FEE
         belief_chosen_part = C.PARTS[player.belief_chosen_part]
         belief_in_part = player.participant.vars['belief'][player.belief_chosen_part]
-        # TODO: risk
+
         # TODO: test!!
 
         return {
@@ -1509,9 +1521,9 @@ class FinalPage(Page):
             'belief_chosen_part': belief_chosen_part,
             'belief_in_chosen_part': belief_in_part,
             'payment_for_belief': player.payment_for_belief,
-            'payment_for_risk': 9,
-            'chosen_risk_question': 10,
-            'choice_in_risk_question': 11
+            'payment_for_risk': player.risk_payment,
+            'chosen_risk_question': player.risk_chosen,
+            'choice_in_risk_question': player.choice_in_risk_chosen
         }
 
 
