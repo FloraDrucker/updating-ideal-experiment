@@ -14,14 +14,16 @@
         <li> For your payment for the task, the computer has selected {{ task_chosen_part }} randomly, in which you completed {{ performance_in_chosen_part }} tasks. The fixed payoff per task was {{ true_payoff }} points, so you will receive <b>{{ payoff_for_work }} points = {{ payoff_for_work_usd }} for your work.</b></li>
         <li> You spent {{ leisure_minutes }} minutes on the <b>outside options</b>, so you receive <b>{{ leisure_payoff }}</b> for this part. </li>
         <li> The randomly chosen part for payment for your beliefs about the true benefit is part {{ belief_chosen_part }}, and your guess was {{ belief_in_chosen_part }} in this part. Your <b>payment for your beliefs is {{ payment_for_belief }}</b>. </li>
-        <li> You receive <b>{{ payment_for_risk }} from the lottery decision</b>, because the randomly selected decision  was {{ chosen_risk_question }}, where you chose {{ choice_in_risk_question }}. </li>
+        <li> You receive <b>{{ payment_for_risk }} points (= {{ payment_for_risk_usd }}) from the lottery decision</b>, because the randomly selected decision  was {{ chosen_risk_question }}, where you chose {{ choice_in_risk_question }}. </li>
     </ul>
 
 </p>
 
-    <p>
-    You will receive your payments within 3 days via the Prolific payment system.
-    </p>
+<p> Your total payment is therefore {{ total_payment }} for the study. </p>
+
+<p>
+    You will receive your payment within 3 days via the Prolific payment system.
+</p>
 
     <p>
         Please click <a href="{{ completion_url }}" rel="noopener noreferrer">HERE</a> to <b>go back to Prolific, proving that you completed this part of the study.</b> Alternatively, you can go back to Prolific, and manually enter the following <b>completion code:</b> {{ completion_code }}

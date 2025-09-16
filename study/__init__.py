@@ -37,7 +37,6 @@ class C(BaseConstants):
         j = RISK_FIXED[i]
         RISK_CHOICES[i] = f"{j} points or 50 % chance of 1000 points, 50 % chance of 0 points"
         RISK_OPTIONS[i] = {0: f"{j} points", 1: "50 % chance of 1000 points, 50 % chance of 0 points"}
-    print(RISK_FIXED, RISK_CHOICES, RISK_OPTIONS)
 
 
 class Subsession(BaseSubsession):
@@ -61,7 +60,7 @@ class Player(BasePlayer):
     belief_chosen_part = models.IntegerField(blank=False)
     payment_for_belief = models.CurrencyField(blank=False)
     risk_chosen = models.IntegerField(blank=False)
-    risk_payment = models.CurrencyField(blank=False)
+    risk_payment = models.IntegerField(blank=False)
     choice_in_risk_chosen = models.IntegerField(blank=False)
 
     # Ideal values
@@ -1516,13 +1515,16 @@ class FinalPage(Page):
         chosen_part = C.PARTS[player.task_chosen_part]
         performance_in_part = player.participant.vars['actual'][player.task_chosen_part]
         payoff_for_work = base_constants.TRUE_PAYOFF*performance_in_part
-        payoff_in_usd = config['real_world_currency_per_point']*payoff_for_work
+        payoff_in_usd = cu(config['real_world_currency_per_point']*payoff_for_work)
         leisure_minutes = (C.TIMEOUT_SECONDS - player.participant.vars['active_tab_seconds'][player.task_chosen_part])/60
         leisure_payoff = leisure_minutes * base_constants.FLAT_LEISURE_FEE
         belief_chosen_part = C.PARTS[player.belief_chosen_part]
         belief_in_part = player.participant.vars['belief'][player.belief_chosen_part]
         chosen_risk_question = C.RISK_CHOICES[player.risk_chosen]
         choice_in_risk_chosen = C.RISK_OPTIONS[player.risk_chosen][player.choice_in_risk_chosen]
+        payment_for_risk_usd = cu(player.risk_payment*config['real_world_currency_per_point'])
+
+        total_payment = cu(config['participation_fee'] + payoff_in_usd + leisure_payoff + player.payment_for_belief + payment_for_risk_usd)
 
         ppvars = player.participant.vars
         ppvars['task_chosen_part'] = player.task_chosen_part
@@ -1549,8 +1551,10 @@ class FinalPage(Page):
             'belief_in_chosen_part': belief_in_part,
             'payment_for_belief': player.payment_for_belief,
             'payment_for_risk': player.risk_payment,
+            'payment_for_risk_usd': payment_for_risk_usd,
             'chosen_risk_question': chosen_risk_question,
             'choice_in_risk_question': choice_in_risk_chosen,
+            'total_payment': total_payment,
         }
 
 
