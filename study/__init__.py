@@ -13,18 +13,21 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 6  # = number of sessions including trial. Certain pages will only be shown in certain rounds, e.g. predicted and ideal in only rounds 2 and 6
     PARTS = {
-        1: 'the Trial Part',
-        2: 'Part One',
-        3: 'Part Two',
-        4: 'Part Three',
-        5: 'Part Four',
-        6: 'Part Five',
+        0: 'the Trial Part',
+        1: 'Part One',
+        2: 'Part Two',
+        3: 'Part Three',
+        4: 'Part Four',
+        5: 'Part Five',
     }
     USE_TIMEOUT = True
     TIMEOUT_SECONDS = 30  # TODO: set this to 600 for the real experiment (10 minutes)
     TIMEOUT_MINUTES = round(TIMEOUT_SECONDS / 60)
     TASK_LENGTH = 4
     SIGNAL_TIMEOUT = 5  # seconds signal is shown
+    RISK_LARGE = 1000
+    RISK_STEP = 50
+    RISK_FIXED = [i*RISK_STEP for i in range(round(RISK_LARGE/RISK_STEP)+1)]
 
 
 class Subsession(BaseSubsession):
@@ -43,6 +46,11 @@ class Player(BasePlayer):
     do_ideal = models.BooleanField(initial=False) # whether the participant has to do the stated ideal number of tasks
     ideal_to_do = models.IntegerField(default=999)
     ideal_index = models.IntegerField(null=True, blank=True, default=None)
+    # TODO: save these to participant vars
+    task_chosen_part = models.IntegerField(blank=False)
+    prob = models.FloatField(blank=False)
+    belief_chosen_part = models.IntegerField(blank=False)
+    payment_for_belief = models.CurrencyField(blank=False)
 
     # Ideal values
     ideal50 = models.IntegerField(
@@ -1080,7 +1088,7 @@ class PartStart(Page):
     @staticmethod
     def vars_for_template(player):
         return {
-            'part': C.PARTS[player.round_number]
+            'part': C.PARTS[player.round_number-1]
         }
 
 
@@ -1456,7 +1464,16 @@ class Survey5(Page):
         print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
         # Randomize and calculate final payment
-        # TODO
+        # Chosen part for payment for task and beliefs:
+        parts = [i for i in range(C.NUM_ROUNDS)]
+        parts_belief = parts[1:C.NUM_ROUNDS]
+        player.task_chosen_part = random.choice(parts)
+        player.belief_chosen_part = random.choice(parts_belief)
+
+        # Payment for belief:
+        belief_in_part = player.participant.vars['belief'][player.belief_chosen_part]
+        player.prob = 1-(belief_in_part - base_constants.TRUE_PAYOFF)^2/base_constants.SCALING_PAR
+        player.payment_for_belief = random.choice([base_constants.BELIEF_BONUS, 0], p=[player.prob, 1-player.prob])
 
 
 class FinalPage(Page):
@@ -1467,20 +1484,31 @@ class FinalPage(Page):
     @staticmethod
     def vars_for_template(player: Player):
         config = player.session.config
+        chosen_part = C.PARTS[player.task_chosen_part]
+        performance_in_part = player.participant.vars['actual'][player.task_chosen_part]
+        payoff_for_work = base_constants.TRUE_PAYOFF*performance_in_part
+        payoff_in_usd = config.real_world_currency_per_point*payoff_for_work
+        leisure_minutes = (C.TIMEOUT_SECONDS - player.participant.vars['active_tab_seconds'][chosen_part])/60
+        leisure_payoff = leisure_minutes * base_constants.FLAT_LEISURE_FEE
+        belief_chosen_part = C.PARTS[player.belief_chosen_part]
+        belief_in_part = player.participant.vars['belief'][player.belief_chosen_part]
+        # TODO: risk
+        # TODO: test!!
+
         return {
             'completion_url': config.get('prolific_completion_url', ''),
             'completion_code': config.get('prolific_completion_code', ''),
             'completion_fee': config.get('participation_fee', ''),
-            'task_chosen_part': 1,
-            'performance_in_chosen_part': 2,
+            'task_chosen_part': chosen_part,
+            'performance_in_chosen_part': performance_in_part,
             'true_payoff': base_constants.TRUE_PAYOFF,
-            'payoff_for_work': 3,
-            'payoff_for_work_usd': 4,
-            'leisure_minutes': 5,
-            'leisure_payoff': 6,
-            'belief_chosen_part': 6,
-            'belief_in_chosen_part': 7,
-            'payment_for_belief': 8,
+            'payoff_for_work': payoff_for_work,
+            'payoff_for_work_usd': payoff_in_usd,
+            'leisure_minutes': leisure_minutes,
+            'leisure_payoff': leisure_payoff,
+            'belief_chosen_part': belief_chosen_part,
+            'belief_in_chosen_part': belief_in_part,
+            'payment_for_belief': player.payment_for_belief,
             'payment_for_risk': 9,
             'chosen_risk_question': 10,
             'choice_in_risk_question': 11
