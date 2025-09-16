@@ -45,7 +45,6 @@ class Player(BasePlayer):
     do_ideal = models.BooleanField(initial=False) # whether the participant has to do the stated ideal number of tasks
     ideal_to_do = models.IntegerField(default=999)
     ideal_index = models.IntegerField(null=True, blank=True, default=None)
-    # TODO: save these to participant vars
     task_chosen_part = models.IntegerField(blank=False)
     prob = models.FloatField(blank=False)
     belief_chosen_part = models.IntegerField(blank=False)
@@ -1056,6 +1055,14 @@ def creating_session(subsession: Subsession):
         ppvars['big5_neuroticism2'] = None
         ppvars['big5_neuroticism3'] = None
 
+        # Variables for payment
+        ppvars['task_chosen_part'] = None
+        ppvars['prob'] = None
+        ppvars['belief_chosen_part'] = None
+        ppvars['payment_for_belief'] = None
+        ppvars['risk_chosen'] = None
+        ppvars['risk_payment'] = None
+        ppvars['choice_in_risk_chosen'] = None
 
 # This is the Live Send code, so that performance etc can be stored immediately
 def live_update_performance(player: Player, data):
@@ -1504,7 +1511,14 @@ class FinalPage(Page):
         belief_chosen_part = C.PARTS[player.belief_chosen_part]
         belief_in_part = player.participant.vars['belief'][player.belief_chosen_part]
 
-        # TODO: test!!
+        ppvars = player.participant.vars
+        ppvars['task_chosen_part'] = player.task_chosen_part
+        ppvars['prob'] = player.prob
+        ppvars['belief_chosen_part'] = player.belief_chosen_part
+        ppvars['payment_for_belief'] = player.payment_for_belief
+        ppvars['risk_chosen'] = player.risk_chosen
+        ppvars['risk_payment'] = player.risk_payment
+        ppvars['choice_in_risk_chosen'] = player.choice_in_risk_chosen
 
         return {
             'completion_url': config.get('prolific_completion_url', ''),
