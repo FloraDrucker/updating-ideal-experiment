@@ -26,9 +26,18 @@ class C(BaseConstants):
     TASK_LENGTH = 4
     SIGNAL_TIMEOUT = 5  # seconds signal is shown
     RISK_LARGE = 1000
-    RISK_FIXED = {i: 50*i for i in range(round(RISK_LARGE/50)+1)}
-    RISK_CHOICES = {i: f"{RISK_FIXED[i]} points or 50 % chance of 1000 points, 50 % chance of 0 points" for i in RISK_FIXED.keys()}
-    RISK_OPTIONS = {i: {0: f"{RISK_FIXED[i]} points", 1: "50 % chance of 1000 points, 50 % chance of 0 points"} for i in RISK_FIXED.keys()}
+    RISK_STEP = 50
+    RISK_FIXED = {}
+    for i in range(round(RISK_LARGE/50)+1):
+        j = i*RISK_STEP
+        RISK_FIXED[i] = j
+    RISK_CHOICES = {}
+    RISK_OPTIONS = {}
+    for i in RISK_FIXED.keys():
+        j = RISK_FIXED[i]
+        RISK_CHOICES[i] = f"{j} points or 50 % chance of 1000 points, 50 % chance of 0 points"
+        RISK_OPTIONS[i] = {0: f"{j} points", 1: "50 % chance of 1000 points, 50 % chance of 0 points"}
+    print(RISK_FIXED, RISK_CHOICES, RISK_OPTIONS)
 
 
 class Subsession(BaseSubsession):
