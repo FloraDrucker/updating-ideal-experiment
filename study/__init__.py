@@ -27,6 +27,8 @@ class C(BaseConstants):
     SIGNAL_TIMEOUT = 5  # seconds signal is shown
     RISK_LARGE = 1000
     RISK_FIXED = {i: 50*i for i in range(round(RISK_LARGE/50)+1)}
+    RISK_CHOICES = {i: f"{RISK_FIXED[i]} points or 50 % chance of 1000 points, 50 % chance of 0 points" for i in RISK_FIXED.keys()}
+    RISK_OPTIONS = {i: {0: f"{RISK_FIXED[i]} points", 1: "50 % chance of 1000 points, 50 % chance of 0 points"} for i in RISK_FIXED.keys()}
 
 
 class Subsession(BaseSubsession):
@@ -1510,6 +1512,8 @@ class FinalPage(Page):
         leisure_payoff = leisure_minutes * base_constants.FLAT_LEISURE_FEE
         belief_chosen_part = C.PARTS[player.belief_chosen_part]
         belief_in_part = player.participant.vars['belief'][player.belief_chosen_part]
+        chosen_risk_question = C.RISK_CHOICES[player.risk_chosen]
+        choice_in_risk_chosen = C.RISK_OPTIONS[player.risk_chosen][player.choice_in_risk_chosen]
 
         ppvars = player.participant.vars
         ppvars['task_chosen_part'] = player.task_chosen_part
@@ -1519,6 +1523,7 @@ class FinalPage(Page):
         ppvars['risk_chosen'] = player.risk_chosen
         ppvars['risk_payment'] = player.risk_payment
         ppvars['choice_in_risk_chosen'] = player.choice_in_risk_chosen
+
 
         return {
             'completion_url': config.get('prolific_completion_url', ''),
@@ -1535,8 +1540,8 @@ class FinalPage(Page):
             'belief_in_chosen_part': belief_in_part,
             'payment_for_belief': player.payment_for_belief,
             'payment_for_risk': player.risk_payment,
-            'chosen_risk_question': player.risk_chosen,
-            'choice_in_risk_question': player.choice_in_risk_chosen
+            'chosen_risk_question': chosen_risk_question,
+            'choice_in_risk_question': choice_in_risk_chosen,
         }
 
 
