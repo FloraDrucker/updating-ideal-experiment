@@ -27,7 +27,7 @@ class C(BaseConstants):
     SIGNAL_TIMEOUT = 5  # seconds signal is shown
     RISK_LARGE = 1000
     RISK_STEP = 50
-    RISK_FIXED = [i*RISK_STEP for i in range(round(RISK_LARGE/RISK_STEP)+1)]
+    RISK_FIXED = 50*[i for i in range(round(RISK_LARGE/RISK_STEP)+1)]
 
 
 class Subsession(BaseSubsession):
