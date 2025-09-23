@@ -10,10 +10,10 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 1
     TOTAL_DURATION = 80
-    AVG_ADD_INCOME = cu(5.0)  # TODO: change this!! average extra income they can earn from the tasks
-    BELIEF_BONUS = cu(2.0)  # TODO: change this!! bonus for correct beliefs
-    SCALING_PAR = 14400  # TODO: change this!! scaling parameter for the binarized quadratic scoring rule
-    FLAT_LEISURE_FEE = cu(0.1)  # TODO: change this!! flat fee per minute of leisure
+    AVG_ADD_INCOME = cu(6.5)  # TODO: change this after pilot!!  average extra income they can earn from the tasks
+    BELIEF_BONUS = cu(2.0)  # bonus for correct beliefs
+    SCALING_PAR = 900  # scaling parameter for the binarized quadratic scoring rule
+    FLAT_LEISURE_FEE = cu(0.1)  # flat fee per minute of leisure
     BENEFIT_RANGE_MIN = 50
     BENEFIT_RANGE_MAX = 150
     TRUE_PAYOFF = 120
