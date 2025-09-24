@@ -10,8 +10,8 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 1
     TOTAL_DURATION = 80
-    AVG_ADD_INCOME = cu(5.0)  # average extra income they can earn from the tasks
-    BELIEF_BONUS = cu(2.0)  # bonus for correct beliefs
+    AVG_ADD_INCOME = cu(7.0)  # average extra income they can earn from the tasks
+    BELIEF_BONUS = 666.67  # bonus for correct beliefs
     SCALING_PAR = 25  # TODO: change this!! scaling parameter for the binarized quadratic scoring rule
     BENEFIT_RANGE_MIN = 50
     BENEFIT_RANGE_MAX = 150
@@ -77,7 +77,7 @@ class Player(BasePlayer):
     q5 = models.StringField(
         label='<b>Question 5</b> <br> How is the fixed payoff per correctly solved task calculated?',
         choices=[
-            'It is the average of 120 numbers between 50 points and 150 points',
+            'It is the average of 120 numbers between 50 points and 150 pointsAll payments will be converted from ECU to USD at a rate of 1,000 ECU to 1.5 USD.',
             'It is the highest number out of the 120 balls shown',
             'It is a random number chosen between 50 and 150 each round',
         ],
