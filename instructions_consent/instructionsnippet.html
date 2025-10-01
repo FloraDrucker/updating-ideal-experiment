@@ -3,16 +3,15 @@
 <div class="text">
 
 <p>
-    In all five parts, you will work on the task you just saw for at most 10 minutes. You will receive a fixed payoff for each correctly solved encryption task in the part that will be randomly chosen for payment. The payoff is between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points per task. 1,000 points equal
-    {{ thousand_points }}. Every part will have the following stages:
+    In all five parts, you will work on the task you just saw for at most 10 minutes. You will receive <b> a fixed payoff {{ if player.treatment == False }} of {{ C.TRUE_PAYOFF }} points {{ endif }} </b> for each correctly solved encryption task in the part that will be randomly chosen for payment. {{ if player.treatment == True }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: we chose <b> a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} </b>, and you will have to guess this number. {{ endif }} Every part will have the following stages:
 </p>
 
 <br>
 
-<h5> 1. Guessing the true payoff of the task </h5>
+<h5> 1. Guessing the {{ guess_about }}. </h5>
 
 <p>
-    You will have to state a number for how large you think the fixed payoff per correctly solved task is based on your current information. You will receive a bonus payment of {{C.BELIEF_BONUS}} points if your guess in the randomly chosen part is close to the true task payoff. The more precise your guess about the fixed task payoff is – i.e., the closer it is to the true fixed payoff for each correctly solved task -, the more likely it is that you win {{C.BELIEF_BONUS}} points. Given this payment rule, you should state your best guess to ensure the largest chance of receiving the {{C.BELIEF_BONUS}} points. If you are interested in the exact mathematical formula stating the precise payment rule, please click on the button “Show mathematical formula”.
+    You will have to state how large you think the {{ guess_about }} is based on your current information. You will receive a bonus payment of {{C.BELIEF_BONUS}} points if your guess in the randomly chosen part is close to the true {{ guess_about }}. The more precise your guess – i.e., the closer it is to the true {{ guess_about }} -, the more likely it is that you win {{C.BELIEF_BONUS}} points. Given this payment rule, you should state your best guess to ensure the largest chance of receiving the {{C.BELIEF_BONUS}} points. If you are interested in the exact mathematical formula stating the precise payment rule, please click on the button “Show mathematical formula”.
 </p>
 
 <br>
@@ -32,7 +31,7 @@
 
 <div id="mathFormula" class="border rounded p-3 mt-3 mx-auto" style="display: none; width: 80%; background-color: #f9f9f9;">
     <p>
-        You will have to guess the actual payoff per task at the beginning of each part. The closer your guess is to the actual payoff, the higher the probability that you receive an extra payment of
+        You will have to guess the {{ guess_about }} at the beginning of each part. The closer your guess is to the actual {{ guess_about }}, the higher the probability that you receive an extra payment of
         {{C.BELIEF_BONUS}} points.
     </p>
 
@@ -41,11 +40,14 @@
     </p>
 
     <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
-
-        $$ {p = 1- \frac{(\text{your guess} - \text{actual task payoff})^2}{900}.} $$
+    {{ if player.treatment == True }}
+    $$ {p = 1- \frac{(\text{your guess} - \text{actual payoff per task})^2}{900}.} $$
+    {{ else }}
+    $$ {p = 1- \frac{(\text{your guess} - \text{actual chosen number})^2}{900}.} $$
+    {{ endif }}
 
     <p>
-        If your guess equals the actual task payoff, p=1, and you will get the extra payment for sure. The further your guess deviates from the actual task payoff, the lowe is the probability p that you receive the extra payment. If your guess deviates from the actual task payoff by more than 30, p=0, i.e., p can never turn negative.
+        If your guess equals the actual {{ guess_about }}, then p=1, and you will get the extra payment for sure. The further your guess deviates from the actual {{ guess_about }}, the lower is the probability p that you receive the extra payment. If your guess deviates from the actual {{ guess_about }} by more than 30, then p=0, i.e., p can never turn negative.
     </p>
 
     <p>
@@ -55,10 +57,10 @@
 
 <br>
 
-<h5> 2. Further information about the true payoff per task </h5>
+<h5> 2. Further information about the {{ guess_about }} </h5>
 
 <p>
-    During the course of the experiment, you will get more and more information that will allow you to obtain more precise knowledge of this fixed payoff. This will work in the following way: The fixed payoff is the average of 120 numbers that lie between {{ C.BENEFIT_RANGE_MIN }} points and {{ C.BENEFIT_RANGE_MAX }} points. The same number can occur several times. At the beginning of parts 1 to 4, we will briefly display 30 of these 120 numbers (represented by balls) on the screen. Each of the 120 balls will be displayed only once, so you will have seen all the balls after part 4.
+    During the course of the experiment, you will get more and more information that will allow you to obtain more precise knowledge of the {{ guess_about }}. This will work in the following way: The {{ guess_about }} is <b> the average of 120 numbers that lie between {{ C.BENEFIT_RANGE_MIN }} points and {{ C.BENEFIT_RANGE_MAX }} points.</b> The same number can occur several times. At the beginning of parts 1 to 4, we will briefly display 30 of these 120 numbers (represented by balls) on the screen. Each of the 120 balls will be displayed only once, so you will have seen all the balls after part 4.
 </p>
 
 <script>
@@ -80,8 +82,7 @@
 <h5> 3. Working on the encryption task </h5>
 
 <p>
-    After receiving the information about the fixed payoff, you will work on the task for a maximum of 10 minutes. Your payment for this stage will be the fixed payoff times the number of tasks you completed correctly. However, you do not have to work for the full 10 minutes. We will offer you some alternatives that you can access via different links at the bottom of the page. For each minute spent on one of the alternatives, you will receive a flat fee of
-    {{ C.FLAT_LEISURE_FEE }} points.
+    After receiving the information about the {{ guess_about }}, you will work on the task for a maximum of 10 minutes. Your payment for this stage will be the fixed payoff times the number of tasks you completed correctly. However, you do not have to work for the full 10 minutes. We will offer you some alternatives that you can access via different links at the bottom of the page. For each minute spent on one of the alternatives, you will receive a flat fee of {{ C.FLAT_LEISURE_FEE }} points.
 </p>
 
 <p>
@@ -101,7 +102,7 @@
 <h5> From the second part onwards </h5>
 
 <p>
-    From the second to the fifth part, we will first remind you of how many tasks you completed correctly in the previous part. In the fifth part, you will not receive any new information about the fixed payoff (stage 2), but you will have to guess it (stage 1) and work on the encryption task (stage 3).
+    From the second to the fifth part, we will first remind you of how many tasks you completed correctly in the previous part. In the fifth part, you will not receive any new information about the {{ guess_about }} (stage 2), but you will have to guess it (stage 1) and work on the encryption task (stage 3).
 </p>
 
 <br>
@@ -116,12 +117,12 @@
     <li>A fixed completion fee of {{ participation_fee }} if you complete the whole study.</li>
     <li>Payoff from your performance in a randomly chosen part: number of tasks completed times the true payoff per task.</li>
     <li> {{ C.FLAT_LEISURE_FEE }} points per minute spent on the alternative option in the same randomly chosen part.</li>
-    <li>Bonus payment based on the accuracy of your guess about the true task payoff in a randomly chosen part.</li>
+    <li>Bonus payment based on the accuracy of your guess about the {{ guess_about }} in a randomly chosen part.</li>
     <li>Lottery decision.</li>
 </ol>
 
 <p>
-    The computer will randomly choose a part from the trial and the five main parts that will determine your payoff from sources 2 and 3. It will choose another part randomly from the five main parts (which can be the same as or different from the one first chosen) that will determine your payoff in source 4. All payments will be converted from points to USD at a rate of 1,000 points to
+    The computer will randomly choose a part from the trial and the five main parts that will determine your payoff from sources 2 and 3. It will choose another part randomly from the five main parts (which can be the same as or different from the one first chosen) that will determine your payoff in source 4. All payments will be converted from points to USD at a rate of 1000 points to
     {{ thousand_points }}.
 </p>
 

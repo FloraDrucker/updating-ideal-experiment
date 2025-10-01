@@ -18,7 +18,8 @@ class C(BaseConstants):
     BENEFIT_RANGE_MAX = 150
     TRUE_PAYOFF = 120
     PERCENT_IDEAL = 3  # percentage chance that they will have to do the ideal number of tasks
-
+    GUESS_ABOUT = {True: "payoff per task",
+                   False: "chosen number"}
 
 # Solutions for comprehension check
 solutions = dict(
@@ -39,6 +40,9 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
+    # Treatment
+    treatment = models.BooleanField(blank=False)  # False = Control, True = Main
+
     # Consent
     consent = models.BooleanField(label="Do you wish to participate in the study?", blank=False)
 
@@ -95,8 +99,13 @@ class Player(BasePlayer):
 
 
 def creating_session(subsession: Subsession):
+    import itertools
+    treatments = itertools.cycle([True, False])
+
     # define participant variables
     for p in subsession.get_players():
+        p.treatment = next(treatments)
+        p.participant.vars['treatment'] = p.treatment
         p.participant.vars['consent'] = False
         p.participant.vars['total_wrong'] = None
         p.participant.vars['success_attempt'] = None
@@ -120,9 +129,11 @@ class Instructions(Page):
     def vars_for_template(player: Player):
         participation_fee = player.session.config['participation_fee']
         thousand_points = cu(player.session.config['real_world_currency_per_point']*1000)
+        guess_about = C.GUESS_ABOUT[player.treatment]
         return dict(
             participation_fee=participation_fee,
             thousand_points=thousand_points,
+            guess_about=guess_about,
         )
 
 
