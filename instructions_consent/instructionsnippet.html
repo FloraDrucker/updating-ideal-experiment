@@ -3,7 +3,8 @@
 <div class="text">
 
 <p>
-    In all five parts, you will work on the task you just saw for at most 10 minutes. You will receive a fixed payoff for each correctly solved encryption task in the part that will be randomly chosen for payment. The payoff is between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points per task. 1,000 points equal $1.5. Every part will have the following stages:
+    In all five parts, you will work on the task you just saw for at most 10 minutes. You will receive a fixed payoff for each correctly solved encryption task in the part that will be randomly chosen for payment. The payoff is between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points per task. 1,000 points equal
+    {{ thousand_points }}. Every part will have the following stages:
 </p>
 
 <br>
@@ -41,10 +42,10 @@
 
     <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
 
-    $$ {p = 1- \frac{(\text{your guess} -- \text{actual task payoff})^2}{900}.} $$
+        $$ {p = 1- \frac{(\text{your guess} - \text{actual task payoff})^2}{900}.} $$
 
     <p>
-        If your guess equals the actual task payoff, p=1 and you will get the extra payment for sure. The further your guess deviates from the actual task payoff, the lowe is the probability p that you receive the extra payment. If your guess deviates from the actual task payoff by more than 30, p=0, i.e., p can never turn negative.
+        If your guess equals the actual task payoff, p=1, and you will get the extra payment for sure. The further your guess deviates from the actual task payoff, the lowe is the probability p that you receive the extra payment. If your guess deviates from the actual task payoff by more than 30, p=0, i.e., p can never turn negative.
     </p>
 
     <p>
@@ -114,13 +115,14 @@
 <ol>
     <li>A fixed completion fee of {{ participation_fee }} if you complete the whole study.</li>
     <li>Payoff from your performance in a randomly chosen part: number of tasks completed times the true payoff per task.</li>
-    <li> {{ C.FLAT_LEISURE_FEE }} per minute spent on the alternative option in the same randomly chosen part.</li>
+    <li> {{ C.FLAT_LEISURE_FEE }} points per minute spent on the alternative option in the same randomly chosen part.</li>
     <li>Bonus payment based on the accuracy of your guess about the true task payoff in a randomly chosen part.</li>
     <li>Lottery decision.</li>
 </ol>
 
 <p>
-    The computer will randomly choose a part from the trial and the five main parts that will determine your payoff from sources 2 and 3. It will choose another part randomly from the five main parts (which can be the same as or different from the one first chosen) that will determine your payoff in source 4. All payments will be converted from points to USD at a rate of 1,000 points to $1.5.
+    The computer will randomly choose a part from the trial and the five main parts that will determine your payoff from sources 2 and 3. It will choose another part randomly from the five main parts (which can be the same as or different from the one first chosen) that will determine your payoff in source 4. All payments will be converted from points to USD at a rate of 1,000 points to
+    {{ thousand_points }}.
 </p>
 
 <p>

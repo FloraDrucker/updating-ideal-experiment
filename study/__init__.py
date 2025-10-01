@@ -58,7 +58,7 @@ class Player(BasePlayer):
     task_chosen_part = models.IntegerField(blank=False)
     prob = models.FloatField(blank=False)
     belief_chosen_part = models.IntegerField(blank=False)
-    payment_for_belief = models.CurrencyField(blank=False)
+    payment_for_belief = models.IntegerField(blank=False)
     risk_chosen = models.IntegerField(blank=False)
     risk_payment = models.IntegerField(blank=False)
     choice_in_risk_chosen = models.IntegerField(blank=False)
@@ -1491,8 +1491,9 @@ class Survey5(Page):
 
         # Payment for belief:
         belief_in_part = player.participant.vars['belief'][player.belief_chosen_part]
-        player.prob = 1-((belief_in_part - base_constants.TRUE_PAYOFF)**2/base_constants.SCALING_PAR)
-        player.payment_for_belief = np.random.choice([base_constants.BELIEF_BONUS, 0], p=[player.prob, 1-player.prob])
+        prob = 1-((belief_in_part - base_constants.TRUE_PAYOFF)**2/base_constants.SCALING_PAR)
+        player.prob = max(prob, 0)
+        player.payment_for_belief = int(np.random.choice([base_constants.BELIEF_BONUS, 0], p=[player.prob, 1-player.prob]))
 
         # Payment for risk:
         risk_choices = [i for i in player.participant.vars['risk_choices'].keys()]
@@ -1518,6 +1519,7 @@ class FinalPage(Page):
         payoff_in_usd = cu(config['real_world_currency_per_point']*payoff_for_work)
         leisure_minutes = (C.TIMEOUT_SECONDS - player.participant.vars['active_tab_seconds'][player.task_chosen_part])/60
         leisure_payoff = leisure_minutes * base_constants.FLAT_LEISURE_FEE
+        leisure_payoff_usd = cu(config['real_world_currency_per_point']*leisure_payoff)
         belief_chosen_part = C.PARTS[player.belief_chosen_part]
         belief_in_part = player.participant.vars['belief'][player.belief_chosen_part]
         chosen_risk_question = C.RISK_CHOICES[player.risk_chosen]
@@ -1547,6 +1549,7 @@ class FinalPage(Page):
             'payoff_for_work_usd': payoff_in_usd,
             'leisure_minutes': leisure_minutes,
             'leisure_payoff': leisure_payoff,
+            'leisure_payoff_usd': leisure_payoff_usd,
             'belief_chosen_part': belief_chosen_part,
             'belief_in_chosen_part': belief_in_part,
             'payment_for_belief': player.payment_for_belief,

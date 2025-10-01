@@ -11,9 +11,9 @@ class C(BaseConstants):
     NUM_ROUNDS = 1
     TOTAL_DURATION = 80
     AVG_ADD_INCOME = cu(7.0)  # average extra income they can earn from the tasks
-    BELIEF_BONUS = 666.67  # bonus for correct beliefs
+    BELIEF_BONUS = 670  # bonus for correct beliefs
     SCALING_PAR = 900
-    FLAT_LEISURE_FEE = 66.67  # flat fee per minute of leisure
+    FLAT_LEISURE_FEE = 70  # flat fee per minute of leisure
     BENEFIT_RANGE_MIN = 50
     BENEFIT_RANGE_MAX = 150
     TRUE_PAYOFF = 120
@@ -40,7 +40,7 @@ class Group(BaseGroup):
 
 class Player(BasePlayer):
     # Consent
-    consent = models.BooleanField(label="Do you wish to participate in the study?", initial=False)
+    consent = models.BooleanField(label="Do you wish to participate in the study?", blank=False)
 
     # comprehension check answers
     q1 = models.StringField(
@@ -119,8 +119,10 @@ class Instructions(Page):
     @staticmethod
     def vars_for_template(player: Player):
         participation_fee = player.session.config['participation_fee']
+        thousand_points = cu(player.session.config['real_world_currency_per_point']*1000)
         return dict(
-            participation_fee=participation_fee
+            participation_fee=participation_fee,
+            thousand_points=thousand_points,
         )
 
 
@@ -138,10 +140,12 @@ class ComprehensionCheck(Page):
         # split wrong_questions into a list, handle None
         wrong_questions_list = player.wrong_questions.split(',') if player.wrong_questions else []
         participation_fee = player.session.config['participation_fee']
+        thousand_points = cu(player.session.config['real_world_currency_per_point'] * 1000)
         return dict(
             attempt_number=player.attempt_number,
             wrong_questions_list=wrong_questions_list,
-            participation_fee=participation_fee
+            participation_fee=participation_fee,
+            thousand_points=thousand_points,
         )
 
     @staticmethod
