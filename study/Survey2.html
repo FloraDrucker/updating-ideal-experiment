@@ -30,9 +30,9 @@
 (function(){
   // keep sequences as STRINGS (preserves leading zeros)
   const sequences = [
-    ['23','47'], ['123','246'], ['3456','7890'], ['56789','01234'],
-    ['678901','234567'], ['7890123','3456789'], ['89012345','45678901'],
-    ['901234567','567890123']
+    ['17','63'],['582','694'],['6439','7286'],['42731','75836'],
+    ['619473','392487'],['5917428','4179386'],['58192647','38295174'],
+    ['275862584','713942568']
   ];
 
   let level=0, stage=0, correctCount=0, phase='idle';
@@ -53,6 +53,7 @@
 
   function showTrial(){
     inputBlk.style.display = 'none';
+    // show the number
     disp.textContent = sequences[level][stage];
     phase = 'show'; saveState();
 
@@ -127,6 +128,7 @@
 
   startBtn.addEventListener('click', ()=>{
     instr.style.display = 'none';
+    // show the display box immediately
     disp.style.display = 'block';
     // fresh start
     level=0; stage=0; correctCount=0; phase='show'; saveState();
