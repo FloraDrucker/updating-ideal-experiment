@@ -71,18 +71,38 @@ class Player(BasePlayer):
         label='<b>Question 3</b> <br> In each of the first four parts, how many balls will you see at the beginning of the part?'
     )
 
-    q4 = models.StringField(
+    q4t = models.StringField(
         label='<b>Question 4</b> <br> When guessing the fixed payoff per task, how should you choose your guess to maximize your chance of winning the extra payment?',
         choices=[
             'Always guess a very high number.',
-            'State your actual belief about the true payoff, because the closer your guess is to the real value (between 50 points and 150 points), the higher your probability of winning.',
+            'State your actual belief about the true payoff, because the closer your guess is to the real value (between 50 points and 150 points), the higher is your probability of winning.',
             'Always guess the middle value between 50 points and 150 points.',
         ],
         widget=widgets.RadioSelect,
     )
 
-    q5 = models.StringField(
+    q4c = models.StringField(
+        label='<b>Question 4</b> <br> When guessing the chosen number, how should you choose your guess to maximize your chance of winning the extra payment?',
+        choices=[
+            'Always guess a very high number.',
+            'State your actual belief about the chosen number, because the closer your guess is to the real value (between 50 points and 150 points), the higher is your probability of winning.',
+            'Always guess the middle value between 50 points and 150 points.',
+        ],
+        widget=widgets.RadioSelect,
+    )
+
+    q5t = models.StringField(
         label='<b>Question 5</b> <br> How is the fixed payoff per correctly solved task calculated?',
+        choices=[
+            'It is the average of 120 numbers between 50 points and 150 points.',
+            'It is the highest number out of the 120 balls shown.',
+            'It is a random number chosen between 50 and 150 each round.',
+        ],
+        widget=widgets.RadioSelect,
+    )
+
+    q5c = models.StringField(
+        label='<b>Question 5</b> <br> How is the chosen number calculated?',
         choices=[
             'It is the average of 120 numbers between 50 points and 150 points.',
             'It is the highest number out of the 120 balls shown.',
@@ -139,7 +159,13 @@ class Instructions(Page):
 
 class ComprehensionCheck(Page):
     form_model = 'player'
-    form_fields = ['q1', 'q2', 'q3', 'q4', 'q5']
+
+    @staticmethod
+    def get_form_fields(player):
+        if player.treatment:
+            return ['q1', 'q2', 'q3', 'q4t', 'q5t']
+        else:
+            return ['q1', 'q2', 'q3', 'q4c', 'q5c']
 
     @staticmethod
     def is_displayed(player):
@@ -152,11 +178,13 @@ class ComprehensionCheck(Page):
         wrong_questions_list = player.wrong_questions.split(',') if player.wrong_questions else []
         participation_fee = player.session.config['participation_fee']
         thousand_points = cu(player.session.config['real_world_currency_per_point'] * 1000)
+        guess_about = C.GUESS_ABOUT[player.treatment]
         return dict(
             attempt_number=player.attempt_number,
             wrong_questions_list=wrong_questions_list,
             participation_fee=participation_fee,
             thousand_points=thousand_points,
+            guess_about=guess_about,
         )
 
     @staticmethod
