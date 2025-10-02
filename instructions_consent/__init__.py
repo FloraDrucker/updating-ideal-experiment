@@ -21,13 +21,16 @@ class C(BaseConstants):
     GUESS_ABOUT = {True: "payoff per task",
                    False: "chosen number"}
 
+
 # Solutions for comprehension check
 solutions = dict(
     q1='Yes, because each ball is shown only once, and by part 4 all 120 have been shown.',
     q2='It will be based on your performance in a randomly chosen part (trial or one of the five main parts).',
     q3=30,
-    q4='State your actual belief about the true payoff, because the closer your guess is to the real value (between 50 points and 150 points), the higher your probability of winning.',
-    q5='It is the average of 120 numbers between 50 points and 150 points.'
+    q4c='State your actual belief about the chosen number, because the closer your guess is to the real value (between 50 points and 150 points), the higher is your probability of winning.',
+    q4t='State your actual belief about the true payoff, because the closer your guess is to the real value (between 50 points and 150 points), the higher is your probability of winning.',
+    q5c='It is the average of 120 numbers between 50 and 150.',
+    q5t='It is the average of 120 numbers between 50 points and 150 points.'
 )
 
 
@@ -104,7 +107,7 @@ class Player(BasePlayer):
     q5c = models.StringField(
         label='<b>Question 5</b> <br> How is the chosen number calculated?',
         choices=[
-            'It is the average of 120 numbers between 50 points and 150 points.',
+            'It is the average of 120 numbers between 50 and 150.',
             'It is the highest number out of the 120 balls shown.',
             'It is a random number chosen between 50 and 150 each round.',
         ],
@@ -200,10 +203,16 @@ class ComprehensionCheck(Page):
             wrong_list.append('q2')
         if player.q3 != solutions['q3']:
             wrong_list.append('q3')
-        if player.q4 != solutions['q4']:
-            wrong_list.append('q4')
-        if player.q5 != solutions['q5']:
-            wrong_list.append('q5')
+        if player.treatment:
+            if player.q4t != solutions['q4t']:
+                wrong_list.append('q4t')
+            if player.q5t != solutions['q5t']:
+                wrong_list.append('q5t')
+        else:
+            if player.q4c != solutions['q4c']:
+                wrong_list.append('q4c')
+            if player.q5c != solutions['q5c']:
+                wrong_list.append('q5c')
 
         player.num_wrong = len(wrong_list)
         player.wrong_questions = ','.join(wrong_list)
