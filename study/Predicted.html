@@ -17,7 +17,7 @@
 {{ if player.round_number == 2 }}
 
 <p>
-    Now we ask you to <b> predict how many tasks you would actually do </b> for each possible task payoff level shown below.
+    Now we ask you to <b> predict how many tasks you would actually do </b> {{ if treatment }}for each possible task payoff level shown below{{ endif }}.
 </p>
 
 {{ elif player.round_number == 6 }}

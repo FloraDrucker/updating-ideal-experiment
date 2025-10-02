@@ -153,10 +153,12 @@ class Instructions(Page):
         participation_fee = player.session.config['participation_fee']
         thousand_points = cu(player.session.config['real_world_currency_per_point']*1000)
         guess_about = C.GUESS_ABOUT[player.treatment]
+        percent_normal = 100 - C.PERCENT_IDEAL
         return dict(
             participation_fee=participation_fee,
             thousand_points=thousand_points,
             guess_about=guess_about,
+            percent_normal=percent_normal,
         )
 
 
@@ -182,12 +184,14 @@ class ComprehensionCheck(Page):
         participation_fee = player.session.config['participation_fee']
         thousand_points = cu(player.session.config['real_world_currency_per_point'] * 1000)
         guess_about = C.GUESS_ABOUT[player.treatment]
+        percent_normal = 100 - C.PERCENT_IDEAL
         return dict(
             attempt_number=player.attempt_number,
             wrong_questions_list=wrong_questions_list,
             participation_fee=participation_fee,
             thousand_points=thousand_points,
             guess_about=guess_about,
+            percent_normal=percent_normal,
         )
 
     @staticmethod

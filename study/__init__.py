@@ -65,31 +65,31 @@ class Player(BasePlayer):
 
     # Ideal values
     ideal50 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you ideally want to do for 50 points per task?"
     )
     ideal60 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you ideally want to do for 60 points per task?"
     )
     ideal70 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you ideally want to do for 70 points per task?"
     )
     ideal80 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you ideally want to do for 80 points per task?"
     )
     ideal90 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you ideally want to do for 90 points per task?"
     )
     ideal100 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you ideally want to do for 100 points per task?"
     )
     ideal110 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you ideally want to do for 110 points per task?"
     )
     ideal120 = models.IntegerField(
@@ -97,15 +97,15 @@ class Player(BasePlayer):
         label="How many tasks do you ideally want to do for 120 points per task?"
     )
     ideal130 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you ideally want to do for 130 points per task?"
     )
     ideal140 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you ideally want to do for 140 points per task?"
     )
     ideal150 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you ideally want to do for 150 points per task?"
     )
     lastideal = models.IntegerField(
@@ -115,31 +115,31 @@ class Player(BasePlayer):
 
     # Predicted values
     predicted50 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you predict you will do for 50 points per task?"
     )
     predicted60 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you predict you will do for 60 points per task?"
     )
     predicted70 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you predict you will do for 70 points per task?"
     )
     predicted80 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you predict you will do for 80 points per task?"
     )
     predicted90 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you predict you will do for 90 points per task?"
     )
     predicted100 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you predict you will do for 100 points per task?"
     )
     predicted110 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you predict you will do for 110 points per task?"
     )
     predicted120 = models.IntegerField(
@@ -147,15 +147,15 @@ class Player(BasePlayer):
         label="How many tasks do you predict you will do for 120 points per task?"
     )
     predicted130 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you predict you will do for 130 points per task?"
     )
     predicted140 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you predict you will do for 140 points per task?"
     )
     predicted150 = models.IntegerField(
-        blank=False,
+        blank=True,
         label="How many tasks do you predict you will do for 150 points per task?"
     )
     lastpredicted = models.IntegerField(
@@ -1118,9 +1118,13 @@ class Interval(Page):
 
     @staticmethod
     def vars_for_template(player):
+        treatment = player.participant.vars['treatment']
+        guess_about = base_constants.GUESS_ABOUT[treatment]
         return {
             'benefit_min': base_constants.BENEFIT_RANGE_MIN,
             'benefit_max': base_constants.BENEFIT_RANGE_MAX,
+            'guess_about': guess_about,
+            'treatment': treatment,
         }
 
 
@@ -1130,8 +1134,11 @@ class Ideal(Page):
     @staticmethod
     def get_form_fields(player):
         if player.round_number == 2:
-            return ['ideal50', 'ideal60', 'ideal70', 'ideal80', 'ideal90', 'ideal100',
-                    'ideal110', 'ideal120', 'ideal130', 'ideal140', 'ideal150']
+            if player.participant.vars['treatment']:
+                return ['ideal50', 'ideal60', 'ideal70', 'ideal80', 'ideal90', 'ideal100',
+                        'ideal110', 'ideal120', 'ideal130', 'ideal140', 'ideal150']
+            else:
+                return ['ideal120']
         elif player.round_number == 6:
             return ['lastideal']
         else:
@@ -1143,24 +1150,29 @@ class Ideal(Page):
 
     @staticmethod
     def vars_for_template(player):
+        treatment = player.participant.vars['treatment']
         return {
             'percent_ideal': base_constants.PERCENT_IDEAL,
+            'treatment': treatment,
         }
 
     @staticmethod
     def before_next_page(player, timeout_happened):
         if player.round_number == 2:
-            player.participant.vars['ideal'][1] = player.ideal50
-            player.participant.vars['ideal'][2] = player.ideal60
-            player.participant.vars['ideal'][3] = player.ideal70
-            player.participant.vars['ideal'][4] = player.ideal80
-            player.participant.vars['ideal'][5] = player.ideal90
-            player.participant.vars['ideal'][6] = player.ideal100
-            player.participant.vars['ideal'][7] = player.ideal110
-            player.participant.vars['ideal'][8] = player.ideal120
-            player.participant.vars['ideal'][9] = player.ideal130
-            player.participant.vars['ideal'][10] = player.ideal140
-            player.participant.vars['ideal'][11] = player.ideal150
+            if player.participant.vars['treatment']:
+                player.participant.vars['ideal'][1] = player.ideal50
+                player.participant.vars['ideal'][2] = player.ideal60
+                player.participant.vars['ideal'][3] = player.ideal70
+                player.participant.vars['ideal'][4] = player.ideal80
+                player.participant.vars['ideal'][5] = player.ideal90
+                player.participant.vars['ideal'][6] = player.ideal100
+                player.participant.vars['ideal'][7] = player.ideal110
+                player.participant.vars['ideal'][8] = player.ideal120
+                player.participant.vars['ideal'][9] = player.ideal130
+                player.participant.vars['ideal'][10] = player.ideal140
+                player.participant.vars['ideal'][11] = player.ideal150
+            else:
+                player.participant.vars['ideal'][8] = player.ideal120
         elif player.round_number == 6:
             player.participant.vars['ideal'][12] = player.lastideal
         else:
@@ -1175,9 +1187,12 @@ class Predicted(Page):
     @staticmethod
     def get_form_fields(player):
         if player.round_number == 2:
-            return ['predicted50', 'predicted60', 'predicted70', 'predicted80', 'predicted90',
-                   'predicted100', 'predicted110', 'predicted120', 'predicted130', 'predicted140',
-                   'predicted150']
+            if player.participant.vars['treatment']:
+                return ['predicted50', 'predicted60', 'predicted70', 'predicted80', 'predicted90',
+                        'predicted100', 'predicted110', 'predicted120', 'predicted130', 'predicted140',
+                        'predicted150']
+            else:
+                return ['predicted120']
         elif player.round_number == 6:
             return ['lastpredicted']
         else:
@@ -1188,19 +1203,29 @@ class Predicted(Page):
         return player.round_number == 2 or player.round_number == 6
 
     @staticmethod
+    def vars_for_template(player):
+        treatment = player.participant.vars['treatment']
+        return {
+            'treatment': treatment,
+        }
+
+    @staticmethod
     def before_next_page(player, timeout_happened):
         if player.round_number == 2:
-            player.participant.vars['predicted'][1] = player.predicted50
-            player.participant.vars['predicted'][2] = player.predicted60
-            player.participant.vars['predicted'][3] = player.predicted70
-            player.participant.vars['predicted'][4] = player.predicted80
-            player.participant.vars['predicted'][5] = player.predicted90
-            player.participant.vars['predicted'][6] = player.predicted100
-            player.participant.vars['predicted'][7] = player.predicted110
-            player.participant.vars['predicted'][8] = player.predicted120
-            player.participant.vars['predicted'][9] = player.predicted130
-            player.participant.vars['predicted'][10] = player.predicted140
-            player.participant.vars['predicted'][11] = player.predicted150
+            if player.participant.vars['treatment']:
+                player.participant.vars['predicted'][1] = player.predicted50
+                player.participant.vars['predicted'][2] = player.predicted60
+                player.participant.vars['predicted'][3] = player.predicted70
+                player.participant.vars['predicted'][4] = player.predicted80
+                player.participant.vars['predicted'][5] = player.predicted90
+                player.participant.vars['predicted'][6] = player.predicted100
+                player.participant.vars['predicted'][7] = player.predicted110
+                player.participant.vars['predicted'][8] = player.predicted120
+                player.participant.vars['predicted'][9] = player.predicted130
+                player.participant.vars['predicted'][10] = player.predicted140
+                player.participant.vars['predicted'][11] = player.predicted150
+            else:
+                player.participant.vars['predicted'][8] = player.predicted120
         elif player.round_number == 6:
             player.participant.vars['predicted'][12] = player.lastpredicted
         else:
@@ -1228,7 +1253,15 @@ class Belief(Page):
         return player.round_number > 1
 
     form_model = 'player'
-    form_fields = ['belief']
+    form_fields = ['belief']  # TODO: fix label for control treatment
+
+    @staticmethod
+    def vars_for_template(player):
+        treatment = player.participant.vars['treatment']
+        guess_about = base_constants.GUESS_ABOUT[treatment]
+        return {
+            'guess_about': guess_about,
+        }
 
     @staticmethod
     def before_next_page(player, timeout_happened):
@@ -1528,6 +1561,9 @@ class FinalPage(Page):
 
         total_payment = cu(config['participation_fee'] + payoff_in_usd + leisure_payoff + player.payment_for_belief + payment_for_risk_usd)
 
+        treatment = player.participant.vars['treatment']
+        guess_about = base_constants.GUESS_ABOUT[treatment]
+
         ppvars = player.participant.vars
         ppvars['task_chosen_part'] = player.task_chosen_part
         ppvars['prob'] = player.prob
@@ -1558,6 +1594,8 @@ class FinalPage(Page):
             'chosen_risk_question': chosen_risk_question,
             'choice_in_risk_question': choice_in_risk_chosen,
             'total_payment': total_payment,
+            'guess_about': guess_about,
+            'treatment': treatment,
         }
 
 

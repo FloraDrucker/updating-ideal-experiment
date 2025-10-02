@@ -94,7 +94,8 @@
 <h5> In the first part </h5>
 
 <p>
-    At the beginning of the first part, we will ask you to state how many tasks you would ideally want to do within the 10 minutes at different levels of the task payoff, given your experience with the trial task and the alternative options you have. Additionally, we will ask you to predict how many tasks you would actually do for these different payoff levels. There is a 5 percent chance that you will have to do as many tasks as you stated as ideal{{ if player.treatment }} for the true payoff level in the fifth part{{ endif }}. With 95 percent probability, however, {{ if player.treatment }}you will not learn the true payoff yet, and {{ endif }}you will be able to complete as many tasks as you want in part 5, too.
+    At the beginning of the first part, we will ask you to state how many tasks you would ideally want to do within the 10 minutes {{ if player.treatment }}at different levels of the task payoff{{ else }}for {{C.TRUE_PAYOFF }} points per task{{ endif }}, given your experience with the trial task and the alternative options you have. Additionally, we will ask you to predict how many tasks you {{ if player.treatment }}would actually do for these payoff levels{{ else }}will actually do{{ endif }}. There is a
+    {{ C.PERCENT_IDEAL }} percent chance that you will have to do as many tasks as you stated as ideal {{ if player.treatment }}for the true payoff level {{ endif }}in Part Five. With {{ percent_normal }} percent probability, however, {{ if player.treatment }}you will not learn the true payoff yet, and {{ endif }}you will be able to complete as many tasks as you want in Part Five, too.
 </p>
 
 <br>

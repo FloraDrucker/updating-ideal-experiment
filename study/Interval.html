@@ -2,13 +2,13 @@
 {% load otree %}
 
 {% block title %}
-    Information about the task payoff
+    Information about the {{ guess_about }}
 {% endblock %}
 
 {% block content %}
 
 <p>
-    The payoff per task you are going to earn is between {{ benefit_min }} and {{ benefit_max}} points.
+    The {{ guess_about }} is between {{ benefit_min }} and {{ benefit_max}}{{ if treatment }} points{{ endif }}.
 </p>
 
 

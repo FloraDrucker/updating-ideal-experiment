@@ -17,11 +17,11 @@
 {{ if player.round_number == 2 }}
 
 <p>
-    We first ask you to choose, based on your experience with the task in the trial round, the number of tasks you would <b> ideally want to do </b> in {{ C.TIMEOUT_MINUTES }} minutes for each possible level of the true task payoff shown below.
+    We first ask you to choose, based on your experience with the task in the trial round, the number of tasks you would <b> ideally want to do </b> in {{ C.TIMEOUT_MINUTES }} minutes{{ if treatment }} for each possible level of the true task payoff shown below{{ endif }}.
 </p>
 
 <p>
-    In Part 5, there is a {{ percent_ideal }} percent chance that you will have to do as many tasks as you stated as ideal for the true task payoff. Should the true task payoff be different from the payoffs you stated your ideal work amounts, we will extrapolate the ideal amount of work to the true payoff from your answers.
+    In Part 5, there is a {{ percent_ideal }} percent chance that you will have to do as many tasks as you stated as ideal{{ if treatment }} for the true task payoff. Should the true task payoff be different from the payoffs you stated your ideal work amounts, we will extrapolate the ideal amount of work to the true payoff from your answers{{ endif }}.
 </p>
 
 {{ elif player.round_number == 6 }}
