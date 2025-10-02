@@ -3,7 +3,7 @@
 <div class="text">
 
 <p>
-    In all five parts, you will work on the task you just saw for at most 10 minutes. You will receive <b> a fixed payoff {{ if player.treatment == False }} of {{ C.TRUE_PAYOFF }} points {{ endif }} </b> for each correctly solved encryption task in the part that will be randomly chosen for payment. {{ if player.treatment == True }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: we chose <b> a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} </b>, and you will have to guess this number. {{ endif }} Every part will have the following stages:
+    In all five parts, you will work on the task you just saw for at most 10 minutes. You will receive <b> a fixed payoff {{ if player.treatment == False }} of {{ C.TRUE_PAYOFF }} points {{ endif }} </b> for each correctly solved encryption task in the part that will be randomly chosen for payment. {{ if player.treatment == True }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: we chose <b> a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }}</b>, and you will have to guess this number. {{ endif }} Every part will have the following stages:
 </p>
 
 <br>
@@ -82,7 +82,7 @@
 <h5> 3. Working on the encryption task </h5>
 
 <p>
-    After receiving the information about the {{ guess_about }}, you will work on the task for a maximum of 10 minutes. Your payment for this stage will be the fixed payoff times the number of tasks you completed correctly. However, you do not have to work for the full 10 minutes. We will offer you some alternatives that you can access via different links at the bottom of the page. For each minute spent on one of the alternatives, you will receive a flat fee of {{ C.FLAT_LEISURE_FEE }} points.
+    After receiving the information about the {{ guess_about }}, you will work on the task for a maximum of 10 minutes. Your payment for the encryption task will be {{ if player.treatment == True }}the fixed payoff {{ else }} {{C.TRUE_PAYOFF }} points {{ endif }}times the number of tasks you completed correctly. However, you do not have to work for the full 10 minutes. We will offer you some alternatives that you can access via different links at the bottom of the page. For each minute spent on one of the alternatives, you will receive a flat fee of {{ C.FLAT_LEISURE_FEE }} points.
 </p>
 
 <p>
@@ -94,7 +94,7 @@
 <h5> In the first part </h5>
 
 <p>
-    At the beginning of the first part, we will ask you to state how many tasks you would ideally want to do within the 10 minutes at different levels of the task payoff, given your experience with the trial task and the alternative options you have. Additionally, we will ask you to predict how many tasks you would actually do for these different payoff levels. There is a 5 percent chance that you will have to do as many tasks as you stated as ideal for the true payoff level in the fifth part. With 95 percent probability, however, you will not learn the true payoff yet, and you will be able to complete as many tasks as you want in part 5.
+    At the beginning of the first part, we will ask you to state how many tasks you would ideally want to do within the 10 minutes at different levels of the task payoff, given your experience with the trial task and the alternative options you have. Additionally, we will ask you to predict how many tasks you would actually do for these different payoff levels. There is a 5 percent chance that you will have to do as many tasks as you stated as ideal{{ if player.treatment == True }} for the true payoff level in the fifth part{{ endif }}. With 95 percent probability, however, {{ if player.treatment == True }}you will not learn the true payoff yet, and {{ endif }}you will be able to complete as many tasks as you want in part 5, too.
 </p>
 
 <br>
@@ -115,7 +115,7 @@
 
 <ol>
     <li>A fixed completion fee of {{ participation_fee }} if you complete the whole study.</li>
-    <li>Payoff from your performance in a randomly chosen part: number of tasks completed times the true payoff per task.</li>
+    <li>Payoff from your performance in a randomly chosen part: number of tasks completed times {{ if player.treatment == True }}the true payoff per task{{ else }} {{C.TRUE_PAYOFF }} points{{ endif }}.</li>
     <li> {{ C.FLAT_LEISURE_FEE }} points per minute spent on the alternative option in the same randomly chosen part.</li>
     <li>Bonus payment based on the accuracy of your guess about the {{ guess_about }} in a randomly chosen part.</li>
     <li>Lottery decision.</li>
