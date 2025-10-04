@@ -82,7 +82,7 @@
 <h5> 3. Working on the encryption task </h5>
 
 <p>
-    After receiving the information about the {{ guess_about }}, you will work on the task for a maximum of 10 minutes. Your payment for the encryption task will be {{ if player.treatment }}the fixed payoff {{ else }} {{C.TRUE_PAYOFF }} points {{ endif }}times the number of tasks you completed correctly. However, you do not have to work for the full 10 minutes. We will offer you some alternatives that you can access via different links at the bottom of the page. For each minute spent on one of the alternatives, you will receive a flat fee of {{ C.FLAT_LEISURE_FEE }} points.
+    After receiving the information about the {{ guess_about }}, you will work on the task for a maximum of 10 minutes.{{ if not player.treatment }} Working on the encryption task has nothing to do with guessing the chosen number, but it will determine part of your payoff.{{ endif }} Your payment for the encryption task will be {{ if player.treatment }}the fixed payoff {{ else }} {{C.TRUE_PAYOFF }} points {{ endif }}times the number of tasks you completed correctly. However, you do not have to work for the full 10 minutes. We will offer you some alternatives that you can access via different links at the bottom of the page. For each minute spent on one of the alternatives, you will receive a flat fee of {{ C.FLAT_LEISURE_FEE }} points.
 </p>
 
 <p>

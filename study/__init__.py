@@ -108,9 +108,14 @@ class Player(BasePlayer):
         blank=True,
         label="How many tasks do you ideally want to do for 150 points per task?"
     )
-    lastideal = models.IntegerField(
-        blank=False,
+    lastideal_t = models.IntegerField(
+        blank=True,
         label="How many tasks do you ideally want to do in this round for what you think the task payoff is?"
+    )
+
+    lastideal_c = models.IntegerField(
+        blank=True,
+        label="How many tasks do you ideally want to do in this round?"
     )
 
     # Predicted values
@@ -158,14 +163,24 @@ class Player(BasePlayer):
         blank=True,
         label="How many tasks do you predict you will do for 150 points per task?"
     )
-    lastpredicted = models.IntegerField(
-        blank=False,
+    lastpredicted_t = models.IntegerField(
+        blank=True,
         label="How many tasks do you predict you will do in this round for what you think the task payoff is?"
     )
 
-    belief = models.IntegerField(
-        blank=False,
-        label="What do you think is the true task payoff in points?"
+    lastpredicted_c = models.IntegerField(
+        blank=True,
+        label="How many tasks do you predict you will do in this round?"
+    )
+
+    belief_t = models.IntegerField(
+        blank=True,
+        label="What do you think is the task payoff in points?"
+    )
+
+    belief_c = models.IntegerField(
+        blank=True,
+        label="What do you think is the chosen number?"
     )
 
     risk_0 = models.IntegerField(
@@ -1074,6 +1089,7 @@ def creating_session(subsession: Subsession):
         ppvars['risk_payment'] = None
         ppvars['choice_in_risk_chosen'] = None
 
+
 # This is the Live Send code, so that performance etc can be stored immediately
 def live_update_performance(player: Player, data):
     own_id = player.id_in_group
@@ -1140,7 +1156,10 @@ class Ideal(Page):
             else:
                 return ['ideal120']
         elif player.round_number == 6:
-            return ['lastideal']
+            if player.participant.vars['treatment']:
+                return['lastideal_t']
+            else:
+                return['lastideal_c']
         else:
             return []
 
@@ -1151,9 +1170,11 @@ class Ideal(Page):
     @staticmethod
     def vars_for_template(player):
         treatment = player.participant.vars['treatment']
+        payoff = base_constants.TRUE_PAYOFF
         return {
             'percent_ideal': base_constants.PERCENT_IDEAL,
             'treatment': treatment,
+            'payoff': payoff,
         }
 
     @staticmethod
@@ -1174,7 +1195,10 @@ class Ideal(Page):
             else:
                 player.participant.vars['ideal'][8] = player.ideal120
         elif player.round_number == 6:
-            player.participant.vars['ideal'][12] = player.lastideal
+            if player.participant.vars['treatment']:
+                player.participant.vars['ideal'][12] = player.lastideal_t
+            else:
+                player.participant.vars['ideal'][12] = player.lastideal_c
         else:
             pass
 
@@ -1194,7 +1218,10 @@ class Predicted(Page):
             else:
                 return ['predicted120']
         elif player.round_number == 6:
-            return ['lastpredicted']
+            if player.participant.vars['treatment']:
+                return ['lastpredicted_t']
+            else:
+                return ['lastpredicted_c']
         else:
             return []
 
@@ -1205,8 +1232,10 @@ class Predicted(Page):
     @staticmethod
     def vars_for_template(player):
         treatment = player.participant.vars['treatment']
+        payoff = base_constants.TRUE_PAYOFF
         return {
             'treatment': treatment,
+            'payoff': payoff,
         }
 
     @staticmethod
@@ -1227,7 +1256,10 @@ class Predicted(Page):
             else:
                 player.participant.vars['predicted'][8] = player.predicted120
         elif player.round_number == 6:
-            player.participant.vars['predicted'][12] = player.lastpredicted
+            if player.participant.vars['treatment']:
+                player.participant.vars['predicted'][12] = player.lastpredicted_t
+            else:
+                player.participant.vars['predicted'][12] = player.lastpredicted_c
         else:
             pass
 
@@ -1253,7 +1285,13 @@ class Belief(Page):
         return player.round_number > 1
 
     form_model = 'player'
-    form_fields = ['belief']  # TODO: fix label for control treatment
+
+    @staticmethod
+    def get_form_fields(player):
+        if player.participant.vars['treatment']:
+            return ['belief_t']
+        else:
+            return ['belief_c']
 
     @staticmethod
     def vars_for_template(player):
@@ -1266,7 +1304,10 @@ class Belief(Page):
     @staticmethod
     def before_next_page(player, timeout_happened):
         if player.round_number > 1:
-            player.participant.vars['belief'][player.round_number-1] = player.belief
+            if player.participant.vars['treatment']:
+                player.participant.vars['belief'][player.round_number-1] = player.belief_t
+            else:
+                player.participant.vars['belief'][player.round_number-1] = player.belief_c
         # TODO: remind them here about the interval again?
 
         if player.round_number == 6:
@@ -1293,6 +1334,14 @@ class Signal(Page):
     def is_displayed(player):
         return 1 < player.round_number < 6
 
+    @staticmethod
+    def vars_for_template(player):
+        treatment = player.participant.vars['treatment']
+        guess_about = base_constants.GUESS_ABOUT[treatment]
+        return {
+            'guess_about': guess_about,
+        }
+
 
 class Work(Page):  # in period 5, we tell the participants the number of tasks they have to do here
     @staticmethod
@@ -1303,10 +1352,13 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
     def vars_for_template(player):
         if player.do_ideal:
             part_ideal_elicited = {8: 'first part', 12: 'last part'}
+            treatment = player.participant.vars['treatment']
+            guess_about = base_constants.GUESS_ABOUT[treatment]
             return {
                 'ideal_to_do': player.ideal_to_do,
                 'percent_ideal': base_constants.PERCENT_IDEAL,
-                'part_ideal_elicited': part_ideal_elicited[player.ideal_index]
+                'part_ideal_elicited': part_ideal_elicited[player.ideal_index],
+                'guess_about': guess_about,
             }
         else:
             pass
@@ -1315,7 +1367,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
-    form_fields = ['performance', 'mistakes', 'link_click_count', 'active_tab_seconds',]  # TODO: save mistakes!
+    form_fields = ['performance', 'mistakes', 'link_click_count', 'active_tab_seconds',]
     if C.USE_TIMEOUT:
         timeout_seconds = C.TIMEOUT_SECONDS
 
@@ -1550,7 +1602,7 @@ class FinalPage(Page):
         performance_in_part = player.participant.vars['actual'][player.task_chosen_part]
         payoff_for_work = base_constants.TRUE_PAYOFF*performance_in_part
         payoff_in_usd = cu(config['real_world_currency_per_point']*payoff_for_work)
-        leisure_minutes = (C.TIMEOUT_SECONDS - player.participant.vars['active_tab_seconds'][player.task_chosen_part])/60
+        leisure_minutes = round((C.TIMEOUT_SECONDS - player.participant.vars['active_tab_seconds'][player.task_chosen_part])/60, 2)
         leisure_payoff = leisure_minutes * base_constants.FLAT_LEISURE_FEE
         leisure_payoff_usd = cu(config['real_world_currency_per_point']*leisure_payoff)
         belief_chosen_part = C.PARTS[player.belief_chosen_part]
@@ -1558,8 +1610,9 @@ class FinalPage(Page):
         chosen_risk_question = C.RISK_CHOICES[player.risk_chosen]
         choice_in_risk_chosen = C.RISK_OPTIONS[player.risk_chosen][player.choice_in_risk_chosen]
         payment_for_risk_usd = cu(player.risk_payment*config['real_world_currency_per_point'])
+        payment_for_belief_usd = cu(config['real_world_currency_per_point']*player.payment_for_belief)
 
-        total_payment = cu(config['participation_fee'] + payoff_in_usd + leisure_payoff + player.payment_for_belief + payment_for_risk_usd)
+        total_payment = cu(config['participation_fee'] + payoff_in_usd + leisure_payoff_usd + payment_for_belief_usd + payment_for_risk_usd)
 
         treatment = player.participant.vars['treatment']
         guess_about = base_constants.GUESS_ABOUT[treatment]
@@ -1589,6 +1642,7 @@ class FinalPage(Page):
             'belief_chosen_part': belief_chosen_part,
             'belief_in_chosen_part': belief_in_part,
             'payment_for_belief': player.payment_for_belief,
+            'payment_for_belief_usd': payment_for_belief_usd,
             'payment_for_risk': player.risk_payment,
             'payment_for_risk_usd': payment_for_risk_usd,
             'chosen_risk_question': chosen_risk_question,
