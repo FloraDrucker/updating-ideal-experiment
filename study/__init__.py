@@ -979,7 +979,7 @@ class Player(BasePlayer):
     digitspan_max_level = models.IntegerField(
         initial=0,
         min=0,
-        max=9,
+        max=8,
         label="Max digit-span level reached"
     )
 
