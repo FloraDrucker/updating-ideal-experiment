@@ -1093,6 +1093,7 @@ def creating_session(subsession: Subsession):
         ppvars['risk_chosen'] = None
         ppvars['risk_payment'] = None
         ppvars['choice_in_risk_chosen'] = None
+        ppvars['total_payment'] = None
 
 
 # This is the Live Send code, so that performance etc can be stored immediately
@@ -1630,6 +1631,7 @@ class FinalPage(Page):
         ppvars['risk_chosen'] = player.risk_chosen
         ppvars['risk_payment'] = player.risk_payment
         ppvars['choice_in_risk_chosen'] = player.choice_in_risk_chosen
+        ppvars['total_payment'] = total_payment
 
 
         return {
@@ -1676,3 +1678,59 @@ page_sequence = [
     Survey5,
     FinalPage
 ]
+
+
+# Data export
+def custom_export(players):
+    # Collect keys for the export table
+    all_var_keys = set()
+
+    for p in players:
+        for var_name, var_value in p.participant.vars.items():
+            if isinstance(var_value, dict):
+                # flatten dictionary keys
+                for subkey in var_value.keys():
+                    all_var_keys.add(f"{var_name}.{subkey}")
+            else:
+                all_var_keys.add(var_name)
+
+    all_var_keys = sorted(all_var_keys)
+
+    # Build header
+    header = [
+        'session_code',
+        'participant_code',
+    ] + all_var_keys
+    yield header
+
+    # Build data rows
+    for p in players:
+        participant = p.participant
+        session = p.session
+
+        row = [
+            session.code,
+            participant.code,
+            p.round_number,
+            p.id_in_group,
+            p.payoff
+        ]
+
+        # Fill in flattened variable values
+        for key in all_var_keys:
+            if '.' in key:
+                var_name, subkey = key.split('.', 1)
+                val = p.participant.vars.get(var_name, {})
+                if isinstance(val, dict):
+                    row.append(val.get(subkey, ''))
+                else:
+                    row.append('')
+            else:
+                val = p.participant.vars.get(key, '')
+                # Serialize dicts or lists as JSON to make them readable in export
+                if isinstance(val, (dict, list)):
+                    row.append(json.dumps(val))
+                else:
+                    row.append(val)
+
+        yield row
