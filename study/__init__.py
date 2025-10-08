@@ -1687,12 +1687,7 @@ def custom_export(players):
 
     for p in players:
         for var_name, var_value in p.participant.vars.items():
-            if isinstance(var_value, dict):
-                # flatten dictionary keys
-                for subkey in var_value.keys():
-                    all_var_keys.add(f"{var_name}.{subkey}")
-            else:
-                all_var_keys.add(var_name)
+            all_var_keys.add(var_name)
 
     all_var_keys = sorted(all_var_keys)
 
@@ -1708,29 +1703,17 @@ def custom_export(players):
         participant = p.participant
         session = p.session
 
-        row = [
-            session.code,
-            participant.code,
-            p.round_number,
-            p.id_in_group,
-            p.payoff
-        ]
+        if p.round_number == C.NUM_ROUNDS:
 
-        # Fill in flattened variable values
-        for key in all_var_keys:
-            if '.' in key:
-                var_name, subkey = key.split('.', 1)
-                val = p.participant.vars.get(var_name, {})
-                if isinstance(val, dict):
-                    row.append(val.get(subkey, ''))
-                else:
-                    row.append('')
-            else:
+            row = [
+                session.code,
+                participant.code,
+            ]
+
+            for key in all_var_keys:
                 val = p.participant.vars.get(key, '')
-                # Serialize dicts or lists as JSON to make them readable in export
-                if isinstance(val, (dict, list)):
-                    row.append(json.dumps(val))
-                else:
-                    row.append(val)
+                row.append(val)
 
-        yield row
+            yield row
+
+# TODO treat dictionaries somehow
