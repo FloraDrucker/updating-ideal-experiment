@@ -1683,22 +1683,28 @@ page_sequence = [
 # Data export
 def custom_export(players):
     # Collect keys for the export table
-    all_var_keys = set()
+    fp = players[0]
+    all_participant_vars = [v for v in fp.participant.vars.keys()]
+    all_var_keys = []
+    for var in all_participant_vars:
+        if isinstance(fp.participant.vars[var], dict):
+            for k in fp.participant.vars[var].keys():
+                all_var_keys.append(f"{var}_{k}")
+        else:
+            all_var_keys.append(var)
 
-    for p in players:
-        for var_name, var_value in p.participant.vars.items():
-            all_var_keys.add(var_name)
-
-    all_var_keys = sorted(all_var_keys)
+    print(all_participant_vars)
+    print(all_var_keys)
 
     # Build header
     header = [
-        'session_code',
-        'participant_code',
-    ] + all_var_keys
+                 'session_code',
+                 'participant_code',
+             ] + all_var_keys
     yield header
 
     # Build data rows
+
     for p in players:
         participant = p.participant
         session = p.session
@@ -1710,10 +1716,12 @@ def custom_export(players):
                 participant.code,
             ]
 
-            for key in all_var_keys:
-                val = p.participant.vars.get(key, '')
-                row.append(val)
+            for var in all_participant_vars:
+                if isinstance(p.participant.vars[var], dict):
+                    for key in p.participant.vars[var].keys():
+                        row.append(p.participant.vars[var][key])
+                else:
+                    val = p.participant.vars.get(var, '')
+                    row.append(val)
 
             yield row
-
-# TODO treat dictionaries somehow
