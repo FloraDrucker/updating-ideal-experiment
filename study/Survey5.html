@@ -7,11 +7,29 @@
 
 {% block content %}
 
+<h5> Please answer the following questions. </h5>
+
 <p>
-    <b>Please indicate to what extent the following statements apply to you.</b> The statements are about how you view yourself.  Move the slider to the answer of your choice. The rating scale ranges from 1 (not at all like me) to 5 (very much like me).
+    The statements are about how you view yourself. The rating scale ranges from 1 (not at all like me) to 5 (very much like me).
 </p>
 
-{% formfields %}
+{% for field in form %}
+    {% if 'BSCS_' in field.name %}
+        {{ field.label }}<br>
+        {{ field }}<br><br>
+    {% endif %}
+{% endfor %}
+
+<br>
+
+<h5>Please answer the following questions as well.</h5>
+
+{% for field in form %}
+    {% if 'BSCS_' not in field.name %}
+        {{ field.label }}<br>
+        {{ field }}<br>
+    {% endif %}
+{% endfor %}
 
 {% next_button %}
 

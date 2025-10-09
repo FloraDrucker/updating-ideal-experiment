@@ -1129,7 +1129,7 @@ class PartStart(Page):
     @staticmethod
     def vars_for_template(player):
         return {
-            'part': C.PARTS[player.round_number-1]
+            'part': C.PARTS[player.round_number-1],
         }
 
 
@@ -1303,8 +1303,13 @@ class Belief(Page):
     def vars_for_template(player):
         treatment = player.participant.vars['treatment']
         guess_about = base_constants.GUESS_ABOUT[treatment]
+        interval_min = base_constants.BENEFIT_RANGE_MIN
+        interval_max = base_constants.BENEFIT_RANGE_MAX
         return {
             'guess_about': guess_about,
+            'interval_min': interval_min,
+            'interval_max': interval_max,
+            'treatment': treatment
         }
 
     @staticmethod
@@ -1468,9 +1473,11 @@ class Survey3(Page):
 
     @staticmethod
     def vars_for_template(player):
+        thousand_points = cu(1000*player.session.config['real_world_currency_per_point'])
         return dict(
             risk_prefix='risk_',
-            big5_prefix='big5_'
+            big5_prefix='big5_',
+            thousand_points = thousand_points
         )
 
     @staticmethod
