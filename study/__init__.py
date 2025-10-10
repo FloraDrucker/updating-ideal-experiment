@@ -21,8 +21,8 @@ class C(BaseConstants):
         5: 'Part Five',
     }
     USE_TIMEOUT = True
-    TIMEOUT_SECONDS = 30  # TODO: set this to 600 for the real experiment (10 minutes)
-    TIMEOUT_MINUTES = round(TIMEOUT_SECONDS / 60)
+    # TIMEOUT_SECONDS = 600
+    # TIMEOUT_MINUTES = round(TIMEOUT_SECONDS / 60)
     TASK_LENGTH = 4
     SIGNAL_TIMEOUT = 5  # seconds signal is shown
     RISK_LARGE = 1000
@@ -1122,12 +1122,20 @@ def live_update_performance(player: Player, data):
     return {own_id: answer}
 
 
+def get_timeout_seconds(player):
+    config = player.session.config
+    return config['work_length_seconds']
+
+
 # PAGES
 class PartStart(Page):
     @staticmethod
     def vars_for_template(player):
+        config = player.session.config
+        work_length_minutes = round(config['work_length_seconds']/60)
         return {
             'part': C.PARTS[player.round_number-1],
+            'work_length_minutes': work_length_minutes,
         }
 
 
@@ -1175,10 +1183,13 @@ class Ideal(Page):
     def vars_for_template(player):
         treatment = player.participant.vars['treatment']
         payoff = base_constants.TRUE_PAYOFF
+        config = player.session.config
+        work_length_minutes = round(config['work_length_seconds']/60)
         return {
             'percent_ideal': base_constants.PERCENT_IDEAL,
             'treatment': treatment,
             'payoff': payoff,
+            'work_length_minutes': work_length_minutes,
         }
 
     @staticmethod
@@ -1352,6 +1363,8 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
 
     @staticmethod
     def vars_for_template(player):
+        config = player.session.config
+        work_length_minutes = round(config['work_length_seconds'] / 60)
         if player.do_ideal:
             part_ideal_elicited = {8: 'first part', 12: 'last part'}
             treatment = player.participant.vars['treatment']
@@ -1361,17 +1374,20 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
                 'percent_ideal': base_constants.PERCENT_IDEAL,
                 'part_ideal_elicited': part_ideal_elicited[player.ideal_index],
                 'guess_about': guess_about,
+                'work_length_minutes': work_length_minutes,
             }
         else:
-            pass
+            return {
+                'work_length_minutes': work_length_minutes,
+            }
 
 
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
     form_fields = ['performance', 'mistakes', 'link_click_count', 'active_tab_seconds',]
-    if C.USE_TIMEOUT:
-        timeout_seconds = C.TIMEOUT_SECONDS
+
+    get_timeout_seconds = get_timeout_seconds
 
     @staticmethod
     def vars_for_template(player):
@@ -1387,9 +1403,11 @@ class Task(Page):
 
     @staticmethod
     def js_vars(player):
+        config = player.session.config
+        work_length_seconds = config['work_length_seconds']
         return dict(
             required_tasks=player.ideal_to_do,
-            timeout_seconds=C.TIMEOUT_SECONDS,
+            timeout_seconds=work_length_seconds,
         )
 
     @staticmethod
@@ -1600,7 +1618,8 @@ class FinalPage(Page):
         performance_in_part = player.participant.vars['actual'][player.task_chosen_part]
         payoff_for_work = base_constants.TRUE_PAYOFF*performance_in_part
         payoff_in_usd = cu(config['real_world_currency_per_point']*payoff_for_work)
-        leisure_minutes = round((C.TIMEOUT_SECONDS - player.participant.vars['active_tab_seconds'][player.task_chosen_part])/60, 2)
+        work_length_seconds = config['work_length_seconds']
+        leisure_minutes = round((work_length_seconds - player.participant.vars['active_tab_seconds'][player.task_chosen_part])/60, 2)
         leisure_payoff = leisure_minutes * base_constants.FLAT_LEISURE_FEE
         leisure_payoff_usd = cu(config['real_world_currency_per_point']*leisure_payoff)
         belief_chosen_part = C.PARTS[player.belief_chosen_part]
@@ -1685,12 +1704,11 @@ def custom_export(players):
         else:
             all_var_keys.append(var)
 
-
     # Build header
-    header = [
-                 'session_code',
-                 'participant_code',
-             ] + all_var_keys
+    header = ['session_code',
+              'work_length_seconds',
+              'participant_code',
+              ] + all_var_keys
     yield header
 
     # Build data rows
@@ -1703,6 +1721,7 @@ def custom_export(players):
 
             row = [
                 session.code,
+                session.config.get('work_length_seconds', ''),
                 participant.code,
             ]
 
