@@ -7,6 +7,7 @@ SESSION_CONFIGS = [
         app_sequence=['instructions_consent', 'study'],
         num_demo_participants=3,
         participation_fee=11.0,
+        work_length_seconds=30,
         prolific_completion_url='FILL THIS IN!',
         prolific_completion_code='FILL THIS IN!',
      ),

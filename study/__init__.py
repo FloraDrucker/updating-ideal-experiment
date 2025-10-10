@@ -1103,10 +1103,8 @@ def live_update_performance(player: Player, data):
         perf = data['performance']
         player.performance = perf
         shuffle = True
-        print('received ', perf, 'shuffle?', shuffle)
     else:
         shuffle = True
-        print('received nothing, shuffle?', shuffle)
     if 'link_click_count' in data:
         player.link_click_count = data['link_click_count']
         shuffle = False
@@ -1208,8 +1206,6 @@ class Ideal(Page):
         else:
             pass
 
-        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
-
 
 class Predicted(Page):
     form_model = 'player'
@@ -1268,8 +1264,6 @@ class Predicted(Page):
                 player.participant.vars['predicted'][12] = player.lastpredicted_c
         else:
             pass
-
-        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
 class Performance(Page):  # display performance from the previous round
@@ -1333,9 +1327,6 @@ class Belief(Page):
                 player.ideal_to_do = player.participant.vars['ideal'][player.ideal_index]
                 player.participant.vars['ideal_to_do'] = player.ideal_to_do
                 player.participant.vars['ideal_index'] = player.ideal_index
-                print("Ideal to do:", player.ideal_to_do)
-
-        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
 class Signal(Page):
@@ -1407,7 +1398,6 @@ class Task(Page):
         player.participant.vars['mistakes'][player.round_number-1] = player.mistakes
         player.participant.vars['link_click_count'][player.round_number-1] = player.link_click_count
         player.participant.vars['active_tab_seconds'][player.round_number-1] = player.active_tab_seconds
-        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
 class Results(Page):
@@ -1439,7 +1429,7 @@ class Survey1(Page):
         ppvars['big5_openness2'] = player.big5_openness2
         ppvars['big5_openness3'] = player.big5_openness3
         ppvars['big5_openness4'] = player.big5_openness4
-        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
+
 
 class Survey2(Page):
     form_model = 'player'
@@ -1453,7 +1443,7 @@ class Survey2(Page):
     def before_next_page(player, timeout_happened):
         ppvars = player.participant.vars
         ppvars['digitspan_max_level'] = player.digitspan_max_level
-        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
+
 
 class Survey3(Page):
     @staticmethod
@@ -1510,8 +1500,6 @@ class Survey3(Page):
         player.participant.vars['big5_extraversion2'] = player.big5_extraversion2
         player.participant.vars['big5_extraversion3'] = player.big5_extraversion3
 
-        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
-
 
 class Survey4(Page):
     @staticmethod
@@ -1538,8 +1526,6 @@ class Survey4(Page):
         ppvars['big5_neuroticism1'] = player.big5_neuroticism1
         ppvars['big5_neuroticism2'] = player.big5_neuroticism2
         ppvars['big5_neuroticism3'] = player.big5_neuroticism3
-
-        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
 class Survey5(Page):
@@ -1578,7 +1564,6 @@ class Survey5(Page):
         ppvars['ballsremembered3'] = player.ballsremembered3
         ppvars['screenshot'] = player.screenshot
 
-        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
         # Randomize and calculate final payment
         # Chosen part for payment for task and beliefs:
@@ -1700,8 +1685,6 @@ def custom_export(players):
         else:
             all_var_keys.append(var)
 
-    print(all_participant_vars)
-    print(all_var_keys)
 
     # Build header
     header = [

@@ -133,8 +133,6 @@ def creating_session(subsession: Subsession):
         p.participant.vars['attempt_number'] = 0
         p.participant.vars['excluded'] = False
 
-        print('Participant variables are', p.participant.vars)
-
 
 # PAGES
 class Welcome(Page):
@@ -266,7 +264,6 @@ class Consent(Page):
     @staticmethod
     def before_next_page(player, timeout_happened):
         player.participant.vars['consent'] = player.consent
-        print("Participant:", player.participant.code, "Variables:", player.participant.vars)
 
 
 class NoConsent(Page):
