@@ -1139,23 +1139,6 @@ class PartStart(Page):
         }
 
 
-class Interval(Page):
-    @staticmethod
-    def is_displayed(player):
-        return player.round_number == 2  # only shown in the first real round
-
-    @staticmethod
-    def vars_for_template(player):
-        treatment = player.participant.vars['treatment']
-        guess_about = base_constants.GUESS_ABOUT[treatment]
-        return {
-            'benefit_min': base_constants.BENEFIT_RANGE_MIN,
-            'benefit_max': base_constants.BENEFIT_RANGE_MAX,
-            'guess_about': guess_about,
-            'treatment': treatment,
-        }
-
-
 class Ideal(Page):
     form_model = 'player'
 
@@ -1277,6 +1260,23 @@ class Predicted(Page):
             pass
 
 
+class Interval(Page):
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number == 2  # only shown in the first real round
+
+    @staticmethod
+    def vars_for_template(player):
+        treatment = player.participant.vars['treatment']
+        guess_about = base_constants.GUESS_ABOUT[treatment]
+        return {
+            'benefit_min': base_constants.BENEFIT_RANGE_MIN,
+            'benefit_max': base_constants.BENEFIT_RANGE_MAX,
+            'guess_about': guess_about,
+            'treatment': treatment,
+        }
+
+
 class Performance(Page):  # display performance from the previous round
 
     @staticmethod
@@ -1324,7 +1324,6 @@ class Belief(Page):
                 player.participant.vars['belief'][player.round_number-1] = player.belief_t
             else:
                 player.participant.vars['belief'][player.round_number-1] = player.belief_c
-        # TODO: remind them here about the interval again?
 
         if player.round_number == 6:
             prob_ideal = round(base_constants.PERCENT_IDEAL/100, 2)
@@ -1673,9 +1672,9 @@ class FinalPage(Page):
 
 page_sequence = [
     PartStart,
-    Interval,
     Ideal,
     Predicted,
+    Interval,
     Performance,
     Belief,
     Signal,
