@@ -604,7 +604,7 @@ class Player(BasePlayer):
         min=0,
         max=555,
         blank=False,
-        label='What is the average of the following five numbers? 123, 88, 147, 102, 95'
+        label='What is the average of the following five numbers? 123, 88, 147, 102, 95. Please do not use a calculator.'
     )
 
     ballsremembered1 = models.IntegerField(
@@ -1620,7 +1620,7 @@ class FinalPage(Page):
         work_length_seconds = config['work_length_seconds']
         leisure_minutes = round((work_length_seconds - player.participant.vars['active_tab_seconds'][player.task_chosen_part])/60, 2)
         leisure_payoff = leisure_minutes * base_constants.FLAT_LEISURE_FEE
-        leisure_payoff_usd = cu(config['real_world_currency_per_point']*leisure_payoff)
+        leisure_payoff_usd = cu(round(config['real_world_currency_per_point']*leisure_payoff), 2)
         belief_chosen_part = C.PARTS[player.belief_chosen_part]
         belief_in_part = player.participant.vars['belief'][player.belief_chosen_part]
         chosen_risk_question = C.RISK_CHOICES[player.risk_chosen]

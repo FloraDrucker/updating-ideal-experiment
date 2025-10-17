@@ -3,15 +3,22 @@
 <div class="text">
 
 <p>
-    In all five parts and the trial, you will work on the task you just saw for at most 10 minutes. You will receive <b> a fixed payoff {{ if not player.treatment }} of {{ C.TRUE_PAYOFF }} points {{ endif }} </b> for each correctly solved encryption task in the part that will be randomly chosen for payment. {{ if player.treatment }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: we chose <b> a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }}</b>, and you will have to guess this number. {{ endif }} Throughout the study, you will receive points that will translate at the end into US dollars at a conversion rate of <b>1000 points = {{ thousand_points }}.</b> Each part of the study will have the following stages:
+    In the trial and all five consecutive parts, you will work on the task you just saw for at most 10 minutes. You will receive <b> a fixed payoff {{ if not player.treatment }} of {{ C.TRUE_PAYOFF }} points {{ endif }} </b> for each correctly solved encryption task in the part that will be randomly chosen for payment. {{ if player.treatment }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: we chose <b> a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }}</b>, and you will have to guess this number. {{ endif }}
 </p>
 
-<br>
+<p>
+    After the trial, at the beginning of the first part, we will ask you to state how many tasks you would <b>ideally want to do</b> within the 10 minutes <b>{{ if player.treatment }}for different levels of the task payoff{{ else }}for {{C.TRUE_PAYOFF }} points per task{{ endif }},</b> given your experience with the trial task and the alternative options you have. Additionally, we will ask you to <b>predict how many tasks you {{ if player.treatment }}would actually do</b> for these payoff levels{{ else }}will actually do{{ endif }}</b>. There is a
+    {{ C.PERCENT_IDEAL }} percent chance that you will have to do as many tasks as you stated as ideal {{ if player.treatment }}for the true payoff level {{ endif }}in Part Five. {{ if player.treatment }}Should the true task payoff be different from the payoffs you stated your ideal work amounts, we will extrapolate the ideal amount of work to the true payoff from your answers.{{ endif }} With {{ percent_normal }} percent probability, however, {{ if player.treatment }}you will not learn the true payoff yet, and {{ endif }}you will be able to complete as many tasks as you want in Part Five, too.
+</p>
 
-<h5> 1. Guessing the {{ guess_about }}. </h5>
+    <br>
+
+    <p>Then, each part of the study will have the following stages:</p>
+
+<h5> 1. Guessing the {{ guess_about }} </h5>
 
 <p>
-    In all parts except for the trial, you will have to <b>state how large you think the {{ guess_about }} is</b> based on your current information. You will receive a <b>bonus payment of {{C.BELIEF_BONUS}} points if your guess</b> in the randomly chosen part <b>is close to the true {{ guess_about }}.</b> The more precise your guess – i.e., the closer it is to the true {{ guess_about }} -, the more likely it is that you win {{C.BELIEF_BONUS}} points. Given this payment rule, <b>you should state your best guess</b> to ensure the largest chance of receiving the {{C.BELIEF_BONUS}} points. If you are interested in the exact mathematical formula stating the precise payment rule, please click on the button “Show mathematical formula”.
+    In all parts except for the trial, you will have to <b>state how large you think the {{ guess_about }} is</b> based on your current information. You can earn a <b>bonus payment of {{C.BELIEF_BONUS}} points if your guess</b> in the randomly chosen part <b>is close to the true {{ guess_about }}.</b> The more precise your guess – i.e., the closer it is to the true {{ guess_about }} -, the more likely it is that you win {{C.BELIEF_BONUS}} points. Given this payment rule, <b>you should state your best guess</b> to ensure the largest chance of receiving the {{C.BELIEF_BONUS}} points. If you are interested in the exact mathematical formula stating the precise payment rule, please click on the button “Show mathematical formula”.
 </p>
 
 <br>
@@ -31,11 +38,6 @@
 
 <div id="mathFormula" class="border rounded p-3 mt-3 mx-auto" style="display: none; width: 80%; background-color: #f9f9f9;">
     <p>
-        You will have to guess the {{ guess_about }} at the beginning of each part. <b>The closer your guess</b> is to the actual {{ guess_about }}, <b>the higher the probability</b> that you receive an extra payment of
-        {{C.BELIEF_BONUS}} points.
-    </p>
-
-    <p>
         The probability of receiving the payment is
     </p>
 
@@ -48,10 +50,6 @@
 
     <p>
         If your guess equals the actual {{ guess_about }}, then p=1, and you will get the extra payment for sure. The further your guess deviates from the actual {{ guess_about }}, the lower is the probability p that you receive the extra payment. If your guess deviates from the actual {{ guess_about }} by more than 30, then p=0, i.e., p can never turn negative.
-    </p>
-
-    <p>
-        In each part, we will draw a new, random number. Each number between 0 and 1 will be equally likely. If the randomly drawn number is smaller than or equal to p (the probability that you will receive the extra payment for your guess), you will receive the extra payment of {{C.BELIEF_BONUS}} points. If the randomly drawn number is larger than p, you will not receive the extra payment.
     </p>
 </div>
 
@@ -82,36 +80,25 @@
 <h5> 3. Working on the encryption task </h5>
 
 <p>
-    After receiving the information about the {{ guess_about }}, you will <b>work on the task for 10 minutes.</b>{{ if not player.treatment }} Working on the encryption task has nothing to do with guessing the chosen number, but it will determine part of your payoff.{{ endif }} Your payment for the encryption task will be <b>{{ if player.treatment }}the fixed payoff {{ else }} {{C.TRUE_PAYOFF }} points {{ endif }}times the number of tasks you completed correctly.</b>
+    After receiving the information about the {{ guess_about }}, you will <b>work on the task for 10 minutes.</b> Your payment for the encryption task will be <b>{{ if player.treatment }}the fixed payoff {{ else }} {{C.TRUE_PAYOFF }} points {{ endif }}times the number of tasks you completed correctly.</b>
 </p>
     <p>
     However, you do not have to work for the full 10 minutes. We will offer you some <b>alternatives that you can access via different links</b> at the top of the page. For <b>each minute spent on the alternatives,</b> you will receive a flat fee of <b>{{ C.FLAT_LEISURE_FEE }} points.</b> You can go back to the task and continue working on it anytime during the 10 minutes. A bell will remind you shortly before the end of the working time to come back to the work page, so <b>please turn on the sound on your computer.</b>
 </p>
-
-<p>
-    After the first part, we ask you to answer a few questions before we move on to the next part.
+    <p>
+    From the second to the fifth part, before asking about your guess about the {{ guess_about }}, we will <b>first remind you of how many tasks you completed correctly in the previous part.</b> In the fifth part, you will not receive any new information about the {{ guess_about }} anymore, but you will have to still guess it and work on the encryption task.
 </p>
 
-<br>
-
-<h5> In the first part </h5>
+    <h5> 4. Questionnaire </h5>
 
 <p>
-    After the trial, at the beginning of the first part, we will ask you to state how many tasks you would <b>ideally want to do</b> within the 10 minutes <b>{{ if player.treatment }}for different levels of the task payoff{{ else }}for {{C.TRUE_PAYOFF }} points per task{{ endif }},</b> given your experience with the trial task and the alternative options you have. Additionally, we will ask you to <b>predict how many tasks you {{ if player.treatment }}would actually do</b> for these payoff levels{{ else }}will actually do{{ endif }}</b>. There is a
-    {{ C.PERCENT_IDEAL }} percent chance that you will have to do as many tasks as you stated as ideal {{ if player.treatment }}for the true payoff level {{ endif }}in Part Five. {{ if player.treatment }}Should the true task payoff be different from the payoffs you stated your ideal work amounts, we will extrapolate the ideal amount of work to the true payoff from your answers.{{ endif }} With {{ percent_normal }} percent probability, however, {{ if player.treatment }}you will not learn the true payoff yet, and {{ endif }}you will be able to complete as many tasks as you want in Part Five, too.
+    Between each consecutive part, we will ask you to answer a few questions.
 </p>
 
-<br>
+    <br>
+    <br>
 
-<h5> From the second part onwards </h5>
-
-<p>
-    From the second to the fifth part, before asking about your guess about the {{ guess_about }}, we will <b>first remind you of how many tasks you completed correctly in the previous part.</b> In the fifth part, you will not receive any new information about the {{ guess_about }} anymore, but you will have to still guess it (stage 1) and work on the encryption task (stage 3).
-</p>
-
-<br>
-
-<h5> Payment for the study </h5>
+<h4> Payment for the study </h4>
 
 <p>
     Your final payoff will come from <b>five sources:</b>
@@ -126,16 +113,13 @@
 </ol>
 
 <p>
-    The computer will <b>randomly choose a part</b> from the trial and the five main parts that will determine your <b>payoff from the task (sources 2 and 3).</b> It will choose <b>another part randomly</b> from the five main parts (which can be the same as or different from the one first chosen) that will determine your <b>payoff for your guess</b> about the {{ guess_about }} (source 4). All payments will be converted from points to USD at a rate of 1000 points = {{ thousand_points }}.
-</p>
-
-<p>
-    You will receive all payments via the Prolific payment system within three days after the study.
+    The computer will <b>randomly choose a part</b> from the trial and the five main parts that will determine your <b>payoff from the task and the alternative options.</b> It will choose <b>another part randomly</b> from the five main parts (which can be the same as or different from the one first chosen) that will determine your <b>payoff for your guess</b> about the {{ guess_about }}. All payments will be converted from points to USD at a rate of <b>1000 points = {{ thousand_points }}.</b>
 </p>
 
 <br>
+<br>
 
-<h5> Study information </h5>
+<h4> Further information </h4>
 
 <p>
     This study is conducted by researchers at the Düsseldorf Institute for Competition Economics at Heinrich Heine University Düsseldorf and financed by [x].
@@ -146,7 +130,7 @@
 </p>
 
 <p>
-    Participation in this study is not associated with any foreseeable risk or benefit. Your answers will be collected confidentially and anonymously (the researchers will not be able to link decisions and participants' identity beyond the Prolific ID provided). At the data analysis stage your Prolific ID will be changed to a random identifying number, and the Prolific IDs will be deleted. In case the results of the study are published, there can be no references to your identity. Data anonymity is guaranteed.
+    Participation in this study is not associated with any foreseeable risk. Your answers will be collected confidentially and anonymously (the researchers will not be able to link decisions and participants' identity beyond the Prolific ID provided). At the data analysis stage your Prolific ID will be changed to a random identifying number, and the Prolific IDs will be deleted. In case the results of the study are published, there can be no references to your identity. Data anonymity is guaranteed.
 </p>
 
 <p>
