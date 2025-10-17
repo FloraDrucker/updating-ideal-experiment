@@ -1620,7 +1620,7 @@ class FinalPage(Page):
         work_length_seconds = config['work_length_seconds']
         leisure_minutes = round((work_length_seconds - player.participant.vars['active_tab_seconds'][player.task_chosen_part])/60, 2)
         leisure_payoff = leisure_minutes * base_constants.FLAT_LEISURE_FEE
-        leisure_payoff_usd = cu(round(config['real_world_currency_per_point']*leisure_payoff), 2)
+        leisure_payoff_usd = cu(round(config['real_world_currency_per_point']*leisure_payoff, 2))
         belief_chosen_part = C.PARTS[player.belief_chosen_part]
         belief_in_part = player.participant.vars['belief'][player.belief_chosen_part]
         chosen_risk_question = C.RISK_CHOICES[player.risk_chosen]

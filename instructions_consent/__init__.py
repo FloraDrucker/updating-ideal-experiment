@@ -52,7 +52,7 @@ class Player(BasePlayer):
         label='<b>Question 1</b> <br> At the end of part 4, will you have seen all the numbers (“balls”) from the underlying distribution?',
         choices=[
             'Yes, because the same 120 balls are shown repeatedly in every part.',
-            'Yes, because each ball is shown only once, and by part 4 all 120 have been shown.',
+            'Yes, because each ball is shown only once, and by part 4 all 120 will have been shown.',
             'No, because some balls are never shown.',
         ],
         widget=widgets.RadioSelect,
