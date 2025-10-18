@@ -4,8 +4,21 @@
 {% block styles %}
 <style type="text/css">
 
+    .otree-content.container,
+.otree-body.container,
+.otree-timer.alert {
+    max-width: 90vw;
+    width: 90vw;
+}
+
+.otree-timer.alert {
+    border-radius: 0;
+    padding: 1rem 2rem;
+}
+
 .otree-content{
-    width:200%;
+    width:90vw;
+    max-width: 90vw;
     background-color: rgb(255 255 255);
 }
 
@@ -27,8 +40,8 @@
 
 .task-container{
     display: grid;
-    width: 50%;
-    margin: auto;
+    width: min(95%, 1200px);
+    margin: 2rem auto;
     border: 1px solid rgb(226, 238, 221);
     padding: 10px;
     align-items: center;
@@ -76,7 +89,7 @@
 }
 
 .task-code{
-    font-size: 2vw;
+    font-size: 1.8vw;
     width: 3em;
 }
 
