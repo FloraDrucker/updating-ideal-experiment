@@ -1344,7 +1344,7 @@ class Signal(Page):
 
     @staticmethod
     def is_displayed(player):
-        return 1 < player.round_number < 6
+        return 2 < player.round_number < 6
 
     @staticmethod
     def vars_for_template(player):
