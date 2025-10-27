@@ -11,9 +11,9 @@
 
     <ul>
         <li> You receive the <b>completion fee of {{ completion_fee }}</b>. </li>
-        <li> For your payment for the task, the computer has selected {{ task_chosen_part }} randomly, in which you completed {{ performance_in_chosen_part }} tasks. The fixed payoff per task was {{ true_payoff }} points, so you will receive <b>{{ payoff_for_work }} points (= {{ payoff_for_work_usd }}) for your work.</b></li>
+        <li> For your <b>payment for the task</b>, the computer has selected <b>{{ task_chosen_part }}</b> randomly, in which you completed {{ performance_in_chosen_part }} tasks. The fixed payoff per task was {{ true_payoff }} points, so you will receive <b>{{ payoff_for_work }} points (= {{ payoff_for_work_usd }}) for your work.</b></li>
         <li> In {{ task_chosen_part }}, you spent {{ leisure_minutes }} minutes on the <b>outside options</b>, so you receive <b>{{ leisure_payoff }} points (= {{ leisure_payoff_usd }})</b> for this part. </li>
-        <li> {{ if not treatment }} The chosen number was {{ true_payoff }}.{{ endif }} The randomly chosen part for payment for your guess about the {{ guess_about }} is part {{ belief_chosen_part }}, and your guess was {{ belief_in_chosen_part }} in this part. Your <b>payment for your guess is {{ payment_for_belief }} points (= {{ payment_for_belief_usd }})</b>. </li>
+        <li> {{ if not treatment }} The chosen number was {{ true_payoff }}.{{ endif }} The randomly chosen part for <b>payment for your guess</b> about the {{ guess_about }} is <b>{{ belief_chosen_part }}</b>, and your guess was {{ belief_in_chosen_part }} in this part. Your <b>payment for your guess is {{ payment_for_belief }} points (= {{ payment_for_belief_usd }})</b>. </li>
         <li> In the lottery decision, the randomly selected decision was {{ chosen_risk_question }}, where you chose {{ choice_in_risk_question }}.{{ if player.choice_in_risk_chosen }} The lottery realization was {{ payment_for_risk }} points.{{ endif }} Therefore, you receive <b>{{ payment_for_risk }} points (= {{ payment_for_risk_usd }})</b>.</li>
     </ul>
 

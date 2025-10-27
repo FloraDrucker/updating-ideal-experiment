@@ -13,12 +13,12 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 6  # = number of sessions including trial. Certain pages will only be shown in certain rounds, e.g. predicted and ideal in only rounds 2 and 6
     PARTS = {
-        0: 'the Trial Part',
-        1: 'Part One',
-        2: 'Part Two',
-        3: 'Part Three',
-        4: 'Part Four',
-        5: 'Part Five',
+        0: 'the trial part',
+        1: 'part one',
+        2: 'part two',
+        3: 'part three',
+        4: 'part four',
+        5: 'part five',
     }
     USE_TIMEOUT = True
     # TIMEOUT_SECONDS = 600
