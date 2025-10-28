@@ -23,7 +23,7 @@ solutions = dict(
     q2='It will be based on your performance in a randomly chosen part (trial or one of the five main parts)',
     q3=40,
     q4='State your actual belief about the true payoff, because the closer your guess is to the real value (between 50 points and 150 points), the higher your probability of winning',
-    q5='It is the average of 120 numbers between 50 points and 150 points'
+    q5='It is the average of 120 numbers between 50 points and 150 points. All payments will be converted from points to USD at a rate of 1,000 points to 1.5 USD.',
 )
 
 
@@ -77,7 +77,7 @@ class Player(BasePlayer):
     q5 = models.StringField(
         label='<b>Question 5</b> <br> How is the fixed payoff per correctly solved task calculated?',
         choices=[
-            'It is the average of 120 numbers between 50 points and 150 pointsAll payments will be converted from ECU to USD at a rate of 1,000 ECU to 1.5 USD.',
+            'It is the average of 120 numbers between 50 points and 150 points. All payments will be converted from points to USD at a rate of 1,000 points to 1.5 USD.',
             'It is the highest number out of the 120 balls shown',
             'It is a random number chosen between 50 and 150 each round',
         ],
