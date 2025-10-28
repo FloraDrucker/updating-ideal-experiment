@@ -941,6 +941,18 @@ class Player(BasePlayer):
         blank=False
     )
 
+    ai_integral = models.IntegerField(
+        label="What is the approximate value of ∫ e^{-x²} dx over the real line?",
+        choices = [
+            [1, '1'],
+            [2, '√π ≈ 1.772'],
+            [3, 'π ≈ 3.142'],
+            [4, "I don’t know the answer"],
+        ],
+        widget = widgets.RadioSelectHorizontal,
+        blank = False
+    )
+
     #Wechsler Level
     digitspan_max_level = models.IntegerField(
         initial=0,
@@ -1316,7 +1328,7 @@ class Survey5(Page):
         'BSCS_dobadthings', 'BSCS_refusebad', 'BSCS_morediscipline', 'BSCS_irondiscipline',
         'BSCS_pleasure', 'BSCS_concentrating', 'BSCS_work', 'BSCS_stop',
         'BSCS_alternatives', 'averagetask', 'ballsremembered1', 'ballsremembered2',
-        'ballsremembered3','screenshot'
+        'ballsremembered3','screenshot', 'ai_integral'
     ]
 
 

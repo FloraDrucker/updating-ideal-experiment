@@ -21,7 +21,7 @@ class C(BaseConstants):
 solutions = dict(
     q1='Yes, because each ball is shown only once, and by part 4 all 120 have been shown',
     q2='It will be based on your performance in a randomly chosen part (trial or one of the five main parts)',
-    q3=30,
+    q3=40,
     q4='State your actual belief about the true payoff, because the closer your guess is to the real value (between 50 points and 150 points), the higher your probability of winning',
     q5='It is the average of 120 numbers between 50 points and 150 points'
 )
@@ -61,7 +61,7 @@ class Player(BasePlayer):
     )
 
     q3 = models.IntegerField(
-        label='<b>Question 3</b> <br> In each of the first four parts, how many balls will you see at the beginning of the part?'
+        label='<b>Question 3</b> <br> In part two to four, how many balls will you see at the beginning of each part?'
     )
 
     q4 = models.StringField(
