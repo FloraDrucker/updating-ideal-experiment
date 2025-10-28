@@ -25,13 +25,25 @@
 <h5>Please answer the following questions as well.</h5>
 
 {% for field in form %}
-    {% if 'BSCS_' not in field.name %}
+    {% if 'BSCS_' not in field.name and field.name != 'ai_integral' %}
         {{ field.label }}<br>
         {{ field }}<br>
     {% endif %}
 {% endfor %}
 
+<p id="mathFormula">
+    What is the approximate value of
+    \( \displaystyle \int_{-\infty}^{\infty} e^{-x^2} \, dx \)
+    over the real line
+</p>
+{{ form.ai_integral }}<br><br>
+
 {% next_button %}
+
+<!-- Load MathJax -->
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js">
+</script>
 
 
 {% endblock %}

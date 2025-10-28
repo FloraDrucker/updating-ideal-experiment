@@ -975,6 +975,17 @@ class Player(BasePlayer):
         blank=False
     )
 
+    ai_integral = models.IntegerField(
+        choices=[
+            [1, '1'],
+            [2, '√π ≈ 1.772'],
+            [3, 'π ≈ 3.142'],
+            [4, "I don’t know the answer"],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
     #Wechsler Level
     digitspan_max_level = models.IntegerField(
         initial=0,
@@ -1057,6 +1068,7 @@ def creating_session(subsession: Subsession):
         ppvars['ballsremembered2'] = None
         ppvars['ballsremembered3'] = None
         ppvars['screenshot'] = None
+        ppvars['ai_integral'] = None
 
         # Wechsler
         ppvars['digitspan_max_level'] = None
@@ -1556,7 +1568,7 @@ class Survey5(Page):
         'BSCS_dobadthings', 'BSCS_refusebad', 'BSCS_morediscipline', 'BSCS_irondiscipline',
         'BSCS_pleasure', 'BSCS_concentrating', 'BSCS_work', 'BSCS_stop',
         'BSCS_alternatives', 'averagetask', 'ballsremembered1', 'ballsremembered2',
-        'ballsremembered3','screenshot'
+        'ballsremembered3','screenshot', 'ai_integral'
     ]
 
     @staticmethod
@@ -1580,6 +1592,7 @@ class Survey5(Page):
         ppvars['ballsremembered2'] = player.ballsremembered2
         ppvars['ballsremembered3'] = player.ballsremembered3
         ppvars['screenshot'] = player.screenshot
+        ppvars['ai_integral'] = player.ai_integral
 
 
         # Randomize and calculate final payment
