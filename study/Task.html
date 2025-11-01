@@ -226,21 +226,25 @@ td {
 document.addEventListener("DOMContentLoaded", (event) => {
     liveSend({});
 });
-// Unlock alarm audio on first user interaction
-document.addEventListener('click', () => {
+/// --- Unlock alarm audio on first user interaction (click / key / move)
+function unlockAudio() {
     const alarm = document.getElementById('alarm-sound');
     if (alarm) {
-        // Attempt a quick play/pause to satisfy autoplay policy
         alarm.play()
             .then(() => {
                 alarm.pause();
                 alarm.currentTime = 0;
             })
             .catch(() => {
-                // ignore if it still fails
+                // ignore any autoplay restriction errors
             });
     }
-}, { once: true });
+}
+
+// Listen to several possible user interactions to unlock audio
+['click', 'keydown', 'mousemove'].forEach(evt => {
+    document.addEventListener(evt, unlockAudio, { once: true });
+});
 
 function myFunction() {
     let errors=checkSolution(letters_per_word);

@@ -1423,10 +1423,15 @@ class Task(Page):
 
     @staticmethod
     def before_next_page(player, timeout_happened):
-        player.participant.vars['actual'][player.round_number-1] = player.performance
-        player.participant.vars['mistakes'][player.round_number-1] = player.mistakes
-        player.participant.vars['link_click_count'][player.round_number-1] = player.link_click_count
-        player.participant.vars['active_tab_seconds'][player.round_number-1] = player.active_tab_seconds
+        p = player
+        pp = p.participant
+        pp.vars['actual'][player.round_number-1] = player.performance
+        pp.vars['mistakes'][player.round_number-1] = player.mistakes
+        pp.vars['link_click_count'][player.round_number-1] = player.link_click_count
+        pp.vars['active_tab_seconds'][player.round_number-1] = player.active_tab_seconds
+
+        print("Player vars are", p.performance, p.mistakes, p.link_click_count, p.active_tab_seconds)
+        print("Participant vars are", pp.vars['actual'], pp.vars['mistakes'], pp.vars['link_click_count'], pp.vars['active_tab_seconds'])
 
 
 class Results(Page):
