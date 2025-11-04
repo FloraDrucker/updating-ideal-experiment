@@ -1126,6 +1126,7 @@ def live_update_performance(player: Player, data):
     if 'mistakes' in data:
         player.mistakes = data['mistakes']
         shuffle = False
+
     answer = dict(performance=player.performance,
                   link_click_count=player.link_click_count,
                   active_tab_seconds=player.active_tab_seconds,
@@ -1435,7 +1436,7 @@ class Task(Page):
 
 
 class Results(Page):
-    pass  # this we don't need actually. or do we?
+    pass
 
 
 class Survey1(Page):
