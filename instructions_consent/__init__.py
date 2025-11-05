@@ -226,7 +226,7 @@ class ComprehensionCheck(Page):
         else:
             player.success_attempt = 0  # allow second attempt
 
-        player.participant.vars['success_attempt'] = player.success_attempt
+        player.participant.vars['success_attempt'] = player.field_maybe_none('success_attempt')
         player.participant.vars['attempt_number'] = player.attempt_number
         player.participant.vars['excluded'] = player.excluded
 
