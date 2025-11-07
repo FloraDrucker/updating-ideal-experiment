@@ -1634,11 +1634,22 @@ class FinalPage(Page):
         config = player.session.config
         chosen_part = C.PARTS[player.task_chosen_part]
         performance_in_part = player.participant.vars['actual'][player.task_chosen_part]
-        payoff_for_work = base_constants.TRUE_PAYOFF*performance_in_part
+        not_done_ideal = 0
+        if chosen_part == 5 and player.participant.vars['do_ideal'] and performance_in_part < player.participant.vars['ideal_to_do']:
+            not_done_ideal = 1
+            performance_to_pay = 0
+        else:
+            performance_to_pay = performance_in_part
+
+        payoff_for_work = base_constants.TRUE_PAYOFF*performance_to_pay
         payoff_in_usd = cu(config['real_world_currency_per_point']*payoff_for_work)
         work_length_seconds = config['work_length_seconds']
         leisure_minutes = round((work_length_seconds - player.participant.vars['active_tab_seconds'][player.task_chosen_part])/60, 2)
-        leisure_payoff = leisure_minutes * base_constants.FLAT_LEISURE_FEE
+        if not_done_ideal:
+            leisure_to_pay = 0
+        else:
+            leisure_to_pay = leisure_minutes
+        leisure_payoff = leisure_to_pay * base_constants.FLAT_LEISURE_FEE
         leisure_payoff_usd = cu(round(config['real_world_currency_per_point']*leisure_payoff, 2))
         belief_chosen_part = C.PARTS[player.belief_chosen_part]
         belief_in_part = player.participant.vars['belief'][player.belief_chosen_part]
@@ -1667,8 +1678,13 @@ class FinalPage(Page):
             'completion_url': config.get('prolific_completion_url', ''),
             'completion_code': config.get('prolific_completion_code', ''),
             'completion_fee': config.get('participation_fee', ''),
+            'chosen_part_index': player.task_chosen_part,
+            'ideal_to_do': player.participant.vars['ideal_to_do'],
             'task_chosen_part': chosen_part,
             'performance_in_chosen_part': performance_in_part,
+            'percent_ideal': base_constants.PERCENT_IDEAL,
+            'do_ideal': ppvars['do_ideal'],
+            'not_done_ideal': not_done_ideal,
             'true_payoff': base_constants.TRUE_PAYOFF,
             'payoff_for_work': payoff_for_work,
             'payoff_for_work_usd': payoff_in_usd,
