@@ -65,31 +65,31 @@ class Player(BasePlayer):
 
     # Ideal values
     ideal50 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you ideally want to do for 50 points per task?"
     )
     ideal60 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you ideally want to do for 60 points per task?"
     )
     ideal70 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you ideally want to do for 70 points per task?"
     )
     ideal80 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you ideally want to do for 80 points per task?"
     )
     ideal90 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you ideally want to do for 90 points per task?"
     )
     ideal100 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you ideally want to do for 100 points per task?"
     )
     ideal110 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you ideally want to do for 110 points per task?"
     )
     ideal120 = models.IntegerField(
@@ -97,54 +97,54 @@ class Player(BasePlayer):
         label="How many tasks do you ideally want to do for 120 points per task?"
     )
     ideal130 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you ideally want to do for 130 points per task?"
     )
     ideal140 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you ideally want to do for 140 points per task?"
     )
     ideal150 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you ideally want to do for 150 points per task?"
     )
     lastideal_t = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you ideally want to do in this round for what you think the task payoff is?"
     )
 
     lastideal_c = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you ideally want to do in this round?"
     )
 
     # Predicted values
     predicted50 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you predict you will do for 50 points per task?"
     )
     predicted60 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you predict you will do for 60 points per task?"
     )
     predicted70 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you predict you will do for 70 points per task?"
     )
     predicted80 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you predict you will do for 80 points per task?"
     )
     predicted90 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you predict you will do for 90 points per task?"
     )
     predicted100 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you predict you will do for 100 points per task?"
     )
     predicted110 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you predict you will do for 110 points per task?"
     )
     predicted120 = models.IntegerField(
@@ -152,34 +152,34 @@ class Player(BasePlayer):
         label="How many tasks do you predict you will do for 120 points per task?"
     )
     predicted130 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you predict you will do for 130 points per task?"
     )
     predicted140 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you predict you will do for 140 points per task?"
     )
     predicted150 = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you predict you will do for 150 points per task?"
     )
     lastpredicted_t = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you predict you will do in this round for what you think the task payoff is?"
     )
 
     lastpredicted_c = models.IntegerField(
-        blank=True,
+        blank=False,
         label="How many tasks do you predict you will do in this round?"
     )
 
     belief_t = models.IntegerField(
-        blank=True,
+        blank=False,
         label="What do you think is the task payoff in points?"
     )
 
     belief_c = models.IntegerField(
-        blank=True,
+        blank=False,
         label="What do you think is the chosen number?"
     )
 
@@ -1205,11 +1205,19 @@ class Ideal(Page):
                 player.participant.vars['ideal'][11] = player.ideal150
             else:
                 player.participant.vars['ideal'][8] = player.ideal120
+                # Fill all other "ideal" fields with safe placeholder values
+                # so blank=False validation never fails
+                for i in [1, 2, 3, 4, 5, 6, 7, 9, 10, 11]:
+                    setattr(player, f'ideal{50 + 10 * (i - 1)}', 999)
         elif player.round_number == 6:
             if player.participant.vars['treatment']:
                 player.participant.vars['ideal'][12] = player.lastideal_t
+                # Pre-fill the field not shown to avoid blank=False error
+                player.lastideal_c = 999
             else:
                 player.participant.vars['ideal'][12] = player.lastideal_c
+                # Pre-fill the field not shown to avoid blank=False error
+                player.lastideal_t = 999
         else:
             pass
 
@@ -1264,11 +1272,17 @@ class Predicted(Page):
                 player.participant.vars['predicted'][11] = player.predicted150
             else:
                 player.participant.vars['predicted'][8] = player.predicted120
+                # Fill all other "predicted" fields with safe placeholder values
+                # so blank=False validation never fails
+                for i in [1, 2, 3, 4, 5, 6, 7, 9, 10, 11]:
+                    setattr(player, f'predicted{50 + 10 * (i - 1)}', 999)
         elif player.round_number == 6:
             if player.participant.vars['treatment']:
                 player.participant.vars['predicted'][12] = player.lastpredicted_t
+                player.lastpredicted_c = 999
             else:
                 player.participant.vars['predicted'][12] = player.lastpredicted_c
+                player.lastpredicted_t = 999
         else:
             pass
 
@@ -1335,8 +1349,10 @@ class Belief(Page):
         if player.round_number > 1:
             if player.participant.vars['treatment']:
                 player.participant.vars['belief'][player.round_number-1] = player.belief_t
+                player.belief_c = 50
             else:
                 player.participant.vars['belief'][player.round_number-1] = player.belief_c
+                player.belief_t = 50
 
         if player.round_number == 6:
             prob_ideal = round(base_constants.PERCENT_IDEAL/100, 2)
@@ -1392,11 +1408,6 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
             return {
                 'work_length_minutes': work_length_minutes,
             }
-
-    # JUST TO TEST!!!
-    @staticmethod
-    def before_next_page(player, timeout_happened):
-        player.ideal_to_do = 2
 
 
 class Task(Page):
