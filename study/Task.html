@@ -247,43 +247,56 @@ function unlockAudio() {
 });
 
 function myFunction() {
-    let errors=checkSolution(letters_per_word);
+    let errors = checkSolution(letters_per_word);
 
-    if (errors == 0) {
-        let temp = Number(document.getElementById("performance").value) + 1
+    if (errors === 0) {
+        let temp = Number(document.getElementById("performance").value) + 1;
         document.getElementById("performance").value = temp;
         document.getElementById("error-form").style.display = "none";
+
         let performance = Number(document.getElementById("performance").value);
         document.getElementById("performance-display").innerText = performance;
-        liveSend({'performance': performance});
+        liveSend({ 'performance': performance });
         document.getElementById("task_code_0").focus();
 
-        if (document.getElementById("performance").value == required_tasks) {
-            document.getElementById("next-button").click();
+        // ✅ If they reached or exceeded required tasks, lock inputs & stop further work
+        if (performance >= required_tasks) {
+            disableTaskInputs();
+            document.getElementById("submit-solution").disabled = true;
+            document.getElementById("error-form").innerText =
+                "You have completed all required tasks. You can browse other pages until time runs out.";
+            document.getElementById("error-form").style.display = "block";
+            return; // do NOT auto-submit or generate a new dict
         }
 
-        let dict=genNewDict();
+        // Otherwise, generate new task normally
+        let dict = genNewDict();
         shuffle(legend_letters);
 
         for (let i = 0; i <= 25; i++) {
-            document.getElementById("llid_"+i).innerText=legend_letters[i];
-            document.getElementById("lcid_"+i).innerText=dict[legend_letters[i]];
+            document.getElementById("llid_" + i).innerText = legend_letters[i];
+            document.getElementById("lcid_" + i).innerText = dict[legend_letters[i]];
         }
 
         let word = genNewWord(letters_per_word, word_letters);
-        for (let i=0; i< letters_per_word; i++) {
-            document.getElementById("task_letter_"+i).innerText=word[i];
-            document.getElementById("task_code_"+i).value='';
+        for (let i = 0; i < letters_per_word; i++) {
+            document.getElementById("task_letter_" + i).innerText = word[i];
+            document.getElementById("task_code_" + i).value = '';
         }
     }
 
     else if (errors > 0) {
-        let temp = Number(document.getElementById("mistakes").value) + 1
+        let temp = Number(document.getElementById("mistakes").value) + 1;
         document.getElementById("mistakes").value = temp;
-        liveSend({ mistakes: temp })
-        <!-- TODO: change this to 1 mistake or x mistakes -->
-        document.getElementById("error-form").innerText = "There are "+errors+" mistakes.";
+        liveSend({ mistakes: temp });
+        document.getElementById("error-form").innerText = "There are " + errors + " mistakes.";
         document.getElementById("error-form").style.display = "block";
+    }
+}
+
+function disableTaskInputs() {
+    for (let i = 0; i < letters_per_word; i++) {
+        document.getElementById("task_code_" + i).disabled = true;
     }
 }
 
@@ -370,23 +383,35 @@ function liveRecv(data) {
     document.getElementById("performance-display").innerText = data.performance;
     document.getElementById('link_click_count').value = data.link_click_count;
     document.getElementById('active_tab_seconds').value = data.active_tab_seconds;
-    document.getElementById('mistakes').value = data.mistakes
+    document.getElementById('mistakes').value = data.mistakes;
+
+    // ✅ Always check the "completed" condition first
+    if (data.performance >= required_tasks) {
+        disableTaskInputs();
+        const submitBtn = document.getElementById("submit-solution");
+        submitBtn.disabled = true;
+        document.getElementById("error-form").innerText =
+            "You have completed all required tasks. You can browse other pages until time runs out.";
+        document.getElementById("error-form").style.display = "block";
+        return; // stop here — do not shuffle or generate a new word
+    }
+
+    // ✅ Otherwise, update the task if server told us to shuffle
     if (data.shuffle) {
         dict = genNewDict();
         shuffle(legend_letters);
 
         for (let i = 0; i <= 25; i++) {
-            document.getElementById("llid_"+i).innerText=legend_letters[i];
-            document.getElementById("lcid_"+i).innerText=dict[legend_letters[i]];
+            document.getElementById("llid_" + i).innerText = legend_letters[i];
+            document.getElementById("lcid_" + i).innerText = dict[legend_letters[i]];
         }
 
         word = genNewWord(letters_per_word, word_letters);
-        for (let i=0; i< letters_per_word; i++) {
-            document.getElementById("task_letter_"+i).innerText=word[i];
+        for (let i = 0; i < letters_per_word; i++) {
+            document.getElementById("task_letter_" + i).innerText = word[i];
         }
         document.getElementById("task_code_0").focus();
     }
-    else {}
 }
 
 document.getElementById("submit-solution")
