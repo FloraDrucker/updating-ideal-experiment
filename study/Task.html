@@ -38,6 +38,13 @@
 
 }
 
+.success-message {
+    border: 1px solid rgb(204, 238, 204);
+    background-color: rgb(217, 255, 217);
+    color: rgb(0, 100, 0);
+    text-align: center;
+}
+
 .task-container{
     display: grid;
     width: min(95%, 1200px);
@@ -263,9 +270,12 @@ function myFunction() {
         if (performance >= required_tasks) {
             disableTaskInputs();
             document.getElementById("submit-solution").disabled = true;
-            document.getElementById("error-form").innerText =
-                "You have completed all required tasks. You can browse other pages until time runs out.";
-            document.getElementById("error-form").style.display = "block";
+            const msgBox = document.getElementById("error-form");
+            msgBox.classList.remove("otree-form-errors"); // remove red styling
+            msgBox.classList.add("success-message");       // apply green style
+            msgBox.innerText =
+                "✅ You have completed all required tasks. You can browse other pages until time runs out.";
+            msgBox.style.display = "block";
             return; // do NOT auto-submit or generate a new dict
         }
 
@@ -289,8 +299,11 @@ function myFunction() {
         let temp = Number(document.getElementById("mistakes").value) + 1;
         document.getElementById("mistakes").value = temp;
         liveSend({ mistakes: temp });
-        document.getElementById("error-form").innerText = "There are " + errors + " mistakes.";
-        document.getElementById("error-form").style.display = "block";
+        const msgBox = document.getElementById("error-form");
+        msgBox.classList.remove("success-message");
+        msgBox.classList.add("otree-form-errors");
+        msgBox.innerText = "There are " + errors + " mistakes.";
+        msgBox.style.display = "block";
     }
 }
 

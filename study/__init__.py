@@ -1393,6 +1393,11 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
                 'work_length_minutes': work_length_minutes,
             }
 
+    # JUST TO TEST!!!
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        player.ideal_to_do = 2
+
 
 class Task(Page):
     live_method = live_update_performance
