@@ -2,7 +2,7 @@
 {% load otree %}
 
 {% block title %}
-    Questions about ideal number of tasks
+     {{ if not treatment or player.round_number == 6 }}Question {{ else }}Questions {{ endif }}about ideal number of tasks
 {% endblock %}
 
 {% block content %}
