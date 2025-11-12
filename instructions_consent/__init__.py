@@ -17,7 +17,7 @@ class C(BaseConstants):
     BENEFIT_RANGE_MIN = 50
     BENEFIT_RANGE_MAX = 150
     TRUE_PAYOFF = 120
-    PERCENT_IDEAL = 100  # percentage chance that they will have to do the ideal number of tasks
+    PERCENT_IDEAL = 3  # percentage chance that they will have to do the ideal number of tasks
     GUESS_ABOUT = {True: "payoff per task",
                    False: "chosen number"}
     # Solutions for comprehension check
