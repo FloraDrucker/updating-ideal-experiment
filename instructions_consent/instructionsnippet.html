@@ -57,7 +57,7 @@
 <h5> 2. Further information about the {{ guess_about }} </h5>
 
 <p>
-    During the course of the study, you will get more and more information that will allow you to obtain more precise knowledge of the {{ guess_about }}. This will work in the following way: The {{ guess_about }} is <b> the average of 120 numbers</b> that lie <b>between {{ C.BENEFIT_RANGE_MIN }} points and {{ C.BENEFIT_RANGE_MAX }} points.</b> The same number can occur several times. <b>At the beginning of parts two to four,</b> we will briefly <b>display 40 of these 120 numbers</b> (represented by balls) on the screen. Each of the 120 balls will be displayed only once, so <b>you will have seen all the balls after part four.</b>
+    During the course of the study, you will get more and more information that will allow you to obtain more precise knowledge of the {{ guess_about }}. This will work in the following way: The {{ guess_about }} is <b> the average of 120 numbers</b> that lie <b>between {{ C.BENEFIT_RANGE_MIN }} {{ if player.treatment }}points{{ endif }} and {{ C.BENEFIT_RANGE_MAX }}{{ if player.treatment }} points{{ endif }}.</b> The same number can occur several times. <b>At the beginning of parts two to four,</b> we will briefly <b>display 40 of these 120 numbers</b> (represented by balls) on the screen. Each of the 120 balls will be displayed only once, so <b>you will have seen all the balls after part four.</b>
 </p>
 
 <script>
