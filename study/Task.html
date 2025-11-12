@@ -359,36 +359,20 @@ function randomDataSet(dataSetSize, minValue, maxValue) {
 }
 
 function genNewDict() {
-    let dict = {}
-    dict["A"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["B"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["C"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["D"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["E"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["F"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["G"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["H"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["I"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["J"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["K"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["L"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["M"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["N"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["O"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["P"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["Q"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["R"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["S"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["T"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["U"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["V"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["W"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["X"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["Y"] = Math.floor(Math.random() * (999 - 100) + 100);
-    dict["Z"] = Math.floor(Math.random() * (999 - 100) + 100);
-    shuffle(dict)
-    return dict
+    const dict = {};
+    const letters = genCharArray('A', 'Z');
+    for (const letter of letters) {
+        dict[letter] = Math.floor(Math.random() * 900) + 100; // 100–999
+    }
+    return dict;
+}
 
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 }
 
 function liveRecv(data) {
