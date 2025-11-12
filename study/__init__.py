@@ -48,6 +48,8 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
+    current_dict = models.LongStringField()
+    current_word = models.LongStringField()
     performance = models.IntegerField(initial=0, blank=False)
     mistakes = models.IntegerField(initial=0, blank=False)
     link_click_count = models.IntegerField(initial=0) # Added this to track the links clicked in the Task.html
@@ -1108,32 +1110,103 @@ def creating_session(subsession: Subsession):
         ppvars['total_payment'] = None
 
 
+def build_random_dict():
+    import string, random
+    letters = list(string.ascii_uppercase)
+    numbers = random.sample(range(100, 1000), 26)
+    random.shuffle(letters)
+    return dict(zip(letters, numbers))
+
+def build_random_word(k=4):
+    import string, random
+    return random.sample(list(string.ascii_uppercase), k)
+
 # This is the Live Send code, so that performance etc can be stored immediately
 def live_update_performance(player: Player, data):
     own_id = player.id_in_group
+
+    # --- INIT (first page load) ---
+    if data.get('init'):
+        if not player.field_maybe_none('current_dict') or not player.field_maybe_none('current_word'):
+            d = build_random_dict()
+            w = build_random_word(C.TASK_LENGTH)
+            player.current_dict = json.dumps(d)
+            player.current_word = json.dumps(w)
+        else:
+            d = json.loads(player.current_dict)
+            w = json.loads(player.current_word)
+
+        return {
+            player.id_in_group: dict(
+                performance=player.performance,
+                mistakes=player.mistakes,
+                link_click_count=player.link_click_count,
+                active_tab_seconds=player.active_tab_seconds,
+                dict=d,
+                word=w
+            )
+        }
+
+    # --- REQUEST UPDATE (when tab becomes visible again) ---
+    if data.get('request_update'):
+        d = json.loads(player.current_dict) if player.current_dict else {}
+        w = json.loads(player.current_word) if player.current_word else []
+        return {
+            own_id: dict(
+                performance=player.performance,
+                link_click_count=player.link_click_count,
+                active_tab_seconds=player.active_tab_seconds,
+                mistakes=player.mistakes,
+                dict=d,
+                word=w,
+                shuffle=False
+            )
+        }
+
+    # --- INCREMENTAL UPDATES (performance, mistakes, time, clicks) ---
+    shuffle = False
     if 'performance' in data:
-        perf = data['performance']
-        player.performance = perf
-        shuffle = True
-    else:
+        player.performance = data['performance']
         shuffle = True
     if 'link_click_count' in data:
         player.link_click_count = data['link_click_count']
-        shuffle = False
     if 'active_tab_seconds' in data:
-        player.active_tab_seconds = data[('active_tab_seconds')]
-        shuffle = False
+        player.active_tab_seconds = data['active_tab_seconds']
     if 'mistakes' in data:
         player.mistakes = data['mistakes']
-        shuffle = False
 
-    answer = dict(performance=player.performance,
-                  link_click_count=player.link_click_count,
-                  active_tab_seconds=player.active_tab_seconds,
-                  mistakes=player.mistakes,
-                  shuffle=shuffle)
-    return {own_id: answer}
+    # --- If we need to generate a new dictionary/word (after a correct solution) ---
+    if shuffle:
+        d = build_random_dict()
+        w = build_random_word(C.TASK_LENGTH)
+        player.current_dict = json.dumps(d)
+        player.current_word = json.dumps(w)
+        return {
+            own_id: dict(
+                performance=player.performance,
+                link_click_count=player.link_click_count,
+                active_tab_seconds=player.active_tab_seconds,
+                mistakes=player.mistakes,
+                dict=d,
+                word=w,
+                shuffle=True
+            )
+        }
 
+    # --- Otherwise, just echo current state ---
+    d = json.loads(player.current_dict) if player.current_dict else {}
+    w = json.loads(player.current_word) if player.current_word else []
+    return {
+        own_id: dict(
+            performance=player.performance,
+            link_click_count=player.link_click_count,
+            active_tab_seconds=player.active_tab_seconds,
+            mistakes=player.mistakes,
+            dict=d,
+            word=w,
+            shuffle=False
+        )
+    }
 
 def get_timeout_seconds(player):
     config = player.session.config

@@ -224,15 +224,25 @@ td {
 
 <script>
 
+    let dict = {};
+    let word = [];
+
   const letters_per_word = {{letters_per_word| safe}};
   const alphabet = genCharArray('A', 'Z');
   const legend_letters = alphabet;
   const word_letters = alphabet;
   const required_tasks = js_vars.required_tasks;
 
-document.addEventListener("DOMContentLoaded", (event) => {
-    liveSend({});
+document.addEventListener("DOMContentLoaded", () => {
+    liveSend({ init: true });  // explicitly request first dictionary/word
 });
+
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        liveSend({ request_update: true });
+    }
+});
+
 /// --- Unlock alarm audio on first user interaction (click / key / move)
 function unlockAudio() {
     const alarm = document.getElementById('alarm-sound');
@@ -248,7 +258,7 @@ function unlockAudio() {
     }
 }
 
-// Listen to several possible user interactions to unlock audio
+// Listen to several possible user interactions to unlock audio once
 ['click', 'keydown', 'mousemove'].forEach(evt => {
     document.addEventListener(evt, unlockAudio, { once: true });
 });
@@ -376,34 +386,51 @@ function shuffle(array) {
 }
 
 function liveRecv(data) {
-    document.getElementById("performance").value = data.performance;
-    document.getElementById("performance-display").innerText = data.performance;
-    document.getElementById('link_click_count').value = data.link_click_count;
-    document.getElementById('active_tab_seconds').value = data.active_tab_seconds;
-    document.getElementById('mistakes').value = data.mistakes;
-
-    // ✅ Always check the "completed" condition first
-    if (data.performance >= required_tasks) {
-        disableTaskInputs();
-        const submitBtn = document.getElementById("submit-solution");
-        submitBtn.disabled = true;
-        document.getElementById("error-form").innerText =
-            "You have completed all required tasks. You can browse other pages until time runs out.";
-        document.getElementById("error-form").style.display = "block";
-        return; // stop here — do not shuffle or generate a new word
+    // --- Always update counters ---
+    if (typeof data.performance === 'number') {
+        document.getElementById("performance").value = data.performance;
+        document.getElementById("performance-display").innerText = data.performance;
+    }
+    if (typeof data.mistakes === 'number') {
+        document.getElementById("mistakes").value = data.mistakes;
+    }
+    if (typeof data.link_click_count === 'number') {
+        document.getElementById("link_click_count").value = data.link_click_count;
+    }
+    if (typeof data.active_tab_seconds === 'number') {
+        document.getElementById("active_tab_seconds").value = data.active_tab_seconds;
     }
 
-    // ✅ Otherwise, update the task if server told us to shuffle
-    if (data.shuffle) {
-        dict = genNewDict();
-        shuffle(legend_letters);
+    // --- Only repaint task when we actually have a new one ---
+    if (data.dict && data.word && data.shuffle) {
+        dict = data.dict;
+        word = data.word;
 
-        for (let i = 0; i <= 25; i++) {
-            document.getElementById("llid_" + i).innerText = legend_letters[i];
-            document.getElementById("lcid_" + i).innerText = dict[legend_letters[i]];
+        const letters = genCharArray('A', 'Z');
+        for (let i = 0; i < 26; i++) {
+            const L = letters[i];
+            document.getElementById("llid_" + i).innerText = L;
+            document.getElementById("lcid_" + i).innerText = dict[L];
         }
 
-        word = genNewWord(letters_per_word, word_letters);
+        for (let i = 0; i < letters_per_word; i++) {
+            document.getElementById("task_letter_" + i).innerText = word[i];
+            document.getElementById("task_code_" + i).value = '';
+        }
+        document.getElementById("task_code_0").focus();
+    }
+    // --- For init: also paint if shuffle flag missing but dict+word exist ---
+    else if (data.dict && data.word && !data.hasOwnProperty('shuffle')) {
+        dict = data.dict;
+        word = data.word;
+
+        const letters = genCharArray('A', 'Z');
+        for (let i = 0; i < 26; i++) {
+            const L = letters[i];
+            document.getElementById("llid_" + i).innerText = L;
+            document.getElementById("lcid_" + i).innerText = dict[L];
+        }
+
         for (let i = 0; i < letters_per_word; i++) {
             document.getElementById("task_letter_" + i).innerText = word[i];
         }
@@ -418,7 +445,8 @@ document.getElementById("submit-solution")
         }
     });
 
-const REMINDER_SECONDS = js_vars.timeout_seconds-5;
+const REMINDER_SECONDS = js_vars.timeout_seconds - 5;
+
 document.addEventListener('DOMContentLoaded', function () {
     const reminderThreshold = js_vars.timeout_seconds - 5;
 
@@ -427,9 +455,9 @@ document.addEventListener('DOMContentLoaded', function () {
         secondsElapsed++;
 
         if (secondsElapsed === reminderThreshold) {
-            clearInterval(interval); // Stop checking
+            clearInterval(interval);
 
-            // Show the reminder
+            // show title blink
             if (document.visibilityState === 'hidden') {
                 const originalTitle = document.title;
                 let toggle = false;
@@ -438,6 +466,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     toggle = !toggle;
                 }, 1000);
 
+                // ✅ Play bell sound
                 const alarm = document.getElementById('alarm-sound');
                 if (alarm) alarm.play().catch(() => {});
 
