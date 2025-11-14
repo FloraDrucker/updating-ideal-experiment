@@ -37,7 +37,7 @@ class C(BaseConstants):
         j = RISK_FIXED[i]
         RISK_CHOICES[i] = f"{j} points or 50 % chance of 1000 points, 50 % chance of 0 points"
         RISK_OPTIONS[i] = {0: f"{j} points", 1: "50 % chance of 1000 points, 50 % chance of 0 points"}
-
+    PERCENT_IDEAL_PART5 = 2
 
 class Subsession(BaseSubsession):
     dictionary = models.StringField()
@@ -1428,7 +1428,7 @@ class Belief(Page):
                 player.belief_t = 50
 
         if player.round_number == 6:
-            prob_ideal = round(base_constants.PERCENT_IDEAL/100, 2)
+            prob_ideal = round((base_constants.PERCENT_IDEAL+C.PERCENT_IDEAL_PART5)/100, 2)
             player.do_ideal = bool(np.random.choice([True, False],
                                                p=[prob_ideal, 1-prob_ideal]))
             player.participant.vars['do_ideal'] = player.do_ideal
