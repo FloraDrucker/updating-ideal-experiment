@@ -407,7 +407,7 @@ class Player(BasePlayer):
             [4, 'Upper class'],
         ],
         blank=False,
-        label='If you had to use one of these five commonly-used names to describe your social class, wich one would it be?'
+        label='If you had to use one of these five commonly-used names to describe your social class, which one would it be?'
     )
 
     children = models.IntegerField(
