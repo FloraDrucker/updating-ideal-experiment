@@ -3,11 +3,11 @@
 <div class="text">
 
 <p>
-    In the trial and all five consecutive parts, you will work on the task you just saw for at most 10 minutes. You will receive <b> a fixed payoff {{ if not player.treatment }} of {{ C.TRUE_PAYOFF }} points {{ endif }} </b> for each correctly solved encryption task in the part that will be randomly chosen for payment. {{ if player.treatment }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: we chose <b> a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }}</b>, and you will have to guess this number. {{ endif }}
+    In the trial and in all five consecutive parts, you will work on the task you just saw for at most 10 minutes. You will receive <b> a fixed payoff {{ if not player.treatment }} of {{ C.TRUE_PAYOFF }} points {{ endif }} </b> for each correctly solved encryption task in the part that will be randomly chosen for payment. {{ if player.treatment }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: we chose <b> a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }}</b>, and you will have to guess this number. {{ endif }}
 </p>
 
 <p>
-    After the trial, at the beginning of the first part, we will ask you to state how many tasks you would <b>ideally want to do</b> within the 10 minutes <b>{{ if player.treatment }}for different levels of the task payoff{{ else }}for {{C.TRUE_PAYOFF }} points per task{{ endif }},</b> given your experience with the trial task and the alternative options you have. Additionally, we will ask you to <b>predict how many tasks you {{ if player.treatment }}would actually do</b> for these payoff levels{{ else }}will actually do{{ endif }}</b>. There is a {{ C.PERCENT_IDEAL }} percent chance that you will have to do as many tasks as you stated as ideal {{ if player.treatment }}for what you now believe the task payoff is {{ endif }}in part five. {{ if player.treatment }}Should your belief be different from the payoffs for which you stated your ideal work amounts, we will extrapolate the ideal amount of work at your believed payoff level from your answers.{{ endif }} With {{ percent_normal }} percent probability, however, you will be able to complete as many tasks as you want in part five, too.
+    After the trial, at the beginning of the first part, we will ask you to state how many tasks you would <b>ideally want to do</b> within the 10 minutes <b>{{ if player.treatment }}for different levels of the task payoff{{ else }}for {{C.TRUE_PAYOFF }} points per task{{ endif }},</b> given your experience with the trial task and the alternative options you have. Additionally, we will ask you to <b>predict how many tasks you {{ if player.treatment }}would actually do</b> for these payoff levels{{ else }}will actually do{{ endif }}</b>. There is a {{ C.PERCENT_IDEAL }}% chance that in part 5 you will have to do as many tasks as you stated as ideal {{ if player.treatment }}for what you now believe the task payoff is {{ endif }}. {{ if player.treatment }}Should your belief be different from the payoffs for which you stated your ideal work amounts, we will extrapolate the ideal amount of work at your believed payoff level from your answers.{{ endif }} With {{ percent_normal }}% probability, however, you will be able to complete as many tasks as you want in part five, too.
 </p>
 
     <br>
@@ -109,7 +109,7 @@
     <li>Payoff from your <b>performance in a randomly chosen part:</b> number of tasks completed times {{ if player.treatment }}the true payoff per task{{ else }} {{C.TRUE_PAYOFF }} points{{ endif }}.</li>
     <li> <b>{{ C.FLAT_LEISURE_FEE }} points per minute spent on the alternative option</b> in the same randomly chosen part.</li>
     <li><b>Bonus payment based on the accuracy of your guess</b> about the {{ guess_about }} in a randomly chosen part.</li>
-    <li>In one of the questionnaires between two parts, you will make a <b>lottery decision</b>. At the end, you will also get paid based on your decision.</li>
+    <li>In one of the questionnaires between two parts, you will make a <b>lottery decision</b>. At the end, you will also get paid based on this decision.</li>
 </ol>
 
 <p>
@@ -130,7 +130,7 @@
 </p>
 
 <p>
-    Participation in this study is not associated with any foreseeable risk. Your answers will be collected confidentially and anonymously (the researchers will not be able to link decisions and participants' identity beyond the Prolific ID provided). At the data analysis stage your Prolific ID will be changed to a random identifying number, and the Prolific IDs will be deleted. In case the results of the study are published, there can be no references to your identity. Data anonymity is guaranteed.
+    Participation in this study is not associated with any foreseeable risk. Your answers will be collected confidentially and anonymously (the researchers will not be able to link decisions and participants' identity beyond the Prolific ID provided). At the data analysis stage, your Prolific ID will be changed to a random identifying number, and the Prolific IDs will be deleted. In case the results of the study are published, there can be no references to your identity. Data anonymity is guaranteed.
 </p>
 
 <p>
