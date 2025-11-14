@@ -21,7 +21,8 @@
     <div id="display-box" style="display:none; font-size:2em; height:2em; margin:1.5em 0;"></div>
 
     <div id="input-block" style="display:none; margin-bottom:1em;">
-      <input id="response" type="text" autocomplete="off" style="font-size:1.5em; width:6em;">
+      <input id="response" type="number" inputmode="numeric" pattern="[0-9]*"
+             autocomplete="off" style="font-size:1.5em; width:6em;">
       <button id="submit-btn" type="button" style="padding:0.5em 1em;">OK</button>
     </div>
 
@@ -62,7 +63,7 @@
   phase = 'show'; saveState();
 
   // calculate display time based on number of digits
-  const displayTime = currentSequence.length * 800;
+  const displayTime = currentSequence.length * 400;
 
   setTimeout(()=>{
     disp.textContent = '';
