@@ -445,40 +445,90 @@ document.getElementById("submit-solution")
         }
     });
 
-const REMINDER_SECONDS = js_vars.timeout_seconds - 5;
+// --- Bell Reminder Logic ---
+// Rings 5 seconds before timeout ONLY if the tab is hidden at that moment.
+document.addEventListener('DOMContentLoaded', () => {
+    const alarm = document.getElementById('alarm-sound');
+    const totalSeconds = js_vars.timeout_seconds;
+    const reminderThreshold = totalSeconds - 5;
+    const startTime = Date.now();
+    let reminderTriggered = false;
 
-document.addEventListener('DOMContentLoaded', function () {
-    const reminderThreshold = js_vars.timeout_seconds - 5;
+    // unlock audio after first interaction
+    function unlockAudio() {
+        if (alarm) {
+            alarm.play().then(() => {
+                alarm.pause();
+                alarm.currentTime = 0;
+            }).catch(() => {});
+        }
+    }
+    ['click', 'keydown', 'mousemove'].forEach(evt => {
+        document.addEventListener(evt, unlockAudio, { once: true });
+    });
 
+    // simple timer that checks once per second
     let secondsElapsed = 0;
-    const interval = setInterval(() => {
+    const tick = setInterval(() => {
         secondsElapsed++;
-
-        if (secondsElapsed === reminderThreshold) {
-            clearInterval(interval);
-
-            // show title blink
+        // at 5 s before timeout, check visibility
+        if (secondsElapsed >= reminderThreshold && !reminderTriggered) {
+            reminderTriggered = true;
             if (document.visibilityState === 'hidden') {
-                const originalTitle = document.title;
-                let toggle = false;
-                const blinkInterval = setInterval(() => {
-                    document.title = toggle ? '⏰ Time’s up!' : originalTitle;
-                    toggle = !toggle;
-                }, 1000);
-
-                // ✅ Play bell sound
-                const alarm = document.getElementById('alarm-sound');
-                if (alarm) alarm.play().catch(() => {});
-
-                document.addEventListener('visibilitychange', () => {
-                    if (document.visibilityState === 'visible') {
-                        clearInterval(blinkInterval);
-                        document.title = originalTitle;
-                    }
-                });
+                triggerReminder();
             }
+            clearInterval(tick);
         }
     }, 1000);
+
+function triggerReminder() {
+    const body = document.body;
+    const originalBg = body.style.backgroundColor;
+
+    // background flash
+    body.style.backgroundColor = '#ffcccc';
+    setTimeout(() => (body.style.backgroundColor = originalBg), 2000);
+
+    // 🔔 play sound
+    if (alarm) alarm.play().catch(() => {});
+
+    // 🔁 title blink
+    const originalTitle = document.title;
+    let toggle = false;
+
+    const blinkInterval = setInterval(() => {
+        document.title = toggle ? '⏰ Time’s up!' : originalTitle;
+        toggle = !toggle;
+    }, 1000);
+
+    // stop blinking when user returns focus (optional but nice)
+    document.addEventListener(
+        'visibilitychange',
+        () => {
+            if (document.visibilityState === 'visible') {
+                clearInterval(blinkInterval);
+                document.title = originalTitle;
+            }
+        },
+        { once: true }
+    );
+}
+
+    // fallback: if the browser throttled the timer while hidden,
+    // ring as soon as the user comes back *and* time is already past threshold
+    document.addEventListener('visibilitychange', () => {
+        if (
+            document.visibilityState === 'visible' &&
+            !reminderTriggered
+        ) {
+            const now = Date.now();
+            const elapsed = (now - startTime) / 1000;
+            if (elapsed >= reminderThreshold) {
+                reminderTriggered = true;
+                triggerReminder();
+            }
+        }
+    });
 });
 
 // Listen for any link click and mark the hidden field
