@@ -1522,7 +1522,7 @@ class Task(Page):
 
         print("Player vars are", p.performance, p.mistakes, p.link_click_count, p.active_tab_seconds)
         print("Participant vars are", pp.vars['actual'], pp.vars['mistakes'], pp.vars['link_click_count'], pp.vars['active_tab_seconds'])
-
+        print("All participant vars are", {i: player.participant.vars[i] for i in player.participant.vars.keys()})
 
 class Results(Page):
     pass
@@ -1561,7 +1561,7 @@ class Survey2(Page):
 
     @staticmethod
     def is_displayed(player):
-        return player.round_number == 3
+        return player.round_number == 1 # change back to 3!!
 
     @staticmethod
     def before_next_page(player, timeout_happened):
@@ -1711,8 +1711,6 @@ class Survey5(Page):
             player.risk_payment = C.RISK_FIXED[player.risk_chosen]
         else:
             player.risk_payment = random.choice([0, C.RISK_LARGE])
-
-        print("Participant vars are", {i:player.participant.vars[i] for i in player.participant.vars.keys()})
 
 
 class FinalPage(Page):
