@@ -1517,10 +1517,17 @@ class Task(Page):
     def before_next_page(player, timeout_happened):
         p = player
         pp = p.participant
-        pp.vars['actual'][player.round_number-1] = player.performance
-        pp.vars['mistakes'][player.round_number-1] = player.mistakes
-        pp.vars['link_click_count'][player.round_number-1] = player.link_click_count
-        pp.vars['active_tab_seconds'][player.round_number-1] = player.active_tab_seconds
+
+        # HARD SERVER-SIDE CAP (cannot exceed required_tasks)
+        required = p.ideal_to_do
+        if p.performance > required:
+            p.performance = required
+
+        # Save everything
+        pp.vars['actual'][player.round_number - 1] = p.performance
+        pp.vars['mistakes'][player.round_number - 1] = p.mistakes
+        pp.vars['link_click_count'][player.round_number - 1] = p.link_click_count
+        pp.vars['active_tab_seconds'][player.round_number - 1] = p.active_tab_seconds
 
         print("Player vars are", p.performance, p.mistakes, p.link_click_count, p.active_tab_seconds)
         print("Participant vars are", pp.vars['actual'], pp.vars['mistakes'], pp.vars['link_click_count'], pp.vars['active_tab_seconds'])

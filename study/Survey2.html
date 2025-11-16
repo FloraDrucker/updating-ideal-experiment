@@ -9,9 +9,12 @@
   <!-- INSTRUCTIONS -->
   <div id="instructions" style="font-size:1.2em; line-height:1.4; margin-bottom:2em;">
     <h5> This is a memory test. </h5>
-    <p>In the following you will see a sequence of numbers. After a few seconds the numbers will disappear. After the numbers disappear, please type in the exact sequence of numbers that was presented to you.</p>
-    <p>The sequences will get longer throughout the survey. After failing a sequence of the same length twice, you will proceed to the next round of encryption tasks.</p>
-      <p>Each sequence is shown for 0.5 seconds per digit (so e.g., a two-digit number is shown for 1 second). Then, you have 1 second per digit to type the sequence into the box (so e.g., you have two seconds to type in a two-digit number). </p>
+    <p>In the following you will see a sequence of numbers. After a few seconds the numbers will disappear.
+       After the numbers disappear, please type in the exact sequence of numbers that was presented to you.</p>
+    <p>The sequences will get longer throughout the survey. After failing a sequence of the same length twice,
+       you will proceed to the next round of encryption tasks.</p>
+    <p>Each sequence is shown for 0.5 seconds per digit (so e.g., a two-digit number is shown for one second).
+       Then, you have 1.5 seconds per digit to type the sequence into the box (so e.g., you have three seconds to type in a two-digit number). </p>
     <button id="start-btn" type="button" style="padding:0.5em 1em;">Start Test</button>
   </div>
 
@@ -27,8 +30,8 @@
       <button id="submit-btn" type="button" style="padding:0.5em 1em;">OK</button>
     </div>
 
-      <div id="end-message" style="display:none; font-size:1.2em; color:#000000; margin-top:1em;">
-    <p><strong>The test has ended. Please click on the Next button to continue.</strong></p>
+    <div id="end-message" style="display:none; font-size:1.2em; color:#000000; margin-top:1em;">
+      <p><strong>The test has ended. Please click on the Next button to continue.</strong></p>
     </div>
 
     <button id="next-page-btn" type="submit" style="display:none; padding:0.5em 1em;">Next</button>
@@ -49,9 +52,8 @@
 
   function startInputTimer() {
     clearInputTimer();  // ⭐ ensure no leftover timers
-
     const currentSequence = sequences[level][stage];
-    const INPUT_TIME_LIMIT = currentSequence.length * 1000; // 1 sec per digit
+    const INPUT_TIME_LIMIT = currentSequence.length * 1500; // 1.5 sec per digit
 
     inputTimer = setTimeout(() => {
         forceSubmit();
@@ -93,7 +95,6 @@
     phase = 'show';
     saveState();
 
-    // calculate display time based on number of digits
     const displayTime = currentSequence.length * 500;
 
     setTimeout(()=>{
@@ -104,11 +105,9 @@
         phase = 'input';
         saveState();
 
-        // invisible timer
         startInputTimer();
     }, displayTime);
   }
-
 
   function finishTask(){
     maxField.value = (level + 1);
@@ -116,15 +115,10 @@
     inputBlk.style.display = 'none';
     disp.style.display = 'none';
 
-    // show end message
     document.getElementById('end-message').style.display = 'block';
-
-    // show next button
     nextBtn.style.display = 'inline-block';
 
-    // mark test as finished (PERSISTENT!)
     sessionStorage.setItem('digitspan_finished', '1');
-
     clearState();
   }
 
@@ -132,18 +126,17 @@
   (function restoreIfAny(){
     const finished = sessionStorage.getItem('digitspan_finished');
     if (finished === '1') {
-        // Prevent restart!
         instr.style.display = 'none';
         disp.style.display = 'none';
         inputBlk.style.display = 'none';
-
         document.getElementById('end-message').style.display = 'block';
         nextBtn.style.display = 'inline-block';
-        return; // ⭐ important
+        return;
     }
 
     const st = sessionStorage.getItem('ds_state');
     if (!st) return;
+
     const s = JSON.parse(st);
     level = s.level ?? 0;
     stage = s.stage ?? 0;
@@ -158,7 +151,6 @@
         inputBlk.style.display = 'block';
         resp.value = '';
         resp.focus();
-
         startInputTimer();
     } else {
         showTrial();
@@ -166,8 +158,9 @@
   })();
 
   okBtn.addEventListener('click', ()=>{
-    clearInputTimer();  // ⭐ stop timer
+    clearInputTimer();
     inputBlk.style.display = 'none';
+
     if (resp.value.trim() === sequences[level][stage]) {
       correctCount++;
     }
@@ -189,13 +182,31 @@
 
   startBtn.addEventListener('click', ()=>{
     instr.style.display = 'none';
-    // show the display box immediately
     disp.style.display = 'block';
-    // fresh start
-    level=0; stage=0; correctCount=0; phase='show'; saveState();
+    level=0; stage=0; correctCount=0; phase='show';
+    saveState();
     showTrial();
   });
+
+  // Disable Enter
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+
+      // allow Enter if OK button is focused
+      if (document.activeElement === okBtn) {
+          return;
+      }
+
+      // allow Enter if Next button is focused
+      if (document.activeElement === nextBtn) {
+          return;
+      }
+
+      // otherwise block Enter everywhere else
+      e.preventDefault();
+  }
+});
+
 })();
 </script>
-
 {% endblock %}

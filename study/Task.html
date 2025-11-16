@@ -233,6 +233,22 @@ td {
   const word_letters = alphabet;
   const required_tasks = js_vars.required_tasks;
 
+// Enforce lockout if participant already completed required tasks
+document.addEventListener("DOMContentLoaded", () => {
+    const performance = Number(document.getElementById("performance").value);
+    if (performance >= required_tasks) {
+        disableTaskInputs();
+        document.getElementById("submit-solution").disabled = true;
+
+        const msgBox = document.getElementById("error-form");
+        msgBox.classList.remove("otree-form-errors");
+        msgBox.classList.add("success-message");
+        msgBox.innerText =
+            "You have completed all required tasks. You can browse other pages until time runs out.";
+        msgBox.style.display = "block";
+    }
+});
+
 document.addEventListener("DOMContentLoaded", () => {
     liveSend({ init: true });  // explicitly request first dictionary/word
 });
@@ -438,6 +454,12 @@ function liveRecv(data) {
             document.getElementById("task_letter_" + i).innerText = word[i];
         }
         document.getElementById("task_code_0").focus();
+    }
+
+    if (Number(document.getElementById("performance").value) >= required_tasks) {
+        disableTaskInputs();
+        document.getElementById("submit-solution").disabled = true;
+        return; // do NOT overwrite UI with new dict/word
     }
 }
 
