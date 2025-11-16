@@ -122,11 +122,26 @@
     // show next button
     nextBtn.style.display = 'inline-block';
 
+    // mark test as finished (PERSISTENT!)
+    sessionStorage.setItem('digitspan_finished', '1');
+
     clearState();
   }
 
   // restore if page was refreshed mid-task
   (function restoreIfAny(){
+    const finished = sessionStorage.getItem('digitspan_finished');
+    if (finished === '1') {
+        // Prevent restart!
+        instr.style.display = 'none';
+        disp.style.display = 'none';
+        inputBlk.style.display = 'none';
+
+        document.getElementById('end-message').style.display = 'block';
+        nextBtn.style.display = 'inline-block';
+        return; // ⭐ important
+    }
+
     const st = sessionStorage.getItem('ds_state');
     if (!st) return;
     const s = JSON.parse(st);
@@ -144,19 +159,11 @@
         resp.value = '';
         resp.focus();
 
-        startInputTimer();   // ⭐ important!
+        startInputTimer();
     } else {
         showTrial();
     }
   })();
-
-  // Enter → OK
-  resp.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      okBtn.click();
-    }
-  });
 
   okBtn.addEventListener('click', ()=>{
     clearInputTimer();  // ⭐ stop timer
