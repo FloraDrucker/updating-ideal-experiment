@@ -312,7 +312,10 @@ function myFunction() {
         const msgBox = document.getElementById("error-form");
         msgBox.classList.remove("success-message");
         msgBox.classList.add("otree-form-errors");
-        msgBox.innerText = "There are " + errors + " mistakes.";
+        msgBox.innerText =
+            errors === 1
+                ? "There is 1 mistake."
+                : "There are " + errors + " mistakes.";
         msgBox.style.display = "block";
     }
 }
