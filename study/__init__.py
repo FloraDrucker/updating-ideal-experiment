@@ -1429,8 +1429,10 @@ class Belief(Page):
 
         if player.round_number == 6:
             prob_ideal = round((base_constants.PERCENT_IDEAL+C.PERCENT_IDEAL_PART5)/100, 2)
-            player.do_ideal = bool(np.random.choice([True, False],
-                                               p=[prob_ideal, 1-prob_ideal]))
+            # to test!!! TODO change back!!!!
+            player.do_ideal = True
+            #player.do_ideal = bool(np.random.choice([True, False],
+            #                                   p=[prob_ideal, 1-prob_ideal]))
             player.participant.vars['do_ideal'] = player.do_ideal
 
         # do either the ideal stated in the first round or in the last round:
@@ -1561,7 +1563,7 @@ class Survey2(Page):
 
     @staticmethod
     def is_displayed(player):
-        return player.round_number == 1 # change back to 3!!
+        return player.round_number == 3
 
     @staticmethod
     def before_next_page(player, timeout_happened):
@@ -1724,7 +1726,7 @@ class FinalPage(Page):
         chosen_part = C.PARTS[player.task_chosen_part]
         performance_in_part = player.participant.vars['actual'][player.task_chosen_part]
         not_done_ideal = 0
-        if chosen_part == 5 and player.participant.vars['do_ideal'] and performance_in_part < player.participant.vars['ideal_to_do']:
+        if player.task_chosen_part == 5 and player.participant.vars['do_ideal'] and performance_in_part < player.participant.vars['ideal_to_do']:
             not_done_ideal = 1
             performance_to_pay = 0
         else:
@@ -1738,7 +1740,7 @@ class FinalPage(Page):
             leisure_to_pay = 0
         else:
             leisure_to_pay = leisure_minutes
-        leisure_payoff = leisure_to_pay * base_constants.FLAT_LEISURE_FEE
+        leisure_payoff = round(leisure_to_pay * base_constants.FLAT_LEISURE_FEE, 2)
         leisure_payoff_usd = cu(round(config['real_world_currency_per_point']*leisure_payoff, 2))
         belief_chosen_part = C.PARTS[player.belief_chosen_part]
         belief_in_part = player.participant.vars['belief'][player.belief_chosen_part]
