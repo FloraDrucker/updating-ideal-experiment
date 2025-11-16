@@ -1712,6 +1712,8 @@ class Survey5(Page):
         else:
             player.risk_payment = random.choice([0, C.RISK_LARGE])
 
+        print("Participant vars are", {i:player.participant.vars[i] for i in player.participant.vars.keys()})
+
 
 class FinalPage(Page):
     @staticmethod
