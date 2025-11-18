@@ -64,6 +64,7 @@ class Player(BasePlayer):
     risk_chosen = models.IntegerField(blank=False)
     risk_payment = models.IntegerField(blank=False)
     choice_in_risk_chosen = models.IntegerField(blank=False)
+    comments = models.LongStringField(blank=True)
 
     # Ideal values
     ideal50 = models.IntegerField(
@@ -1108,6 +1109,7 @@ def creating_session(subsession: Subsession):
         ppvars['risk_payment'] = None
         ppvars['choice_in_risk_chosen'] = None
         ppvars['total_payment'] = None
+        ppvars['comments'] = None
 
 
 def build_random_dict():
@@ -1722,10 +1724,13 @@ class Survey5(Page):
             player.risk_payment = random.choice([0, C.RISK_LARGE])
 
 
-class FinalPage(Page):
+class Payment(Page):
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == C.NUM_ROUNDS
+
+    form_model = 'player'
+    form_fields = ['comments']
 
     @staticmethod
     def vars_for_template(player: Player):
@@ -1773,8 +1778,6 @@ class FinalPage(Page):
 
 
         return {
-            'completion_url': config.get('prolific_completion_url', ''),
-            'completion_code': config.get('prolific_completion_code', ''),
             'completion_fee': config.get('participation_fee', ''),
             'chosen_part_index': player.task_chosen_part,
             'ideal_to_do': player.participant.vars['ideal_to_do'],
@@ -1802,6 +1805,23 @@ class FinalPage(Page):
             'treatment': treatment,
         }
 
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        player.participant.vars['comments'] = player.comments
+
+class FinalPage(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == C.NUM_ROUNDS
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        config = player.session.config
+        return {
+            'completion_url': config.get('prolific_completion_url', ''),
+            'completion_code': config.get('prolific_completion_code', ''),
+            }
+
 
 page_sequence = [
     PartStart,
@@ -1819,6 +1839,7 @@ page_sequence = [
     Survey3,
     Survey4,
     Survey5,
+    Payment,
     FinalPage
 ]
 
