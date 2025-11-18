@@ -1431,10 +1431,8 @@ class Belief(Page):
 
         if player.round_number == 6:
             prob_ideal = round((base_constants.PERCENT_IDEAL+C.PERCENT_IDEAL_PART5)/100, 2)
-            # to test!!! TODO change back!!!!
-            player.do_ideal = True
-            #player.do_ideal = bool(np.random.choice([True, False],
-            #                                   p=[prob_ideal, 1-prob_ideal]))
+            player.do_ideal = bool(np.random.choice([True, False],
+                                               p=[prob_ideal, 1-prob_ideal]))
             player.participant.vars['do_ideal'] = player.do_ideal
 
         # do either the ideal stated in the first round or in the last round:
