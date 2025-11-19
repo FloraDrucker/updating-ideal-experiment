@@ -250,7 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    liveSend({ init: true, pageLoad: true });
+    liveSend({ init: true });  // explicitly request first dictionary/word
 });
 
 document.addEventListener("visibilitychange", () => {
@@ -405,14 +405,6 @@ function shuffle(array) {
 }
 
 function liveRecv(data) {
-    // --- Back-button / reload protection: forced redirect ---
-    if (data.redirect) {
-        const nextBtn = document.getElementById("next-button");
-        if (nextBtn) {
-            nextBtn.click();
-        }
-        return; // don't process anything else
-    }
     // --- Always update counters ---
     if (typeof data.performance === 'number') {
         document.getElementById("performance").value = data.performance;

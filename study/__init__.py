@@ -50,7 +50,6 @@ class Group(BaseGroup):
 class Player(BasePlayer):
     current_dict = models.LongStringField()
     current_word = models.LongStringField()
-    task_page_loaded = models.BooleanField(initial=False)
     performance = models.IntegerField(initial=0, blank=False)
     mistakes = models.IntegerField(initial=0, blank=False)
     link_click_count = models.IntegerField(initial=0) # Added this to track the links clicked in the Task.html
@@ -1128,19 +1127,7 @@ def build_random_word(k=4):
 def live_update_performance(player: Player, data):
     own_id = player.id_in_group
 
-    # --- BACK BUTTON PROTECTION ----------------------------------------
-    # Browser just loaded the page (or reloaded it)
-    if data.get('pageLoad'):
-        if player.task_loaded:
-            # This is NOT the first visit → force redirect
-            return {own_id: {'redirect': True}}
-        else:
-            # First time arriving at the Task page
-            player.task_loaded = True
-            # Do NOT interrupt normal init logic
-            # Simply continue to the rest of the method
-
-    # --- INIT (first page load) -----------------------------------------
+    # --- INIT (first page load) ---
     if data.get('init'):
         if not player.field_maybe_none('current_dict') or not player.field_maybe_none('current_word'):
             d = build_random_dict()
@@ -1152,7 +1139,7 @@ def live_update_performance(player: Player, data):
             w = json.loads(player.current_word)
 
         return {
-            own_id: dict(
+            player.id_in_group: dict(
                 performance=player.performance,
                 mistakes=player.mistakes,
                 link_click_count=player.link_click_count,
@@ -1162,7 +1149,7 @@ def live_update_performance(player: Player, data):
             )
         }
 
-    # --- REQUEST UPDATE (tab becomes visible again) ----------------------
+    # --- REQUEST UPDATE (when tab becomes visible again) ---
     if data.get('request_update'):
         d = json.loads(player.current_dict) if player.current_dict else {}
         w = json.loads(player.current_word) if player.current_word else []
@@ -1178,7 +1165,7 @@ def live_update_performance(player: Player, data):
             )
         }
 
-    # --- PERFORMANCE / CLICK / TIME / MISTAKE UPDATES --------------------
+    # --- INCREMENTAL UPDATES (performance, mistakes, time, clicks) ---
     shuffle = False
     if 'performance' in data:
         player.performance = data['performance']
@@ -1190,7 +1177,7 @@ def live_update_performance(player: Player, data):
     if 'mistakes' in data:
         player.mistakes = data['mistakes']
 
-    # --- GENERATE NEW TASK AFTER CORRECT SOLUTION ------------------------
+    # --- If we need to generate a new dictionary/word (after a correct solution) ---
     if shuffle:
         d = build_random_dict()
         w = build_random_word(C.TASK_LENGTH)
@@ -1208,7 +1195,7 @@ def live_update_performance(player: Player, data):
             )
         }
 
-    # --- OTHERWISE ECHO CURRENT STATE -----------------------------------
+    # --- Otherwise, just echo current state ---
     d = json.loads(player.current_dict) if player.current_dict else {}
     w = json.loads(player.current_word) if player.current_word else []
     return {
