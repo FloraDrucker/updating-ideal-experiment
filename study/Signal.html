@@ -11,27 +11,89 @@
 img {
   border: 2px solid #555;
 }
+
+/* Hide the next button so user doesn't see it */
+.otree-btn-next {
+    display: none !important;
+}
+
+.otree-timer {
+    display: none !important;
+}
+
+
+#timer {
+  font-size: 22px;
+  margin-top: 15px;
+}
 </style>
 
-{{ if player.round_number == 3 }}
+<div id="timer"></div>
 
-<p style="text-align:center" >
+<form id="autoform" method="post">
+    {{ formfields }}
+    {{ next_button }}   <!-- Hidden but needed for auto-submit -->
+</form>
+
+{% if player.round_number == 3 %}
+
+<p style="text-align:center">
     <img src="{{ static 'new_draw1.png' }}" width="900px"/>
 </p>
 
-{{ elif player.round_number == 4 }}
+{% elif player.round_number == 4 %}
 
-<p style="text-align:center" >
+<p style="text-align:center">
     <img src="{{ static 'new_draw2.png' }}" width="900px"/>
 </p>
 
-{{ elif player.round_number == 5 }}
+{% elif player.round_number == 5 %}
 
-<p style="text-align:center" >
+<p style="text-align:center">
     <img src="{{ static 'new_draw3.png' }}" width="900px"/>
 </p>
 
-{{ endif }}
+{% endif %}
 
+{% endblock %}
 
+{% block scripts %}
+<script>
+(function() {
+
+    // Values provided by vars_for_template in Python
+    const start_time = {{ start_time }};
+    const total_time = {{ total_time }};
+
+    // Compute remaining seconds
+    function seconds_left() {
+        const now = Date.now() / 1000;
+        return total_time - (now - start_time);
+    }
+
+    function tick() {
+        const left = seconds_left();
+
+        if (left <= 0) {
+            // Auto click the hidden oTree next button
+            document.querySelector('.otree-btn-next').click();
+        } else {
+            document.getElementById("timer").innerText =
+                "Time remaining: " + Math.ceil(left) + " seconds";
+        }
+    }
+
+    // Update 4× per second
+    setInterval(tick, 250);
+    tick();
+
+    // Prevent backward navigation showing a previous state
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+
+})();
+</script>
 {% endblock %}

@@ -2,6 +2,7 @@ from otree.api import *
 import random, string, json
 from instructions_consent import C as base_constants
 import numpy as np
+import time
 
 doc = """
 Study
@@ -65,6 +66,9 @@ class Player(BasePlayer):
     risk_payment = models.IntegerField(blank=False)
     choice_in_risk_chosen = models.IntegerField(blank=False)
     comments = models.LongStringField(blank=True)
+
+    signal_start_time = models.FloatField(initial=0)
+    task_start_time = models.FloatField(initial=0)
 
     # Ideal values
     ideal50 = models.IntegerField(
@@ -1448,16 +1452,39 @@ class Signal(Page):
 
     @staticmethod
     def is_displayed(player):
+        # Your existing logic
         return 2 < player.round_number < 6
 
     @staticmethod
     def vars_for_template(player):
+
+        # 1. If this is the FIRST time loading the page → store start_time
+        if player.signal_start_time == 0:
+            player.signal_start_time = time.time()
+
+        # 2. Compute how much time has already passed
+        now = time.time()
+        elapsed = now - player.signal_start_time
+
+        # 3. How many seconds REMAIN
+        remaining = C.SIGNAL_TIMEOUT - elapsed
+        if remaining < 0:
+            remaining = 0
+
         treatment = player.participant.vars['treatment']
         guess_about = base_constants.GUESS_ABOUT[treatment]
-        return {
-            'guess_about': guess_about,
-        }
 
+        return dict(
+            guess_about=guess_about,
+            start_time=player.signal_start_time,
+            total_time=C.SIGNAL_TIMEOUT,
+            remaining_time=remaining,
+        )
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        # This page always ends when the countdown hits zero
+        pass
 
 class Work(Page):  # in period 5, we tell the participants the number of tasks they have to do here
     @staticmethod
@@ -1484,54 +1511,53 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
                 'work_length_minutes': work_length_minutes,
             }
 
-
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
-    form_fields = ['performance', 'mistakes', 'link_click_count', 'active_tab_seconds',]
-
-    get_timeout_seconds = get_timeout_seconds
+    form_fields = ['performance', 'mistakes', 'link_click_count', 'active_tab_seconds']
 
     @staticmethod
     def vars_for_template(player):
         letters_per_word = C.TASK_LENGTH
         task_list = [j for j in range(letters_per_word)]
         legend_list = [j for j in range(26)]
-        return {
-            'letters_per_word': letters_per_word,
-            'legend_list': legend_list,
-            'task_list': task_list,
-            'required_tasks': player.ideal_to_do,
-        }
+
+        config = player.session.config
+        total_time = config['work_length_seconds']
+
+        # First time opening the page → set start_time
+        if not player.task_start_time:
+            player.task_start_time = time.time()
+
+        return dict(
+            letters_per_word=letters_per_word,
+            legend_list=legend_list,
+            task_list=task_list,
+            required_tasks=player.ideal_to_do,
+            start_time=player.task_start_time,
+            total_time=total_time,
+        )
 
     @staticmethod
-    def js_vars(player):
-        config = player.session.config
-        work_length_seconds = config['work_length_seconds']
-        return dict(
-            required_tasks=player.ideal_to_do,
-            timeout_seconds=work_length_seconds,
-        )
+    def get_timeout_seconds(player: Player):
+        """Persistent countdown (does NOT restart on Back button)."""
+        total = player.session.config['work_length_seconds']
+        start = player.task_start_time or time.time()
+        remaining = total - (time.time() - start)
+        return max(1, int(remaining))
 
     @staticmethod
     def before_next_page(player, timeout_happened):
         p = player
         pp = p.participant
-
-        # HARD SERVER-SIDE CAP (cannot exceed required_tasks)
         required = p.ideal_to_do
         if p.performance > required:
             p.performance = required
 
-        # Save everything
         pp.vars['actual'][player.round_number - 1] = p.performance
         pp.vars['mistakes'][player.round_number - 1] = p.mistakes
         pp.vars['link_click_count'][player.round_number - 1] = p.link_click_count
         pp.vars['active_tab_seconds'][player.round_number - 1] = p.active_tab_seconds
-
-        print("Player vars are", p.performance, p.mistakes, p.link_click_count, p.active_tab_seconds)
-        print("Participant vars are", pp.vars['actual'], pp.vars['mistakes'], pp.vars['link_click_count'], pp.vars['active_tab_seconds'])
-        print("All participant vars are", {i: player.participant.vars[i] for i in player.participant.vars.keys()})
 
 class Results(Page):
     pass
