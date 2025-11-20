@@ -137,10 +137,14 @@ td {
     display: none;
 }
 
+#task-timer {
+    font-size: 1.5vw;
+    font-weight: bold;
+    color: #333;
+}
+
 </style>
 {% endblock %}
-
-
 
 {% block title %}
     Task
@@ -151,27 +155,24 @@ td {
 <input type="hidden" name="mistakes" id="mistakes"> <span hidden>{{ form.mistakes.errors }}</span>
 
 <p>
-    Your performance so far: <span id="performance-display">{{ player.performance }}</span>  tasks.
+    Your performance so far: <span id="performance-display">{{ player.performance }}</span> tasks.
 </p>
+
+<div id="task-timer">Task Timer: <span id="timer-display">0:00</span></div>
 
 <div class="test" id="hide_task">
 
-<!-- alarm sound input-->
 <audio id="alarm-sound" preload="auto" style="display:none">
   <source src="{% static 'alarm.mp3' %}" type="audio/mpeg">
 </audio>
 
-<!-- linkclick tracker-->
 <input type="hidden" name="link_click_count"
        id="link_click_count" value="{{ player.link_click_count }}">
-<!-- duration tracker-->
-<input
-  type="hidden"
-  name="active_tab_seconds"
+
+<input type="hidden" name="active_tab_seconds"
   id="active_tab_seconds"
   value="{{ player.active_tab_seconds }}">
 
-<!-- link fields -->
 <div style="margin-top: 20px;">
     <p><strong>You may visit these pages instead of working on the task:</strong></p>
     <ul>
@@ -181,20 +182,18 @@ td {
     </ul>
 </div>
 
-<!-- <form id="test_frm"> -->
 <div class="task-container">
     <div class="task-subcontainer" id="task-subcontainer">
-        <div style="font-size: 1.8vw">Word: &nbsp;&nbsp;&nbsp;&nbsp;   </div>
-            {% for l in task_list%}
-                <div class="task-letter" id="task_letter_{{l}}"></div>
-            {% endfor %}
-            <div style="font-size: 1.8vw">Code:   &nbsp;&nbsp;&nbsp;&nbsp;  </div>
-            {% for l in task_list%}
-                <input class="task-code" id="task_code_{{l}}" type="number" onkeypress="return event.keyCode!=13">
-            {% endfor %}
+        <div style="font-size: 1.8vw">Word: &nbsp;&nbsp;&nbsp;&nbsp;</div>
+        {% for l in task_list %}
+            <div class="task-letter" id="task_letter_{{l}}"></div>
+        {% endfor %}
+        <div style="font-size: 1.8vw">Code: &nbsp;&nbsp;&nbsp;&nbsp;</div>
+        {% for l in task_list %}
+            <input class="task-code" id="task_code_{{l}}" type="number" onkeypress="return event.keyCode!=13">
+        {% endfor %}
     </div>
 </div>
-
 
 <br><br>
 <div class="button-container">
@@ -209,23 +208,24 @@ td {
 <tr>
  {% for l in legend_list %}
 <td id="llid_{{l}}"></td>
-{% endfor%}
+{% endfor %}
 </tr>
 <tr>
     {% for l in legend_list %}
 <td id="lcid_{{l}}"></td>
-{% endfor%}
+{% endfor %}
 </tr>
 </table>
 
 <br><br>
 </div>
 
-
 <script>
 
     let dict = {};
     let word = [];
+    let timerInterval;
+    let taskElapsedSeconds = 0;
 
   const letters_per_word = {{letters_per_word| safe}};
   const alphabet = genCharArray('A', 'Z');
@@ -233,7 +233,6 @@ td {
   const word_letters = alphabet;
   const required_tasks = js_vars.required_tasks;
 
-// Enforce lockout if participant already completed required tasks
 document.addEventListener("DOMContentLoaded", () => {
     const performance = Number(document.getElementById("performance").value);
     if (performance >= required_tasks) {
@@ -250,16 +249,15 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    liveSend({ init: true });  // explicitly request first dictionary/word
+    liveSend({ init: true, get_task_timer: true });
 });
 
 document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
-        liveSend({ request_update: true });
+        liveSend({ request_update: true, get_task_timer: true });
     }
 });
 
-/// --- Unlock alarm audio on first user interaction (click / key / move)
 function unlockAudio() {
     const alarm = document.getElementById('alarm-sound');
     if (alarm) {
@@ -268,16 +266,30 @@ function unlockAudio() {
                 alarm.pause();
                 alarm.currentTime = 0;
             })
-            .catch(() => {
-                // ignore any autoplay restriction errors
-            });
+            .catch(() => {});
     }
 }
 
-// Listen to several possible user interactions to unlock audio once
 ['click', 'keydown', 'mousemove'].forEach(evt => {
     document.addEventListener(evt, unlockAudio, { once: true });
 });
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(taskElapsedSeconds / 60);
+    const seconds = taskElapsedSeconds % 60;
+    document.getElementById("timer-display").innerText =
+        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function startTaskTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+
+    timerInterval = setInterval(() => {
+        taskElapsedSeconds++;
+        updateTimerDisplay();
+        liveSend({ task_elapsed_seconds: taskElapsedSeconds });
+    }, 1000);
+}
 
 function myFunction() {
     let errors = checkSolution(letters_per_word);
@@ -292,20 +304,18 @@ function myFunction() {
         liveSend({ 'performance': performance });
         document.getElementById("task_code_0").focus();
 
-        // ✅ If they reached or exceeded required tasks, lock inputs & stop further work
         if (performance >= required_tasks) {
             disableTaskInputs();
             document.getElementById("submit-solution").disabled = true;
             const msgBox = document.getElementById("error-form");
-            msgBox.classList.remove("otree-form-errors"); // remove red styling
-            msgBox.classList.add("success-message");       // apply green style
+            msgBox.classList.remove("otree-form-errors");
+            msgBox.classList.add("success-message");
             msgBox.innerText =
                 "You have completed all required tasks. You can browse other pages until time runs out.";
             msgBox.style.display = "block";
-            return; // do NOT auto-submit or generate a new dict
+            return;
         }
 
-        // Otherwise, generate new task normally
         let dict = genNewDict();
         shuffle(legend_letters);
 
@@ -369,33 +379,6 @@ function genCharArray(charA, charZ) {
     return a;
 }
 
-function shuffle(a) {
-    let j, x, i;
-    let b=a;
-    for (i = b.length - 1; i > 0; i--) {
-        j = Math.floor(Math.random() * (i + 1));
-        x = b[i];
-        b[i] = b[j];
-        b[j] = x;
-    }
-    return a;
-}
-
-function randomDataSet(dataSetSize, minValue, maxValue) {
-  return new Array(dataSetSize).fill(0).map(function(n) {
-    return Math.floor(Math.random() * (maxValue - minValue) + minValue);
-  });
-}
-
-function genNewDict() {
-    const dict = {};
-    const letters = genCharArray('A', 'Z');
-    for (const letter of letters) {
-        dict[letter] = Math.floor(Math.random() * 900) + 100; // 100–999
-    }
-    return dict;
-}
-
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -404,8 +387,16 @@ function shuffle(array) {
     return array;
 }
 
+function genNewDict() {
+    const dict = {};
+    const letters = genCharArray('A', 'Z');
+    for (const letter of letters) {
+        dict[letter] = Math.floor(Math.random() * 900) + 100;
+    }
+    return dict;
+}
+
 function liveRecv(data) {
-    // --- Always update counters ---
     if (typeof data.performance === 'number') {
         document.getElementById("performance").value = data.performance;
         document.getElementById("performance-display").innerText = data.performance;
@@ -420,7 +411,14 @@ function liveRecv(data) {
         document.getElementById("active_tab_seconds").value = data.active_tab_seconds;
     }
 
-    // --- Only repaint task when we actually have a new one ---
+    if (typeof data.task_elapsed_seconds === 'number') {
+        taskElapsedSeconds = data.task_elapsed_seconds;
+        updateTimerDisplay();
+        if (!timerInterval) {
+            startTaskTimer();
+        }
+    }
+
     if (data.dict && data.word && data.shuffle) {
         dict = data.dict;
         word = data.word;
@@ -438,7 +436,6 @@ function liveRecv(data) {
         }
         document.getElementById("task_code_0").focus();
     }
-    // --- For init: also paint if shuffle flag missing but dict+word exist ---
     else if (data.dict && data.word && !data.hasOwnProperty('shuffle')) {
         dict = data.dict;
         word = data.word;
@@ -454,12 +451,13 @@ function liveRecv(data) {
             document.getElementById("task_letter_" + i).innerText = word[i];
         }
         document.getElementById("task_code_0").focus();
+        startTaskTimer();
     }
 
     if (Number(document.getElementById("performance").value) >= required_tasks) {
         disableTaskInputs();
         document.getElementById("submit-solution").disabled = true;
-        return; // do NOT overwrite UI with new dict/word
+        return;
     }
 }
 
@@ -470,8 +468,6 @@ document.getElementById("submit-solution")
         }
     });
 
-// --- Bell Reminder Logic ---
-// Rings 5 seconds before timeout ONLY if the tab is hidden at that moment.
 document.addEventListener('DOMContentLoaded', () => {
     const alarm = document.getElementById('alarm-sound');
     const totalSeconds = js_vars.timeout_seconds;
@@ -479,7 +475,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const startTime = Date.now();
     let reminderTriggered = false;
 
-    // unlock audio after first interaction
     function unlockAudio() {
         if (alarm) {
             alarm.play().then(() => {
@@ -492,11 +487,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener(evt, unlockAudio, { once: true });
     });
 
-    // simple timer that checks once per second
     let secondsElapsed = 0;
     const tick = setInterval(() => {
         secondsElapsed++;
-        // at 5 s before timeout, check visibility
         if (secondsElapsed >= reminderThreshold && !reminderTriggered) {
             reminderTriggered = true;
             if (document.visibilityState === 'hidden') {
@@ -506,41 +499,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 1000);
 
-function triggerReminder() {
-    const body = document.body;
-    const originalBg = body.style.backgroundColor;
+    function triggerReminder() {
+        const body = document.body;
+        const originalBg = body.style.backgroundColor;
 
-    // background flash
-    body.style.backgroundColor = '#ffcccc';
-    setTimeout(() => (body.style.backgroundColor = originalBg), 2000);
+        body.style.backgroundColor = '#ffcccc';
+        setTimeout(() => (body.style.backgroundColor = originalBg), 2000);
 
-    // 🔔 play sound
-    if (alarm) alarm.play().catch(() => {});
+        if (alarm) alarm.play().catch(() => {});
 
-    // 🔁 title blink
-    const originalTitle = document.title;
-    let toggle = false;
+        const originalTitle = document.title;
+        let toggle = false;
 
-    const blinkInterval = setInterval(() => {
-        document.title = toggle ? '⏰ Time’s up!' : originalTitle;
-        toggle = !toggle;
-    }, 1000);
+        const blinkInterval = setInterval(() => {
+            document.title = toggle ? '⏰ Time\'s up!' : originalTitle;
+            toggle = !toggle;
+        }, 1000);
 
-    // stop blinking when user returns focus (optional but nice)
-    document.addEventListener(
-        'visibilitychange',
-        () => {
-            if (document.visibilityState === 'visible') {
-                clearInterval(blinkInterval);
-                document.title = originalTitle;
-            }
-        },
-        { once: true }
-    );
-}
+        document.addEventListener(
+            'visibilitychange',
+            () => {
+                if (document.visibilityState === 'visible') {
+                    clearInterval(blinkInterval);
+                    document.title = originalTitle;
+                }
+            },
+            { once: true }
+        );
+    }
 
-    // fallback: if the browser throttled the timer while hidden,
-    // ring as soon as the user comes back *and* time is already past threshold
     document.addEventListener('visibilitychange', () => {
         if (
             document.visibilityState === 'visible' &&
@@ -556,7 +543,6 @@ function triggerReminder() {
     });
 });
 
-// Listen for any link click and mark the hidden field
 document.querySelectorAll('a').forEach(link => {
   link.addEventListener('click', () => {
     const inp = document.getElementById('link_click_count');
@@ -566,21 +552,18 @@ document.querySelectorAll('a').forEach(link => {
   });
 });
 
-
-  // initialize from hidden input (or zero)
-  let activeTabSeconds = parseInt(
+let activeTabSeconds = parseInt(
     document.getElementById("active_tab_seconds").value,
     10
-  ) || 0;
+) || 0;
 
-  // every second, if this tab is focused, increment + liveSend
-  setInterval(() => {
+setInterval(() => {
     if (document.hasFocus()) {
       activeTabSeconds++;
       document.getElementById("active_tab_seconds").value = activeTabSeconds;
       liveSend({ active_tab_seconds: activeTabSeconds });
     }
-  }, 1000);
+}, 1000);
 
 </script>
 

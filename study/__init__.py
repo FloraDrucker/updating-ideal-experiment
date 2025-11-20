@@ -48,6 +48,8 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
+    task_start_time = models.DateTimeField(null=True, blank=True)
+    task_elapsed_seconds = models.IntegerField(initial=0)
     current_dict = models.LongStringField()
     current_word = models.LongStringField()
     performance = models.IntegerField(initial=0, blank=False)
@@ -1129,6 +1131,13 @@ def build_random_word(k=4):
 def live_update_performance(player: Player, data):
     own_id = player.id_in_group
 
+    # --- TIMER STATE REQUEST ---
+    if data.get('get_task_timer'):
+        if not player.task_start_time:
+            player.task_start_time = timezone.now()
+        elapsed = (timezone.now() - player.task_start_time).total_seconds()
+        return {own_id: {'task_elapsed_seconds': int(elapsed)}}
+
     # --- INIT (first page load) ---
     if data.get('init'):
         if not player.field_maybe_none('current_dict') or not player.field_maybe_none('current_word'):
@@ -1166,6 +1175,10 @@ def live_update_performance(player: Player, data):
                 shuffle=False
             )
         }
+
+    # --- TIMER UPDATE FROM CLIENT ---
+    if data.get('task_elapsed_seconds') is not None:
+        player.task_elapsed_seconds = data['task_elapsed_seconds']
 
     # --- INCREMENTAL UPDATES (performance, mistakes, time, clicks) ---
     shuffle = False
