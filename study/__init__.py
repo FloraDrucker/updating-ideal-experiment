@@ -2,6 +2,7 @@ from otree.api import *
 import random, string, json
 from instructions_consent import C as base_constants
 import numpy as np
+import time
 
 doc = """
 Study
@@ -48,6 +49,7 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
+    task_start_time = models.FloatField(initial=0)
     current_dict = models.LongStringField()
     current_word = models.LongStringField()
     performance = models.IntegerField(initial=0, blank=False)
@@ -1515,24 +1517,47 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
-    form_fields = ['performance', 'mistakes', 'link_click_count', 'active_tab_seconds',]
+    form_fields = ['performance', 'mistakes', 'link_click_count', 'active_tab_seconds']
 
+    # Keep this so oTree still has a server-side cutoff (even though we hide its timer bar)
     get_timeout_seconds = get_timeout_seconds
 
     @staticmethod
-    def vars_for_template(player):
+    def vars_for_template(player: Player):
+        """
+        This runs every time before the template is rendered.
+        We use it to set a *persistent* start_time once,
+        and then always reuse that value so the timer does not reset
+        when the participant hits Back.
+        """
+
+        # Set start time only once (first visit to Task in this round)
+        if player.task_start_time == 0:
+            player.task_start_time = time.time()
+
         letters_per_word = C.TASK_LENGTH
-        task_list = [j for j in range(letters_per_word)]
-        legend_list = [j for j in range(26)]
-        return {
-            'letters_per_word': letters_per_word,
-            'legend_list': legend_list,
-            'task_list': task_list,
-            'required_tasks': player.ideal_to_do,
-        }
+        task_list = list(range(letters_per_word))
+        legend_list = list(range(26))
+
+        # Total allowed time for the task (in seconds)
+        total_time = player.session.config['work_length_seconds']
+
+        return dict(
+            letters_per_word=letters_per_word,
+            legend_list=legend_list,
+            task_list=task_list,
+            required_tasks=player.ideal_to_do,
+
+            # ⬇️ used by the JS timer in Task.html
+            task_start_time=player.task_start_time,  # Unix seconds
+            total_time=total_time,                   # total allowed time in seconds
+        )
 
     @staticmethod
-    def js_vars(player):
+    def js_vars(player: Player):
+        """
+        Still used by your bell-reminder logic and active tab timer in Task.html.
+        """
         config = player.session.config
         work_length_seconds = config['work_length_seconds']
         return dict(
@@ -1541,7 +1566,11 @@ class Task(Page):
         )
 
     @staticmethod
-    def before_next_page(player, timeout_happened):
+    def before_next_page(player: Player, timeout_happened: bool):
+        """
+        1) Enforce the cap that performance cannot exceed ideal_to_do.
+        2) Store all task-related variables in participant.vars.
+        """
         p = player
         pp = p.participant
 
@@ -1550,15 +1579,21 @@ class Task(Page):
         if p.performance > required:
             p.performance = required
 
-        # Save everything
-        pp.vars['actual'][player.round_number - 1] = p.performance
-        pp.vars['mistakes'][player.round_number - 1] = p.mistakes
-        pp.vars['link_click_count'][player.round_number - 1] = p.link_click_count
-        pp.vars['active_tab_seconds'][player.round_number - 1] = p.active_tab_seconds
+        # Save everything for this round (0-indexed keys as in your code)
+        pp.vars['actual'][p.round_number - 1] = p.performance
+        pp.vars['mistakes'][p.round_number - 1] = p.mistakes
+        pp.vars['link_click_count'][p.round_number - 1] = p.link_click_count
+        pp.vars['active_tab_seconds'][p.round_number - 1] = p.active_tab_seconds
 
+        # (Optional) debug prints
         print("Player vars are", p.performance, p.mistakes, p.link_click_count, p.active_tab_seconds)
-        print("Participant vars are", pp.vars['actual'], pp.vars['mistakes'], pp.vars['link_click_count'], pp.vars['active_tab_seconds'])
-        print("All participant vars are", {i: player.participant.vars[i] for i in player.participant.vars.keys()})
+        print("Participant vars are",
+              pp.vars['actual'],
+              pp.vars['mistakes'],
+              pp.vars['link_click_count'],
+              pp.vars['active_tab_seconds'])
+        print("All participant vars are", {k: pp.vars[k] for k in pp.vars.keys()})
+
 
 class Results(Page):
     pass
