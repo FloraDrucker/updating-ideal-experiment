@@ -1921,6 +1921,7 @@ def custom_export(players):
     header = ['session_code',
               'work_length_seconds',
               'participant_code',
+              'prolific_id',
               ] + all_var_keys
     yield header
 
@@ -1936,6 +1937,7 @@ def custom_export(players):
                 session.code,
                 session.config.get('work_length_seconds', ''),
                 participant.code,
+                participant.label,
             ]
 
             for var in all_participant_vars:
