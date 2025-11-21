@@ -1585,15 +1585,6 @@ class Task(Page):
         pp.vars['link_click_count'][p.round_number - 1] = p.link_click_count
         pp.vars['active_tab_seconds'][p.round_number - 1] = p.active_tab_seconds
 
-        # (Optional) debug prints
-        print("Player vars are", p.performance, p.mistakes, p.link_click_count, p.active_tab_seconds)
-        print("Participant vars are",
-              pp.vars['actual'],
-              pp.vars['mistakes'],
-              pp.vars['link_click_count'],
-              pp.vars['active_tab_seconds'])
-        print("All participant vars are", {k: pp.vars[k] for k in pp.vars.keys()})
-
 
 class Results(Page):
     pass
