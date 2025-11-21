@@ -11,11 +11,19 @@
 }
 
 /* Our custom timer */
-#task-timer {
-    font-size: 22px;
-    margin-top: 10px;
-    font-weight: bold;
+.pretty-timer {
+    display: inline-block;
+    background: #fff7c2;                 /* oTree-style light yellow */
+    border: 2px solid #f5d768;           /* slightly darker yellow border */
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6a4d00;                      /* dark warm brown text */
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
+
 
 .otree-content.container,
 .otree-body.container,
@@ -159,8 +167,10 @@ td {
 
 {% block content %}
 
+<br>
+
 <!-- Our custom timer display -->
-<div id="task-timer"></div>
+<div id="task-timer" class="pretty-timer"></div>
 
 <input type="hidden" name="performance" id="performance">
 <span hidden>{{ form.performance.errors }}</span>

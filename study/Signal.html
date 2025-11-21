@@ -1,15 +1,24 @@
 {% extends "global/Page.html" %}
 {% load otree %}
 
-{% block title %}
-    New information about the {{ guess_about }}.
-{% endblock %}
-
-{% block content %}
-
+{% block styles %}
 <style>
 img {
   border: 2px solid #555;
+}
+
+/* Our custom timer */
+.pretty-timer {
+    display: inline-block;
+    background: #fff7c2;                 /* oTree-style light yellow */
+    border: 2px solid #f5d768;           /* slightly darker yellow border */
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6a4d00;                      /* dark warm brown text */
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 
 /* Hide the next button so user doesn't see it */
@@ -21,14 +30,17 @@ img {
     display: none !important;
 }
 
-
-#timer {
-  font-size: 22px;
-  margin-top: 15px;
-}
 </style>
 
-<div id="timer"></div>
+{% endblock %}
+
+{% block title %}
+    New information about the {{ guess_about }}.
+{% endblock %}
+
+{% block content %}
+
+<div id="timer" class="pretty-timer"></div>
 
 <form id="autoform" method="post">
     {{ formfields }}
