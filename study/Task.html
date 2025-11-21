@@ -484,81 +484,74 @@ document.getElementById("submit-solution")
         }
     });
 
+// Prevent URL title from flashing — use nice page name instead
+document.title = "Task";
+let originalTitle = document.title;
+
 // --- Bell Reminder Logic ---
 // Rings 5 seconds before timeout ONLY if the tab is hidden at that moment.
 document.addEventListener('DOMContentLoaded', () => {
-    const alarm = document.getElementById('alarm-sound');
+
     const totalSeconds = js_vars.timeout_seconds;
     const reminderThreshold = totalSeconds - 5;
+
     const startTime = Date.now();
     let reminderTriggered = false;
 
-    function unlockAudio() {
-        if (alarm) {
-            alarm.play().then(() => {
-                alarm.pause();
-                alarm.currentTime = 0;
-            }).catch(() => {});
+    const FLASH_TEXT = "⏰ Time's up!";
+    const FLASH_INTERVAL = 800;
+    let originalTitle = document.title;
+    let flashTimer = null;
+
+    const alarm = document.getElementById("alarm-sound");
+
+    function startTabFlash() {
+        if (flashTimer !== null) return;
+
+        flashTimer = setInterval(() => {
+            document.title =
+                document.title === originalTitle ? FLASH_TEXT : originalTitle;
+        }, FLASH_INTERVAL);
+    }
+
+    function stopTabFlash() {
+        if (flashTimer !== null) {
+            clearInterval(flashTimer);
+            flashTimer = null;
+            document.title = originalTitle;
         }
     }
-    ['click', 'keydown', 'mousemove'].forEach(evt => {
-        document.addEventListener(evt, unlockAudio, { once: true });
-    });
 
-    let secondsElapsed = 0;
+    function triggerReminder() {
+        // 1) Play alarm
+        if (alarm) {
+            alarm.play().catch(() => {});   // Autoplay may fail but usually works after user interaction
+        }
+
+        // 2) Start flashing only if tab is hidden
+        if (document.visibilityState === "hidden") {
+            startTabFlash();
+        }
+    }
+
+    // Check once per second
     const tick = setInterval(() => {
-        secondsElapsed++;
-        if (secondsElapsed >= reminderThreshold && !reminderTriggered) {
+        const elapsed = (Date.now() - startTime) / 1000;
+
+        if (elapsed >= reminderThreshold && !reminderTriggered) {
             reminderTriggered = true;
-            if (document.visibilityState === 'hidden') {
-                triggerReminder();
-            }
+            triggerReminder();
             clearInterval(tick);
         }
     }, 1000);
 
-    function triggerReminder() {
-        const body = document.body;
-        const originalBg = body.style.backgroundColor;
-
-        body.style.backgroundColor = '#ffcccc';
-        setTimeout(() => (body.style.backgroundColor = originalBg), 2000);
-
-        if (alarm) alarm.play().catch(() => {});
-
-        const originalTitle = document.title;
-        let toggle = false;
-
-        const blinkInterval = setInterval(() => {
-            document.title = toggle ? '⏰ Time’s up!' : originalTitle;
-            toggle = !toggle;
-        }, 1000);
-
-        document.addEventListener(
-            'visibilitychange',
-            () => {
-                if (document.visibilityState === 'visible') {
-                    clearInterval(blinkInterval);
-                    document.title = originalTitle;
-                }
-            },
-            { once: true }
-        );
-    }
-
-    document.addEventListener('visibilitychange', () => {
-        if (
-            document.visibilityState === 'visible' &&
-            !reminderTriggered
-        ) {
-            const now = Date.now();
-            const elapsed = (now - startTime) / 1000;
-            if (elapsed >= reminderThreshold) {
-                reminderTriggered = true;
-                triggerReminder();
-            }
+    // When user returns to the tab → stop flashing
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            stopTabFlash();
         }
     });
+
 });
 
 // Listen for any link click and mark the hidden field
