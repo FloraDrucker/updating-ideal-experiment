@@ -438,9 +438,10 @@ function liveRecv(data) {
         dict = data.dict;
         word = data.word;
 
-        const letters = genCharArray('A', 'Z');
+        const server_letters = Object.keys(dict);   // <-- preserves randomized order
+
         for (let i = 0; i < 26; i++) {
-            const L = letters[i];
+            const L = server_letters[i];
             document.getElementById("llid_" + i).innerText = L;
             document.getElementById("lcid_" + i).innerText = dict[L];
         }
@@ -456,9 +457,10 @@ function liveRecv(data) {
         dict = data.dict;
         word = data.word;
 
-        const letters = genCharArray('A', 'Z');
+        const server_letters = Object.keys(dict);   // <-- preserves randomized order
+
         for (let i = 0; i < 26; i++) {
-            const L = letters[i];
+            const L = server_letters[i];
             document.getElementById("llid_" + i).innerText = L;
             document.getElementById("lcid_" + i).innerText = dict[L];
         }
@@ -594,6 +596,14 @@ setInterval(() => {
         return total_time - (now - start_time);
     }
 
+    // Format timer as MM:SS
+    function formatTime(seconds) {
+        seconds = Math.max(0, Math.floor(seconds));
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return m.toString().padStart(2, "0") + ":" + s.toString().padStart(2, "0");
+    }
+
     function tick() {
         const left = seconds_left();
         const timerEl = document.getElementById("task-timer");
@@ -603,7 +613,7 @@ setInterval(() => {
             // auto-click the hidden Next button to submit the page
             document.getElementById("next-button").click();
         } else {
-            timerEl.innerText = "Time remaining: " + Math.ceil(left) + " seconds";
+             timerEl.innerText = "Time remaining: " + formatTime(left);
         }
     }
 
