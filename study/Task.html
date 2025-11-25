@@ -438,10 +438,9 @@ function liveRecv(data) {
         dict = data.dict;
         word = data.word;
 
-        const server_letters = Object.keys(dict);   // <-- preserves randomized order
-
+        const letters = genCharArray('A', 'Z');
         for (let i = 0; i < 26; i++) {
-            const L = server_letters[i];
+            const L = letters[i];
             document.getElementById("llid_" + i).innerText = L;
             document.getElementById("lcid_" + i).innerText = dict[L];
         }
@@ -457,12 +456,12 @@ function liveRecv(data) {
         dict = data.dict;
         word = data.word;
 
-        const server_letters = Object.keys(dict);
+        const letters = genCharArray('A', 'Z');
         for (let i = 0; i < 26; i++) {
-            const L = server_letters[i];
+            const L = letters[i];
             document.getElementById("llid_" + i).innerText = L;
             document.getElementById("lcid_" + i).innerText = dict[L];
-       }
+        }
 
         for (let i = 0; i < letters_per_word; i++) {
             document.getElementById("task_letter_" + i).innerText = word[i];
@@ -582,40 +581,17 @@ setInterval(() => {
 
 </script>
 
-<!-- BACK-BUTTON-SAFE, PERSISTENT TIMER + FINAL GUARANTEED liveSend -->
+<!-- BACK-BUTTON-SAFE, PERSISTENT TIMER (like on Signal) -->
 <script>
 (function(){
 
-    const start_time = {{ task_start_time }};
-    const total_time = {{ total_time }};
+    // These come from vars_for_template in Task page
+    const start_time = {{ task_start_time|json }};  // epoch seconds
+    const total_time = {{ total_time|json }};       // total allowed seconds
 
     function seconds_left() {
         const now = Date.now() / 1000;
         return total_time - (now - start_time);
-    }
-
-    // Format timer as MM:SS
-    function formatTime(seconds) {
-        seconds = Math.max(0, Math.floor(seconds));
-        const m = Math.floor(seconds / 60);
-        const s = seconds % 60;
-        return m.toString().padStart(2, "0") + ":" + s.toString().padStart(2, "0");
-    }
-
-    function finalDataPushAndSubmit() {
-
-        // Final guaranteed save
-        liveSend({
-            performance: Number(document.getElementById("performance").value),
-            mistakes: Number(document.getElementById("mistakes").value),
-            link_click_count: Number(document.getElementById("link_click_count").value),
-            active_tab_seconds: Number(document.getElementById("active_tab_seconds").value)
-        });
-
-        // Let the update reach the server
-        setTimeout(() => {
-            document.getElementById("next-button").click();
-        }, 300);
     }
 
     function tick() {
@@ -624,15 +600,18 @@ setInterval(() => {
         if (!timerEl) return;
 
         if (left <= 0) {
-            finalDataPushAndSubmit();
+            // auto-click the hidden Next button to submit the page
+            document.getElementById("next-button").click();
         } else {
-            timerEl.innerText = "Time remaining: " + formatTime(left);
+            timerEl.innerText = "Time remaining: " + Math.ceil(left) + " seconds";
         }
     }
 
+    // update ~4x per second
     setInterval(tick, 250);
     tick();
 
+    // If page was restored from back/forward cache, reload so timer is correct
     window.addEventListener("pageshow", function(event) {
         if (event.persisted) {
             window.location.reload();
