@@ -572,14 +572,35 @@ let activeTabSeconds = parseInt(
   10
 ) || 0;
 
-// every second, if this tab is focused, increment + liveSend
-setInterval(() => {
-  if (document.hasFocus()) {
-    activeTabSeconds++;
-    document.getElementById("active_tab_seconds").value = activeTabSeconds;
-    liveSend({ active_tab_seconds: activeTabSeconds });
-  }
-}, 1000);
+let lastVisibleStart = null;
+
+// page becomes visible → mark start
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        lastVisibleStart = Date.now();
+    }
+    else {
+        if (lastVisibleStart !== null) {
+            let delta = Math.round((Date.now() - lastVisibleStart) / 1000);
+            liveSend({ add_active_seconds: delta });
+            lastVisibleStart = null;
+        }
+    }
+});
+
+// also record when user leaves the tab or window
+window.addEventListener("blur", () => {
+    if (document.visibilityState === "visible" && lastVisibleStart !== null) {
+        let delta = Math.round((Date.now() - lastVisibleStart) / 1000);
+        liveSend({ add_active_seconds: delta });
+        lastVisibleStart = Date.now();
+    }
+});
+
+// initial entry
+document.addEventListener("DOMContentLoaded", () => {
+    lastVisibleStart = Date.now();
+});
 
 </script>
 

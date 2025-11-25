@@ -1180,6 +1180,13 @@ def live_update_performance(player: Player, data):
         player.active_tab_seconds = data['active_tab_seconds']
     if 'mistakes' in data:
         player.mistakes = data['mistakes']
+    if 'add_active_seconds' in data:
+        player.active_tab_seconds += int(data['add_active_seconds'])
+        return {
+            own_id: dict(
+                active_tab_seconds=player.active_tab_seconds,
+            )
+        }
 
     # --- If we need to generate a new dictionary/word (after a correct solution) ---
     if shuffle:
