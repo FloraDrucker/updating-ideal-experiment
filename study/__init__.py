@@ -1554,9 +1554,9 @@ class Task(Page):
     def vars_for_template(player):
         return dict(
             task_start_time=player.participant.vars.get('task_start_time'),
-            total_time=get_timeout_seconds,
+            total_time=player.page_timeout_seconds,      # oTree 5 correct
             letters_per_word=C.TASK_LENGTH,
-            required_tasks=player.ideal_to_do,
+            required_tasks=player.ideal_to_do,           # correct dynamic value
         )
 
     @staticmethod
