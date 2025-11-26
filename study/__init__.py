@@ -54,8 +54,16 @@ class Player(BasePlayer):
     current_word = models.LongStringField()
     performance = models.IntegerField(initial=0, blank=False)
     mistakes = models.IntegerField(initial=0, blank=False)
-    link_click_count = models.IntegerField(initial=0) # Added this to track the links clicked in the Task.html
-    active_tab_seconds = models.IntegerField(initial=0) # Added this to track the time spend on the Tab
+
+    seconds_on_task = models.IntegerField(initial=0)
+    seconds_on_leisure = models.IntegerField(initial=0)
+    attention_checks_total = models.IntegerField(initial=0)
+    attention_checks_passed = models.IntegerField(initial=0)
+    attention_checks_failed = models.IntegerField(initial=0)
+    leisure_started = models.BooleanField(initial=False)
+    leisure_start_timestamp = models.FloatField(initial=0)
+    leisure_payment_eligible = models.BooleanField(initial=True)
+
     do_ideal = models.BooleanField(initial=False) # whether the participant has to do the stated ideal number of tasks
     ideal_to_do = models.IntegerField(default=999)
     ideal_index = models.IntegerField(null=True, blank=True, default=None)
@@ -1128,98 +1136,111 @@ def build_random_word(k=4):
     return random.sample(list(string.ascii_uppercase), k)
 
 # This is the Live Send code, so that performance etc can be stored immediately
-def live_update_performance(player: Player, data):
-    own_id = player.id_in_group
+def live_update_performance(player, data):
+    import time
 
-    # --- INIT (first page load) ---
+    # ---------------------------------------------------------
+    # INITIAL MESSAGE FROM CLIENT: send initial dictionary/word
+    # ---------------------------------------------------------
     if data.get('init'):
-        if not player.field_maybe_none('current_dict') or not player.field_maybe_none('current_word'):
+        if not player.participant.vars.get('task_dict'):
             d = build_random_dict()
-            w = build_random_word(C.TASK_LENGTH)
-            player.current_dict = json.dumps(d)
-            player.current_word = json.dumps(w)
-        else:
-            d = json.loads(player.current_dict)
-            w = json.loads(player.current_word)
+            w = build_random_word(k=C.TASK_LENGTH)
+            player.participant.vars['task_dict'] = d
+            player.participant.vars['task_word'] = w
 
+        return {
+            player.id_in_group: dict(
+                dict=player.participant.vars['task_dict'],
+                word=player.participant.vars['task_word'],
+            )
+        }
+
+    # ---------------------------------------------------------
+    # CLIENT REQUESTS STATE SYNC
+    # ---------------------------------------------------------
+    if data.get('request_update'):
         return {
             player.id_in_group: dict(
                 performance=player.performance,
                 mistakes=player.mistakes,
-                link_click_count=player.link_click_count,
-                active_tab_seconds=player.active_tab_seconds,
-                dict=d,
-                word=w
+                leisure_started=player.leisure_started,
+                attention_checks_total=player.attention_checks_total,
+                attention_checks_passed=player.attention_checks_passed,
+                attention_checks_failed=player.attention_checks_failed,
+                leisure_payment_eligible=player.leisure_payment_eligible,
+                dict=player.participant.vars['task_dict'],
+                word=player.participant.vars['task_word'],
             )
         }
 
-    # --- REQUEST UPDATE (when tab becomes visible again) ---
-    if data.get('request_update'):
-        d = json.loads(player.current_dict) if player.current_dict else {}
-        w = json.loads(player.current_word) if player.current_word else []
-        return {
-            own_id: dict(
-                performance=player.performance,
-                link_click_count=player.link_click_count,
-                active_tab_seconds=player.active_tab_seconds,
-                mistakes=player.mistakes,
-                dict=d,
-                word=w,
-                shuffle=False
-            )
-        }
-
-    # --- INCREMENTAL UPDATES (performance, mistakes, time, clicks) ---
-    shuffle = False
+    # ---------------------------------------------------------
+    # PERFORMANCE UPDATE
+    # ---------------------------------------------------------
     if 'performance' in data:
-        player.performance = data['performance']
-        shuffle = True
-    if 'link_click_count' in data:
-        player.link_click_count = data['link_click_count']
-    if 'active_tab_seconds' in data:
-        player.active_tab_seconds = data['active_tab_seconds']
+        player.performance = int(data['performance'])
+
+        # NEVER exceed ideal_to_do
+        if player.performance > player.ideal_to_do:
+            player.performance = player.ideal_to_do
+
+        return {player.id_in_group: dict(performance=player.performance)}
+
+    # ---------------------------------------------------------
+    # MISTAKES UPDATE
+    # ---------------------------------------------------------
     if 'mistakes' in data:
-        player.mistakes = data['mistakes']
-    if 'add_active_seconds' in data:
-        player.active_tab_seconds += int(data['add_active_seconds'])
+        player.mistakes = int(data['mistakes'])
+        return {player.id_in_group: dict(mistakes=player.mistakes)}
+
+    # ---------------------------------------------------------
+    # STOP WORKING → Enter leisure mode
+    # ---------------------------------------------------------
+    if data.get('stop_working'):
+        if not player.leisure_started:
+            player.leisure_started = True
+            player.leisure_start_timestamp = time.time()
+        return {player.id_in_group: dict(leisure_started=True)}
+
+    # ---------------------------------------------------------
+    # ATTENTION CHECK
+    # ---------------------------------------------------------
+    if 'attention_check_result' in data:
+        player.attention_checks_total += 1
+
+        if data['attention_check_result'] == 'pass':
+            player.attention_checks_passed += 1
+        else:
+            player.attention_checks_failed += 1
+
+        # rule: >1 fail → no leisure payment
+        player.leisure_payment_eligible = (player.attention_checks_failed <= 1)
+
         return {
-            own_id: dict(
-                active_tab_seconds=player.active_tab_seconds,
+            player.id_in_group: dict(
+                attention_checks_total=player.attention_checks_total,
+                attention_checks_passed=player.attention_checks_passed,
+                attention_checks_failed=player.attention_checks_failed,
+                leisure_payment_eligible=player.leisure_payment_eligible,
             )
         }
 
-    # --- If we need to generate a new dictionary/word (after a correct solution) ---
-    if shuffle:
-        d = build_random_dict()
-        w = build_random_word(C.TASK_LENGTH)
-        player.current_dict = json.dumps(d)
-        player.current_word = json.dumps(w)
-        return {
-            own_id: dict(
-                performance=player.performance,
-                link_click_count=player.link_click_count,
-                active_tab_seconds=player.active_tab_seconds,
-                mistakes=player.mistakes,
-                dict=d,
-                word=w,
-                shuffle=True
-            )
-        }
+    # ---------------------------------------------------------
+    # TASK SECONDS
+    # ---------------------------------------------------------
+    if 'add_task_seconds' in data:
+        player.seconds_on_task += int(data['add_task_seconds'])
+        return {}
 
-    # --- Otherwise, just echo current state ---
-    d = json.loads(player.current_dict) if player.current_dict else {}
-    w = json.loads(player.current_word) if player.current_word else []
-    return {
-        own_id: dict(
-            performance=player.performance,
-            link_click_count=player.link_click_count,
-            active_tab_seconds=player.active_tab_seconds,
-            mistakes=player.mistakes,
-            dict=d,
-            word=w,
-            shuffle=False
-        )
-    }
+    # ---------------------------------------------------------
+    # LEISURE SECONDS
+    # ---------------------------------------------------------
+    if 'add_leisure_seconds' in data:
+        player.seconds_on_leisure += int(data['add_leisure_seconds'])
+        return {}
+
+    return {}
+
 
 def get_timeout_seconds(player):
     config = player.session.config
@@ -1523,74 +1544,50 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
 
 class Task(Page):
     live_method = live_update_performance
-    form_model = 'player'
-    form_fields = ['performance', 'mistakes', 'link_click_count', 'active_tab_seconds']
 
-    # Keep this so oTree still has a server-side cutoff (even though we hide its timer bar)
+    form_model = 'player'
+    form_fields = []   # we store performance/mistakes via liveSend, not form submit
+
     get_timeout_seconds = get_timeout_seconds
 
     @staticmethod
-    def vars_for_template(player: Player):
-        """
-        This runs every time before the template is rendered.
-        We use it to set a *persistent* start_time once,
-        and then always reuse that value so the timer does not reset
-        when the participant hits Back.
-        """
-
-        # Set start time only once (first visit to Task in this round)
-        if player.task_start_time == 0:
-            player.task_start_time = time.time()
-
-        letters_per_word = C.TASK_LENGTH
-        task_list = list(range(letters_per_word))
-        legend_list = list(range(26))
-
-        # Total allowed time for the task (in seconds)
-        total_time = player.session.config['work_length_seconds']
-
+    def vars_for_template(player):
         return dict(
-            letters_per_word=letters_per_word,
-            legend_list=legend_list,
-            task_list=task_list,
-            required_tasks=player.ideal_to_do,
-
-            # ⬇️ used by the JS timer in Task.html
-            task_start_time=player.task_start_time,  # Unix seconds
-            total_time=total_time,                   # total allowed time in seconds
+            task_start_time=player.participant.vars.get('task_start_time'),
+            total_time=player.page_timeout_seconds,      # oTree 5 correct
+            letters_per_word=C.TASK_LENGTH,
+            required_tasks=player.ideal_to_do,           # correct dynamic value
         )
 
     @staticmethod
-    def js_vars(player: Player):
-        """
-        Still used by your bell-reminder logic and active tab timer in Task.html.
-        """
+    def js_vars(player):
         config = player.session.config
-        work_length_seconds = config['work_length_seconds']
         return dict(
             required_tasks=player.ideal_to_do,
-            timeout_seconds=work_length_seconds,
+            timeout_seconds=config['work_length_seconds'],
         )
 
     @staticmethod
-    def before_next_page(player: Player, timeout_happened: bool):
+    def before_next_page(player, timeout_happened):
         """
-        1) Enforce the cap that performance cannot exceed ideal_to_do.
-        2) Store all task-related variables in participant.vars.
+        End-of-round bookkeeping.
         """
         p = player
         pp = p.participant
 
-        # HARD SERVER-SIDE CAP (cannot exceed required_tasks)
-        required = p.ideal_to_do
-        if p.performance > required:
-            p.performance = required
+        # Enforce the HARD cap: cannot exceed ideal_to_do
+        if p.performance > p.ideal_to_do:
+            p.performance = p.ideal_to_do
 
-        # Save everything for this round (0-indexed keys as in your code)
-        pp.vars['actual'][p.round_number - 1] = p.performance
-        pp.vars['mistakes'][p.round_number - 1] = p.mistakes
-        pp.vars['link_click_count'][p.round_number - 1] = p.link_click_count
-        pp.vars['active_tab_seconds'][p.round_number - 1] = p.active_tab_seconds
+        round_idx = p.round_number - 1
+
+        pp.vars['actual'][round_idx] = p.performance
+        pp.vars['mistakes'][round_idx] = p.mistakes
+
+        # Legacy fields not removed from your system:
+        pp.vars['link_click_count'][round_idx] = None
+        pp.vars['active_tab_seconds'][round_idx] = p.seconds_on_task
+
 
 
 class Results(Page):
