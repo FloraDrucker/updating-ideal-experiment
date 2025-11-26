@@ -1,294 +1,655 @@
-{{ block title }}Task{{ endblock }}
+{% extends "global/Page.html" %}
+{% load staticfiles otree %}
 
-{{ block content }}
+{% block styles %}
+<style type="text/css">
 
-<style>
-    .hidden { display: none; }
+/* Hide the built-in oTree timer bar completely */
+.otree-timer,
+.otree-timer.alert {
+    display: none !important;
+}
 
-    #attention-check {
-        position: fixed;
-        top: 40%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        padding: 20px 30px;
-        background: #fffae6;
-        border: 2px solid #ffaa00;
-        border-radius: 10px;
-        font-size: 22px;
-        font-weight: bold;
-        text-align: center;
-        z-index: 10000;
-    }
+/* Our custom timer */
+.pretty-timer {
+    display: inline-block;
+    background: #fff7c2;                 /* oTree-style light yellow */
+    border: 2px solid #f5d768;           /* slightly darker yellow border */
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6a4d00;                      /* dark warm brown text */
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
 
-    #attention-warning {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        background: #ff4444;
-        color: white;
-        padding: 10px;
-        font-size: 18px;
-        font-weight: bold;
-        text-align: center;
-        z-index: 9999;
-        display: none;
-    }
 
-    #stop-work-button {
-        background: #d9534f;
-        color: white;
-        font-size: 18px;
-        font-weight: bold;
-        padding: 6px 12px;
-        border-radius: 6px;
-        margin-left: 20px;
-    }
+.otree-content.container,
+.otree-body.container,
+.otree-timer.alert {
+    max-width: 90vw;
+    width: 90vw;
+}
 
-    #stop-work-button:hover {
-        background: #c9302c;
-    }
+.otree-timer.alert {
+    border-radius: 0;
+    padding: 1rem 2rem;
+}
 
-    #timer {
-        font-size: 22px;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
+.otree-content{
+    width:90vw;
+    max-width: 90vw;
+    background-color: rgb(255 255 255);
+}
+
+.page-header{
+    margin: 0
+}
+
+.otree-body{
+    margin-left:5vw;
+}
+
+.otree-form-errors{
+    display: none;
+    border: 1px solid rgb(255, 217, 204);
+    background-color: rgb(255, 179, 153);
+    text-align: center;
+}
+
+.success-message {
+    border: 1px solid rgb(204, 238, 204);
+    background-color: rgb(217, 255, 217);
+    color: rgb(0, 100, 0);
+    text-align: center;
+}
+
+.task-container{
+    display: grid;
+    width: min(95%, 1200px);
+    margin: 2rem auto;
+    border: 1px solid rgb(226, 238, 221);
+    padding: 10px;
+    align-items: center;
+    justify-items: center;
+}
+
+.task-subcontainer{
+    display: grid;
+    width: auto;
+    margin: auto;
+    align-items: center;
+    justify-items: center;
+    grid-template-columns: auto repeat({{letters_per_word}}, auto);
+    grid-template-rows: 1fr 1fr;
+    grid-column-gap: 1vw;
+    grid-row-gap: 0.5vw;
+}
+
+.legend{
+    display: grid;
+    grid-template-columns: repeat(26, 1em);
+    grid-template-rows: 1;
+    grid-column-gap: 0vw;
+}
+
+.legend-letter{
+    font-size: 1.5vw;
+    background-color: #cccccc;
+}
+
+.legend-code{
+    font-size: 1.5vw;
+}
+
+.task-letter{
+    font-size: 2vw;
+    text-align: center;
+    background-color: rgb(196, 221, 187);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-code{
+    font-size: 1.8vw;
+    width: 3em;
+}
+
+.test{
+  display: block;
+}
+
+table, td, th {
+  border: 1px solid black;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th {
+  font-size: 2vw;
+  height: 2ex;
+  text-align: center;
+  background-color: rgb(200, 200, 200);
+}
+
+td {
+  font-size: 1.5vw;
+  height: 3.5ex;
+  text-align: center;
+}
+
+.button-container{
+    display: grid;
+    grid-template-columns: 6em auto;
+    grid-template-rows: 1;
+    grid-column-gap: 1vw
+}
+
+#next-button{
+    display: none;
+}
+
 </style>
+{% endblock %}
 
 
-<div id="attention-warning"></div>
 
-<div id="timer">
-    Time remaining: <span id="time-remaining"></span>
-    <button id="stop-work-button" type="button">Stop working</button>
+{% block title %}
+    Task
+{% endblock %}
+
+{% block content %}
+
+<br>
+
+<!-- Our custom timer display -->
+<div id="task-timer" class="pretty-timer"></div>
+
+<input type="hidden" name="performance" id="performance">
+<span hidden>{{ form.performance.errors }}</span>
+<input type="hidden" name="mistakes" id="mistakes">
+<span hidden>{{ form.mistakes.errors }}</span>
+
+<p>
+    Your performance so far: <span id="performance-display">{{ player.performance }}</span> tasks.
+</p>
+
+<div class="test" id="hide_task">
+
+<!-- alarm sound input-->
+<audio id="alarm-sound" preload="auto" style="display:none">
+  <source src="{% static 'alarm.mp3' %}" type="audio/mpeg">
+</audio>
+
+<!-- linkclick tracker-->
+<input type="hidden" name="link_click_count"
+       id="link_click_count" value="{{ player.link_click_count }}">
+<!-- duration tracker-->
+<input
+  type="hidden"
+  name="active_tab_seconds"
+  id="active_tab_seconds"
+  value="{{ player.active_tab_seconds }}">
+
+<!-- link fields -->
+<div style="margin-top: 20px;">
+    <p><strong>You may visit these pages instead of working on the task:</strong></p>
+    <ul>
+        <li><a href="https://www.youtube.com" target="_blank">YouTube</a></li>
+        <li><a href="https://www.instagram.com" target="_blank">Instagram</a></li>
+        <li><a href="https://www.bbc.com/news" target="_blank">News</a></li>
+    </ul>
 </div>
 
-<div id="work-container">
-    <h4>Translate the letters using the dictionary:</h4>
-
-    <div id="dictionary-box">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Letter</th>
-                    <th>Number</th>
-                </tr>
-            </thead>
-            <tbody id="dictionary-table"></tbody>
-        </table>
+<div class="task-container">
+    <div class="task-subcontainer" id="task-subcontainer">
+        <div style="font-size: 1.8vw">Word: &nbsp;&nbsp;&nbsp;&nbsp;</div>
+        {% for l in task_list %}
+            <div class="task-letter" id="task_letter_{{l}}"></div>
+        {% endfor %}
+        <div style="font-size: 1.8vw">Code: &nbsp;&nbsp;&nbsp;&nbsp;</div>
+        {% for l in task_list %}
+            <input class="task-code" id="task_code_{{l}}" type="number" onkeypress="return event.keyCode!=13">
+        {% endfor %}
     </div>
-
-    <h4>Your word:</h4>
-    <div id="word-box" style="font-size: 28px; font-weight: bold;"></div>
-
-    <input type="number" id="answer-input" class="form-control" style="width:200px; font-size:20px;" />
-    <button id="submit-answer" class="btn btn-primary" style="margin-top:10px;">Submit</button>
-
-    <div style="margin-top:20px;">
-        <strong>Performance:</strong> <span id="performance-counter">0</span><br>
-        <strong>Mistakes:</strong> <span id="mistake-counter">0</span>
-    </div>
 </div>
 
-<!-- Hidden attention check button -->
-<div id="attention-check" class="hidden">
-    Click here to continue
-    <br><br>
-    <button id="attention-button" class="btn btn-warning" style="font-size:20px;">I'm here</button>
+<br><br>
+<div class="button-container">
+    <input type="button" id="submit-solution" onclick="myFunction()" value="Submit">
+    <div class="otree-form-errors" id="error-form"></div>
+    <!-- hidden next button, used also by our timer -->
+    <input type="submit" id="next-button" name="next" value="Next">
 </div>
 
+<br><br>
 
-{{ endblock }}
+<table>
+<tr>
+ {% for l in legend_list %}
+<td id="llid_{{l}}"></td>
+{% endfor %}
+</tr>
+<tr>
+    {% for l in legend_list %}
+<td id="lcid_{{l}}"></td>
+{% endfor %}
+</tr>
+</table>
 
-{{ block scripts }}
+<br><br>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
 <script>
 
-let dictData = null;
-let wordData = null;
+let dict = {};
+let word = [];
 
-let performance = 0;
-let mistakes = 0;
+const letters_per_word = {{ letters_per_word|safe }};
+const alphabet = genCharArray('A', 'Z');
+const legend_letters = alphabet;
+const word_letters = alphabet;
+const required_tasks = js_vars.required_tasks;
 
-let workMode = true;
-let attentionCheckInterval = 60;   // every minute during leisure
-let lastAttentionCheckTime = null;
+// Enforce lockout if participant already completed required tasks
+document.addEventListener("DOMContentLoaded", () => {
+    const performance = Number(document.getElementById("performance").value || "{{ player.performance }}");
+    if (performance >= required_tasks) {
+        disableTaskInputs();
+        document.getElementById("submit-solution").disabled = true;
 
-// Global countdown
-let totalTime = js_vars.timeout_seconds;
-let deadline = Date.now() + totalTime * 1000;
+        const msgBox = document.getElementById("error-form");
+        msgBox.classList.remove("otree-form-errors");
+        msgBox.classList.add("success-message");
+        msgBox.innerText =
+            "You have completed all required tasks. You can browse other pages until time runs out.";
+        msgBox.style.display = "block";
+    }
+});
 
-// Time tracking
-let lastTick = Date.now();
+// Request first dict/word from server
+document.addEventListener("DOMContentLoaded", () => {
+    liveSend({ init: true });
+});
 
+// If tab becomes visible again, sync state
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        liveSend({ request_update: true });
+    }
+});
 
-// ------------------------------------------------------------
-// ON LOAD: Request initial dictionary/word & periodic sync
-// ------------------------------------------------------------
-liveSend({init: true});
+/// --- Unlock alarm audio on first user interaction (click / key / move)
+function unlockAudio() {
+    const alarm = document.getElementById('alarm-sound');
+    if (alarm) {
+        alarm.play()
+            .then(() => {
+                alarm.pause();
+                alarm.currentTime = 0;
+            })
+            .catch(() => {
+                // ignore any autoplay restriction errors
+            });
+    }
+}
+['click', 'keydown', 'mousemove'].forEach(evt => {
+    document.addEventListener(evt, unlockAudio, { once: true });
+});
 
+// Main submit handler
+function myFunction() {
+    let errors = checkSolution(letters_per_word);
 
-function renderDictAndWord() {
-    // Render dictionary
-    let table = document.getElementById('dictionary-table');
-    table.innerHTML = "";
-    for (const [letter, number] of Object.entries(dictData)) {
-        let row = `<tr><td>${letter}</td><td>${number}</td></tr>`;
-        table.insertAdjacentHTML('beforeend', row);
+    if (errors === 0) {
+        let temp = Number(document.getElementById("performance").value || 0) + 1;
+        document.getElementById("performance").value = temp;
+        document.getElementById("error-form").style.display = "none";
+
+        let performance = temp;
+        document.getElementById("performance-display").innerText = performance;
+        liveSend({ performance: performance });
+        document.getElementById("task_code_0").focus();
+
+        // ✅ If they reached or exceeded required tasks, lock inputs & stop further work
+        if (performance >= required_tasks) {
+            disableTaskInputs();
+            document.getElementById("submit-solution").disabled = true;
+            const msgBox = document.getElementById("error-form");
+            msgBox.classList.remove("otree-form-errors"); // remove red styling
+            msgBox.classList.add("success-message");       // apply green style
+            msgBox.innerText =
+                "You have completed all required tasks. You can browse other pages until time runs out.";
+            msgBox.style.display = "block";
+            return; // do NOT auto-generate new dict here; server will send one
+        }
+
+        // Note: we rely on liveRecv (shuffle=True) to send the next dict+word
     }
 
-    // Render word
-    document.getElementById('word-box').innerText = wordData.join(' - ');
+    else if (errors > 0) {
+        let temp = Number(document.getElementById("mistakes").value || 0) + 1;
+        document.getElementById("mistakes").value = temp;
+        liveSend({ mistakes: temp });
+
+        const msgBox = document.getElementById("error-form");
+        msgBox.classList.remove("success-message");
+        msgBox.classList.add("otree-form-errors");
+        msgBox.innerText =
+            errors === 1
+                ? "There is 1 mistake."
+                : "There are " + errors + " mistakes.";
+        msgBox.style.display = "block";
+    }
 }
 
+function disableTaskInputs() {
+    for (let i = 0; i < letters_per_word; i++) {
+        const el = document.getElementById("task_code_" + i);
+        if (el) el.disabled = true;
+    }
+}
 
-// SERVER → CLIENT updates
+function checkSolution(letters_per_word) {
+    let errors = 0;
+    for (let i = 0; i < letters_per_word; i++) {
+        const cell = document.getElementById("task_code_" + i);
+        const val = Number(cell.value);
+        if (dict[word[i]] !== val) {
+            errors += 1;
+        }
+    }
+    return errors;
+}
+
+function genNewWord(letters_per_word, word_letters) {
+    shuffle(word_letters);
+    let w = [];
+    for (let i = 0; i < letters_per_word; i++) {
+        w[i] = word_letters[i];
+    }
+    return w;
+}
+
+function genCharArray(charA, charZ) {
+    let a = [], i = charA.charCodeAt(0), j = charZ.charCodeAt(0);
+    for (; i <= j; ++i) {
+        a.push(String.fromCharCode(i));
+    }
+    return a;
+}
+
+function shuffle(a) {
+    let j, x, i;
+    let b = a;
+    for (i = b.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        x = b[i];
+        b[i] = b[j];
+        b[j] = x;
+    }
+    return a;
+}
+
+function randomDataSet(dataSetSize, minValue, maxValue) {
+  return new Array(dataSetSize).fill(0).map(function(n) {
+    return Math.floor(Math.random() * (maxValue - minValue) + minValue);
+  });
+}
+
+function genNewDict() {
+    const d = {};
+    const letters = genCharArray('A', 'Z');
+    for (const letter of letters) {
+        d[letter] = Math.floor(Math.random() * 900) + 100; // 100–999
+    }
+    return d;
+}
+
+// liveRecv from server
 function liveRecv(data) {
-
-    if (data.dict && data.word) {
-        dictData = data.dict;
-        wordData = data.word;
-        renderDictAndWord();
+    // --- Always update counters ---
+    if (typeof data.performance === 'number') {
+        document.getElementById("performance").value = data.performance;
+        document.getElementById("performance-display").innerText = data.performance;
+    }
+    if (typeof data.mistakes === 'number') {
+        document.getElementById("mistakes").value = data.mistakes;
+    }
+    if (typeof data.link_click_count === 'number') {
+        document.getElementById("link_click_count").value = data.link_click_count;
+    }
+    if (typeof data.active_tab_seconds === 'number') {
+        document.getElementById("active_tab_seconds").value = data.active_tab_seconds;
     }
 
-    if ('performance' in data) performance = data.performance;
-    document.getElementById('performance-counter').innerText = performance;
+    // --- Only repaint task when we actually have a new one ---
+    if (data.dict && data.word && data.shuffle) {
+        dict = data.dict;
+        word = data.word;
 
-    if ('mistakes' in data) mistakes = data.mistakes;
-    document.getElementById('mistake-counter').innerText = mistakes;
+        const server_letters = Object.keys(dict);   // <-- preserves randomized order
 
-    if ('leisure_started' in data) {
-        workMode = false;
-        enterLeisureMode();
-    }
-
-    if ('attention_checks_failed' in data) {
-        if (data.attention_checks_failed > 0) {
-            showAttentionWarning();
+        for (let i = 0; i < 26; i++) {
+            const L = server_letters[i];
+            document.getElementById("llid_" + i).innerText = L;
+            document.getElementById("lcid_" + i).innerText = dict[L];
         }
-    }
-}
 
-
-// ------------------------------------------------------------
-// SUBMIT ANSWER
-// ------------------------------------------------------------
-document.getElementById('submit-answer').onclick = function() {
-    if (!workMode) return;
-
-    let answer = parseInt(document.getElementById('answer-input').value);
-    if (isNaN(answer)) return;
-
-    let correct = wordData.map(l => dictData[l]).reduce((a,b)=>a+b, 0);
-
-    if (answer === correct) {
-        performance++;
-        liveSend({performance: performance});
-    } else {
-        mistakes++;
-        liveSend({mistakes: mistakes});
-    }
-
-    document.getElementById('answer-input').value = "";
-};
-
-
-// ------------------------------------------------------------
-// STOP WORKING BUTTON
-// ------------------------------------------------------------
-document.getElementById('stop-work-button').onclick = function() {
-    if (!workMode) return;
-    workMode = false;
-
-    liveSend({stop_working: true});
-    enterLeisureMode();
-};
-
-
-// ------------------------------------------------------------
-// ENTER LEISURE MODE
-// ------------------------------------------------------------
-function enterLeisureMode() {
-    document.getElementById('work-container').style.display = "none";
-
-    lastAttentionCheckTime = Math.floor((totalTime - (deadline - Date.now())/1000));
-
-    // Immediately sync state
-    liveSend({request_update: true});
-}
-
-
-// ------------------------------------------------------------
-// ATTENTION CHECK
-// ------------------------------------------------------------
-function triggerAttentionCheck() {
-    let box = document.getElementById('attention-check');
-    box.classList.remove('hidden');
-
-    let clicked = false;
-
-    document.getElementById('attention-button').onclick = function() {
-        clicked = true;
-        box.classList.add('hidden');
-        liveSend({attention_check_result: 'pass'});
-    };
-
-    setTimeout(function() {
-        box.classList.add('hidden');
-
-        if (!clicked) {
-            liveSend({attention_check_result: 'fail'});
-            showAttentionWarning();
+        for (let i = 0; i < letters_per_word; i++) {
+            document.getElementById("task_letter_" + i).innerText = word[i];
+            document.getElementById("task_code_" + i).value = '';
         }
-    }, 5000);
-}
+        document.getElementById("task_code_0").focus();
+    }
+    // --- For init: also paint if shuffle flag missing but dict+word exist ---
+    else if (data.dict && data.word && !data.hasOwnProperty('shuffle')) {
+        dict = data.dict;
+        word = data.word;
 
+        const server_letters = Object.keys(dict);   // <-- preserves randomized order
 
-// ------------------------------------------------------------
-// ATTENTION WARNING BANNER
-// ------------------------------------------------------------
-function showAttentionWarning() {
-    let warn = document.getElementById('attention-warning');
-    warn.innerText = "Missed attention check. If you miss one more, you will not receive payment for this non-work activity.";
-    warn.style.display = "block";
-    setTimeout(() => warn.style.display = "none", 3000);
-}
+        for (let i = 0; i < 26; i++) {
+            const L = server_letters[i];
+            document.getElementById("llid_" + i).innerText = L;
+            document.getElementById("lcid_" + i).innerText = dict[L];
+        }
 
-
-// ------------------------------------------------------------
-// GLOBAL TIMER TICK
-// ------------------------------------------------------------
-function tick() {
-    let now = Date.now();
-    let elapsed = (now - lastTick) / 1000;
-    lastTick = now;
-
-    let remaining = Math.max(0, Math.floor((deadline - now) / 1000));
-    document.getElementById('time-remaining').innerText = remaining + "s";
-
-    // Track task/leisure seconds
-    if (workMode) {
-        if (elapsed > 0) liveSend({add_task_seconds: Math.floor(elapsed)});
-    } else {
-        if (elapsed > 0) liveSend({add_leisure_seconds: Math.floor(elapsed)});
+        for (let i = 0; i < letters_per_word; i++) {
+            document.getElementById("task_letter_" + i).innerText = word[i];
+        }
+        document.getElementById("task_code_0").focus();
     }
 
-    // Trigger attention checks EACH MINUTE OF LEISURE
-    if (!workMode) {
-        let timeSpent = totalTime - remaining;
-        if (timeSpent - lastAttentionCheckTime >= attentionCheckInterval) {
-            lastAttentionCheckTime = timeSpent;
-            triggerAttentionCheck();
+    if (Number(document.getElementById("performance").value || 0) >= required_tasks) {
+        disableTaskInputs();
+        document.getElementById("submit-solution").disabled = true;
+        return; // do NOT overwrite UI with new dict/word
+    }
+}
+
+// Let Enter on the submit button trigger the click
+document.getElementById("submit-solution")
+    .addEventListener("keyup", function(e) {
+        if (e.keyCode === 13) {
+            document.getElementById("submit-solution").click();
+        }
+    });
+
+// Prevent URL title from flashing — use nice page name instead
+document.title = "Task";
+let originalTitle = document.title;
+
+// --- Bell Reminder Logic ---
+// Rings 5 seconds before timeout ONLY if the tab is hidden at that moment.
+document.addEventListener('DOMContentLoaded', () => {
+
+    const totalSeconds = js_vars.timeout_seconds;
+    const reminderThreshold = totalSeconds - 5;
+
+    const startTime = Date.now();
+    let reminderTriggered = false;
+
+    const FLASH_TEXT = "⏰ Time's up!";
+    const FLASH_INTERVAL = 800;
+    let originalTitle = document.title;
+    let flashTimer = null;
+
+    const alarm = document.getElementById("alarm-sound");
+
+    function startTabFlash() {
+        if (flashTimer !== null) return;
+
+        flashTimer = setInterval(() => {
+            document.title =
+                document.title === originalTitle ? FLASH_TEXT : originalTitle;
+        }, FLASH_INTERVAL);
+    }
+
+    function stopTabFlash() {
+        if (flashTimer !== null) {
+            clearInterval(flashTimer);
+            flashTimer = null;
+            document.title = originalTitle;
         }
     }
 
-    // Automatic submit at end
-    if (remaining <= 0) {
-        document.getElementById('form').submit();
-    }
-}
+    function triggerReminder() {
+        // 1) Play alarm
+        if (alarm) {
+            alarm.play().catch(() => {});   // Autoplay may fail but usually works after user interaction
+        }
 
-setInterval(tick, 1000);
+        // 2) Start flashing only if tab is hidden
+        if (document.visibilityState === "hidden") {
+            startTabFlash();
+        }
+    }
+
+    // Check once per second
+    const tick = setInterval(() => {
+        const elapsed = (Date.now() - startTime) / 1000;
+
+        if (elapsed >= reminderThreshold && !reminderTriggered) {
+            reminderTriggered = true;
+            triggerReminder();
+            clearInterval(tick);
+        }
+    }, 1000);
+
+    // When user returns to the tab → stop flashing
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            stopTabFlash();
+        }
+    });
+
+});
+
+// Listen for any link click and mark the hidden field
+document.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    const inp = document.getElementById('link_click_count');
+    const newCount = parseInt(inp.value || "0", 10) + 1;
+    inp.value = newCount;
+    liveSend({ link_click_count: newCount });
+  });
+});
+
+// initialize from hidden input (or zero)
+let activeTabSeconds = parseInt(
+  document.getElementById("active_tab_seconds").value || "0",
+  10
+) || 0;
+
+let lastVisibleStart = null;
+
+// page becomes visible → mark start
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        lastVisibleStart = Date.now();
+    }
+    else {
+        if (lastVisibleStart !== null) {
+            let delta = Math.round((Date.now() - lastVisibleStart) / 1000);
+            liveSend({ add_active_seconds: delta });
+            lastVisibleStart = null;
+        }
+    }
+});
+
+// also record when user leaves the tab or window
+window.addEventListener("blur", () => {
+    if (document.visibilityState === "visible" && lastVisibleStart !== null) {
+        let delta = Math.round((Date.now() - lastVisibleStart) / 1000);
+        liveSend({ add_active_seconds: delta });
+        lastVisibleStart = Date.now();
+    }
+});
+
+// initial entry
+document.addEventListener("DOMContentLoaded", () => {
+    lastVisibleStart = Date.now();
+});
 
 </script>
-{{ endblock }}
+
+<!-- BACK-BUTTON-SAFE, PERSISTENT TIMER (like on Signal) -->
+<script>
+(function(){
+
+    // These come from vars_for_template in Task page
+    const start_time = {{ task_start_time|json }};  // epoch seconds
+    const total_time = {{ total_time|json }};       // total allowed seconds
+
+    function seconds_left() {
+        const now = Date.now() / 1000;
+        return total_time - (now - start_time);
+    }
+
+    // Format timer as MM:SS
+    function formatTime(seconds) {
+        seconds = Math.max(0, Math.floor(seconds));
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return m.toString().padStart(2, "0") + ":" + s.toString().padStart(2, "0");
+    }
+
+    function tick() {
+        const left = seconds_left();
+        const timerEl = document.getElementById("task-timer");
+        if (!timerEl) return;
+
+        if (left <= 0) {
+            // auto-click the hidden Next button to submit the page
+            document.getElementById("next-button").click();
+        } else {
+             timerEl.innerText = "Time remaining: " + formatTime(left);
+        }
+    }
+
+    // update ~4x per second
+    setInterval(tick, 250);
+    tick();
+
+    // If page was restored from back/forward cache, reload so timer is correct
+    window.addEventListener("pageshow", function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+
+})();
+</script>
+
+{% endblock %}
