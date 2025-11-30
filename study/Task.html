@@ -183,30 +183,12 @@ td {
 
 <div class="test" id="hide_task">
 
-<!-- alarm sound input-->
-<audio id="alarm-sound" preload="auto" style="display:none">
-  <source src="{% static 'alarm.mp3' %}" type="audio/mpeg">
-</audio>
-
-<!-- linkclick tracker-->
-<input type="hidden" name="link_click_count"
-       id="link_click_count" value="{{ player.link_click_count }}">
 <!-- duration tracker-->
 <input
   type="hidden"
-  name="active_tab_seconds"
-  id="active_tab_seconds"
-  value="{{ player.active_tab_seconds }}">
-
-<!-- link fields -->
-<div style="margin-top: 20px;">
-    <p><strong>You may visit these pages instead of working on the task:</strong></p>
-    <ul>
-        <li><a href="https://www.youtube.com" target="_blank">YouTube</a></li>
-        <li><a href="https://www.instagram.com" target="_blank">Instagram</a></li>
-        <li><a href="https://www.bbc.com/news" target="_blank">News</a></li>
-    </ul>
-</div>
+  name="work_seconds"
+  id="work_seconds"
+  value="{{ player.work_seconds }}">
 
 <div class="task-container">
     <div class="task-subcontainer" id="task-subcontainer">
@@ -272,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
         msgBox.classList.remove("otree-form-errors");
         msgBox.classList.add("success-message");
         msgBox.innerText =
-            "You have completed all required tasks. You can browse other pages until time runs out.";
+            "You have completed all required tasks. You will receive the flat fee per minute from now on until the time is out.";
         msgBox.style.display = "block";
     }
 });
@@ -287,24 +269,6 @@ document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
         liveSend({ request_update: true });
     }
-});
-
-/// --- Unlock alarm audio on first user interaction (click / key / move)
-function unlockAudio() {
-    const alarm = document.getElementById('alarm-sound');
-    if (alarm) {
-        alarm.play()
-            .then(() => {
-                alarm.pause();
-                alarm.currentTime = 0;
-            })
-            .catch(() => {
-                // ignore any autoplay restriction errors
-            });
-    }
-}
-['click', 'keydown', 'mousemove'].forEach(evt => {
-    document.addEventListener(evt, unlockAudio, { once: true });
 });
 
 // Main submit handler
@@ -329,7 +293,7 @@ function myFunction() {
             msgBox.classList.remove("otree-form-errors"); // remove red styling
             msgBox.classList.add("success-message");       // apply green style
             msgBox.innerText =
-                "You have completed all required tasks. You can browse other pages until time runs out.";
+                "You have completed all required tasks. You will receive the flat fee per minute from now on until the time is out.";
             msgBox.style.display = "block";
             return; // do NOT auto-generate new dict here; server will send one
         }
@@ -426,11 +390,8 @@ function liveRecv(data) {
     if (typeof data.mistakes === 'number') {
         document.getElementById("mistakes").value = data.mistakes;
     }
-    if (typeof data.link_click_count === 'number') {
-        document.getElementById("link_click_count").value = data.link_click_count;
-    }
-    if (typeof data.active_tab_seconds === 'number') {
-        document.getElementById("active_tab_seconds").value = data.active_tab_seconds;
+    if (typeof data.work_seconds === 'number') {
+        document.getElementById("work_seconds").value = data.work_seconds;
     }
 
     // --- Only repaint task when we actually have a new one ---
@@ -567,8 +528,8 @@ document.querySelectorAll('a').forEach(link => {
 });
 
 // initialize from hidden input (or zero)
-let activeTabSeconds = parseInt(
-  document.getElementById("active_tab_seconds").value || "0",
+let workSeconds = parseInt(
+  document.getElementById("work_seconds").value || "0",
   10
 ) || 0;
 

@@ -54,8 +54,8 @@ class Player(BasePlayer):
     current_word = models.LongStringField()
     performance = models.IntegerField(initial=0, blank=False)
     mistakes = models.IntegerField(initial=0, blank=False)
-    link_click_count = models.IntegerField(initial=0) # Added this to track the links clicked in the Task.html
-    active_tab_seconds = models.IntegerField(initial=0) # Added this to track the time spend on the Tab
+    work_seconds = models.IntegerField(initial=0) # This tracks the working time
+    nonwork_seconds = models.IntegerField(initial=0)  # Tracking non-work time
     do_ideal = models.BooleanField(initial=False) # whether the participant has to do the stated ideal number of tasks
     ideal_to_do = models.IntegerField(default=999)
     ideal_index = models.IntegerField(null=True, blank=True, default=None)
@@ -1039,8 +1039,8 @@ def creating_session(subsession: Subsession):
         ppvars['do_ideal'] = False
         ppvars['ideal_to_do'] = None
         ppvars['ideal_index'] = None
-        ppvars['link_click_count'] = {i: None for i in range(C.NUM_ROUNDS)}
-        ppvars['active_tab_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
+        ppvars['work_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
+        ppvars['nonwork_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
 
         # Risk preferences
         ppvars['risk_choices'] = {i: None for i in range(21)}
@@ -1146,8 +1146,7 @@ def live_update_performance(player: Player, data):
             player.id_in_group: dict(
                 performance=player.performance,
                 mistakes=player.mistakes,
-                link_click_count=player.link_click_count,
-                active_tab_seconds=player.active_tab_seconds,
+                work_seconds=player.work_seconds,
                 dict=d,
                 word=w
             )
@@ -1160,8 +1159,7 @@ def live_update_performance(player: Player, data):
         return {
             own_id: dict(
                 performance=player.performance,
-                link_click_count=player.link_click_count,
-                active_tab_seconds=player.active_tab_seconds,
+                work_seconds=player.work_seconds,
                 mistakes=player.mistakes,
                 dict=d,
                 word=w,
@@ -1174,17 +1172,15 @@ def live_update_performance(player: Player, data):
     if 'performance' in data:
         player.performance = data['performance']
         shuffle = True
-    if 'link_click_count' in data:
-        player.link_click_count = data['link_click_count']
-    if 'active_tab_seconds' in data:
-        player.active_tab_seconds = data['active_tab_seconds']
+    if 'work_seconds' in data:
+        player.work_seconds = data['work_seconds']
     if 'mistakes' in data:
         player.mistakes = data['mistakes']
     if 'add_active_seconds' in data:
-        player.active_tab_seconds += int(data['add_active_seconds'])
+        player.work_seconds += int(data['add_active_seconds'])
         return {
             own_id: dict(
-                active_tab_seconds=player.active_tab_seconds,
+                work_seconds=player.work_seconds,
             )
         }
 
@@ -1197,8 +1193,7 @@ def live_update_performance(player: Player, data):
         return {
             own_id: dict(
                 performance=player.performance,
-                link_click_count=player.link_click_count,
-                active_tab_seconds=player.active_tab_seconds,
+                work_seconds=player.work_seconds,
                 mistakes=player.mistakes,
                 dict=d,
                 word=w,
@@ -1212,8 +1207,7 @@ def live_update_performance(player: Player, data):
     return {
         own_id: dict(
             performance=player.performance,
-            link_click_count=player.link_click_count,
-            active_tab_seconds=player.active_tab_seconds,
+            work_seconds=player.work_seconds,
             mistakes=player.mistakes,
             dict=d,
             word=w,
@@ -1524,7 +1518,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
-    form_fields = ['performance', 'mistakes', 'link_click_count', 'active_tab_seconds']
+    form_fields = ['performance', 'mistakes', 'work_seconds']
 
     # Keep this so oTree still has a server-side cutoff (even though we hide its timer bar)
     get_timeout_seconds = get_timeout_seconds
@@ -1589,8 +1583,7 @@ class Task(Page):
         # Save everything for this round (0-indexed keys as in your code)
         pp.vars['actual'][p.round_number - 1] = p.performance
         pp.vars['mistakes'][p.round_number - 1] = p.mistakes
-        pp.vars['link_click_count'][p.round_number - 1] = p.link_click_count
-        pp.vars['active_tab_seconds'][p.round_number - 1] = p.active_tab_seconds
+        pp.vars['work_seconds'][p.round_number - 1] = p.work_seconds
 
 
 class Results(Page):
@@ -1805,7 +1798,7 @@ class Payment(Page):
         payoff_for_work = base_constants.TRUE_PAYOFF*performance_to_pay
         payoff_in_usd = cu(config['real_world_currency_per_point']*payoff_for_work)
         work_length_seconds = config['work_length_seconds']
-        leisure_minutes = round((work_length_seconds - player.participant.vars['active_tab_seconds'][player.task_chosen_part])/60, 2)
+        leisure_minutes = round((work_length_seconds - player.participant.vars['work_seconds'][player.task_chosen_part])/60, 2)
         if not_done_ideal:
             leisure_to_pay = 0
         else:
