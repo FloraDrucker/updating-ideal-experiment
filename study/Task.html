@@ -13,17 +13,16 @@
 /* Our custom timer */
 .pretty-timer {
     display: inline-block;
-    background: #fff7c2;                 /* oTree-style light yellow */
-    border: 2px solid #f5d768;           /* slightly darker yellow border */
+    background: #fff7c2;
+    border: 2px solid #f5d768;
     border-radius: 6px;
     padding: 6px 14px;
     font-size: 14px;
     font-weight: 600;
-    color: #6a4d00;                      /* dark warm brown text */
+    color: #6a4d00;
     margin-bottom: 12px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
-
 
 .otree-content.container,
 .otree-body.container,
@@ -91,7 +90,6 @@
     display: grid;
     grid-template-columns: repeat(26, 1em);
     grid-template-rows: 1;
-    grid-column-gap: 0vw;
 }
 
 .legend-letter{
@@ -119,10 +117,6 @@
     width: 3em;
 }
 
-.test{
-  display: block;
-}
-
 table, td, th {
   border: 1px solid black;
 }
@@ -147,9 +141,8 @@ td {
 
 .button-container{
     display: grid;
-    grid-template-columns: 6em auto;
-    grid-template-rows: 1;
-    grid-column-gap: 1vw
+    grid-template-columns: auto auto auto;
+    grid-column-gap: 1vw;
 }
 
 #next-button{
@@ -158,8 +151,6 @@ td {
 
 </style>
 {% endblock %}
-
-
 
 {% block title %}
     Task
@@ -177,18 +168,14 @@ td {
 <input type="hidden" name="mistakes" id="mistakes">
 <span hidden>{{ form.mistakes.errors }}</span>
 
+<!-- Hidden: final work time -->
+<input type="hidden" name="work_seconds" id="work_seconds" value="{{ player.work_seconds }}">
+
 <p>
     Your performance so far: <span id="performance-display">{{ player.performance }}</span> tasks.
 </p>
 
 <div class="test" id="hide_task">
-
-<!-- duration tracker-->
-<input
-  type="hidden"
-  name="work_seconds"
-  id="work_seconds"
-  value="{{ player.work_seconds }}">
 
 <div class="task-container">
     <div class="task-subcontainer" id="task-subcontainer">
@@ -204,12 +191,24 @@ td {
 </div>
 
 <br><br>
+
 <div class="button-container">
+
+    <!-- Submit -->
     <input type="button" id="submit-solution" onclick="myFunction()" value="Submit">
-    <div class="otree-form-errors" id="error-form"></div>
-    <!-- hidden next button, used also by our timer -->
+
+    <!-- Stop working button -->
+    <input type="button" id="stop-working"
+           value="Stop working"
+           style="background:#ffcccc; font-weight:bold;"
+           onclick="stopWorking()">
+
+    <!-- hidden next button -->
     <input type="submit" id="next-button" name="next" value="Next">
+
 </div>
+
+<div class="otree-form-errors" id="error-form"></div>
 
 <br><br>
 
@@ -239,84 +238,9 @@ let word = [];
 
 const letters_per_word = {{ letters_per_word|safe }};
 const alphabet = genCharArray('A', 'Z');
-const legend_letters = alphabet;
-const word_letters = alphabet;
 const required_tasks = js_vars.required_tasks;
 
-// Enforce lockout if participant already completed required tasks
-document.addEventListener("DOMContentLoaded", () => {
-    const performance = Number(document.getElementById("performance").value || "{{ player.performance }}");
-    if (performance >= required_tasks) {
-        disableTaskInputs();
-        document.getElementById("submit-solution").disabled = true;
-
-        const msgBox = document.getElementById("error-form");
-        msgBox.classList.remove("otree-form-errors");
-        msgBox.classList.add("success-message");
-        msgBox.innerText =
-            "You have completed all required tasks. You will receive the flat fee per minute from now on until the time is out.";
-        msgBox.style.display = "block";
-    }
-});
-
-// Request first dict/word from server
-document.addEventListener("DOMContentLoaded", () => {
-    liveSend({ init: true });
-});
-
-// If tab becomes visible again, sync state
-document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-        liveSend({ request_update: true });
-    }
-});
-
-// Main submit handler
-function myFunction() {
-    let errors = checkSolution(letters_per_word);
-
-    if (errors === 0) {
-        let temp = Number(document.getElementById("performance").value || 0) + 1;
-        document.getElementById("performance").value = temp;
-        document.getElementById("error-form").style.display = "none";
-
-        let performance = temp;
-        document.getElementById("performance-display").innerText = performance;
-        liveSend({ performance: performance });
-        document.getElementById("task_code_0").focus();
-
-        // ✅ If they reached or exceeded required tasks, lock inputs & stop further work
-        if (performance >= required_tasks) {
-            disableTaskInputs();
-            document.getElementById("submit-solution").disabled = true;
-            const msgBox = document.getElementById("error-form");
-            msgBox.classList.remove("otree-form-errors"); // remove red styling
-            msgBox.classList.add("success-message");       // apply green style
-            msgBox.innerText =
-                "You have completed all required tasks. You will receive the flat fee per minute from now on until the time is out.";
-            msgBox.style.display = "block";
-            return; // do NOT auto-generate new dict here; server will send one
-        }
-
-        // Note: we rely on liveRecv (shuffle=True) to send the next dict+word
-    }
-
-    else if (errors > 0) {
-        let temp = Number(document.getElementById("mistakes").value || 0) + 1;
-        document.getElementById("mistakes").value = temp;
-        liveSend({ mistakes: temp });
-
-        const msgBox = document.getElementById("error-form");
-        msgBox.classList.remove("success-message");
-        msgBox.classList.add("otree-form-errors");
-        msgBox.innerText =
-            errors === 1
-                ? "There is 1 mistake."
-                : "There are " + errors + " mistakes.";
-        msgBox.style.display = "block";
-    }
-}
-
+// --- Disable inputs ---
 function disableTaskInputs() {
     for (let i = 0; i < letters_per_word; i++) {
         const el = document.getElementById("task_code_" + i);
@@ -324,291 +248,186 @@ function disableTaskInputs() {
     }
 }
 
-function checkSolution(letters_per_word) {
+// Lockout if already finished required tasks
+document.addEventListener("DOMContentLoaded", () => {
+    const perf = Number("{{ player.performance }}");
+    if (perf >= required_tasks) {
+        disableTaskInputs();
+        document.getElementById("submit-solution").disabled = true;
+        document.getElementById("stop-working").disabled = true;
+
+        const msg = document.getElementById("error-form");
+        msg.classList.remove("otree-form-errors");
+        msg.classList.add("success-message");
+        msg.innerText = "You have completed all required tasks. Flat-fee time has begun.";
+        msg.style.display = "block";
+    }
+});
+
+// Request first word/dict from server
+document.addEventListener("DOMContentLoaded", () => {
+    liveSend({ init: true });
+});
+
+function myFunction() {
+    let errors = checkSolution(letters_per_word);
+
+    if (errors === 0) {
+        let temp = Number(document.getElementById("performance").value || 0) + 1;
+        document.getElementById("performance").value = temp;
+
+        document.getElementById("performance-display").innerText = temp;
+        document.getElementById("error-form").style.display = "none";
+
+        liveSend({ performance: temp });
+
+        if (temp >= required_tasks) {
+            disableTaskInputs();
+            document.getElementById("submit-solution").disabled = true;
+            document.getElementById("stop-working").disabled = true;
+
+            const msg = document.getElementById("error-form");
+            msg.classList.remove("otree-form-errors");
+            msg.classList.add("success-message");
+            msg.innerText = "You have completed all required tasks. Flat-fee time has begun.";
+            msg.style.display = "block";
+            return;
+        }
+    }
+
+    else if (errors > 0) {
+        let temp = Number(document.getElementById("mistakes").value || 0) + 1;
+        document.getElementById("mistakes").value = temp;
+        liveSend({ mistakes: temp });
+
+        const msg = document.getElementById("error-form");
+        msg.classList.remove("success-message");
+        msg.classList.add("otree-form-errors");
+        msg.innerText = errors === 1 ? "There is 1 mistake." : "There are " + errors + " mistakes.";
+        msg.style.display = "block";
+    }
+}
+
+function checkSolution(n) {
     let errors = 0;
-    for (let i = 0; i < letters_per_word; i++) {
-        const cell = document.getElementById("task_code_" + i);
-        const val = Number(cell.value);
-        if (dict[word[i]] !== val) {
-            errors += 1;
+    for (let i = 0; i < n; i++) {
+        if (dict[word[i]] !== Number(document.getElementById("task_code_" + i).value)) {
+            errors++;
         }
     }
     return errors;
 }
 
-function genNewWord(letters_per_word, word_letters) {
-    shuffle(word_letters);
-    let w = [];
-    for (let i = 0; i < letters_per_word; i++) {
-        w[i] = word_letters[i];
-    }
-    return w;
+function genCharArray(a, z) {
+    let arr = [], i = a.charCodeAt(0), j = z.charCodeAt(0);
+    for (; i <= j; ++i) arr.push(String.fromCharCode(i));
+    return arr;
 }
 
-function genCharArray(charA, charZ) {
-    let a = [], i = charA.charCodeAt(0), j = charZ.charCodeAt(0);
-    for (; i <= j; ++i) {
-        a.push(String.fromCharCode(i));
-    }
-    return a;
-}
-
-function shuffle(a) {
-    let j, x, i;
-    let b = a;
-    for (i = b.length - 1; i > 0; i--) {
-        j = Math.floor(Math.random() * (i + 1));
-        x = b[i];
-        b[i] = b[j];
-        b[j] = x;
-    }
-    return a;
-}
-
-function randomDataSet(dataSetSize, minValue, maxValue) {
-  return new Array(dataSetSize).fill(0).map(function(n) {
-    return Math.floor(Math.random() * (maxValue - minValue) + minValue);
-  });
-}
-
-function genNewDict() {
-    const d = {};
-    const letters = genCharArray('A', 'Z');
-    for (const letter of letters) {
-        d[letter] = Math.floor(Math.random() * 900) + 100; // 100–999
-    }
-    return d;
-}
-
-// liveRecv from server
 function liveRecv(data) {
-    // --- Always update counters ---
-    if (typeof data.performance === 'number') {
+    if (data.performance !== undefined) {
         document.getElementById("performance").value = data.performance;
         document.getElementById("performance-display").innerText = data.performance;
     }
-    if (typeof data.mistakes === 'number') {
+    if (data.mistakes !== undefined) {
         document.getElementById("mistakes").value = data.mistakes;
     }
-    if (typeof data.work_seconds === 'number') {
-        document.getElementById("work_seconds").value = data.work_seconds;
-    }
 
-    // --- Only repaint task when we actually have a new one ---
-    if (data.dict && data.word && data.shuffle) {
+    if (data.dict && data.word) {
         dict = data.dict;
         word = data.word;
 
-        const server_letters = Object.keys(dict);   // <-- preserves randomized order
+        const letters = Object.keys(dict);
 
         for (let i = 0; i < 26; i++) {
-            const L = server_letters[i];
+            let L = letters[i];
             document.getElementById("llid_" + i).innerText = L;
             document.getElementById("lcid_" + i).innerText = dict[L];
         }
-
         for (let i = 0; i < letters_per_word; i++) {
             document.getElementById("task_letter_" + i).innerText = word[i];
             document.getElementById("task_code_" + i).value = '';
         }
         document.getElementById("task_code_0").focus();
     }
-    // --- For init: also paint if shuffle flag missing but dict+word exist ---
-    else if (data.dict && data.word && !data.hasOwnProperty('shuffle')) {
-        dict = data.dict;
-        word = data.word;
 
-        const server_letters = Object.keys(dict);   // <-- preserves randomized order
-
-        for (let i = 0; i < 26; i++) {
-            const L = server_letters[i];
-            document.getElementById("llid_" + i).innerText = L;
-            document.getElementById("lcid_" + i).innerText = dict[L];
-        }
-
-        for (let i = 0; i < letters_per_word; i++) {
-            document.getElementById("task_letter_" + i).innerText = word[i];
-        }
-        document.getElementById("task_code_0").focus();
-    }
-
-    if (Number(document.getElementById("performance").value || 0) >= required_tasks) {
+    if (Number(document.getElementById("performance").value) >= required_tasks) {
         disableTaskInputs();
         document.getElementById("submit-solution").disabled = true;
-        return; // do NOT overwrite UI with new dict/word
+        document.getElementById("stop-working").disabled = true;
     }
 }
 
-// Let Enter on the submit button trigger the click
+// ENTER key submits
 document.getElementById("submit-solution")
-    .addEventListener("keyup", function(e) {
-        if (e.keyCode === 13) {
-            document.getElementById("submit-solution").click();
-        }
-    });
+    .addEventListener("keyup", e => { if (e.keyCode === 13) myFunction(); });
 
-// Prevent URL title from flashing — use nice page name instead
+// -----------------------------
+// STOP WORKING BUTTON
+// -----------------------------
+function stopWorking() {
+    disableTaskInputs();
+    document.getElementById("submit-solution").disabled = true;
+    document.getElementById("stop-working").disabled = true;
+
+    const msg = document.getElementById("error-form");
+    msg.classList.remove("otree-form-errors");
+    msg.classList.add("success-message");
+    msg.innerText = "You chose to stop working. Leisure time begins now.";
+    msg.style.display = "block";
+
+    const now = Math.floor(Date.now() / 1000);
+    const start = {{ task_start_time|json }};
+    const work = now - start;
+
+    document.getElementById("work_seconds").value = work;
+
+    liveSend({
+        stop_work: true,
+        work_seconds: work
+    });
+}
+
+// PAGE TITLE
 document.title = "Task";
 let originalTitle = document.title;
 
-// --- Bell Reminder Logic ---
-// Rings 5 seconds before timeout ONLY if the tab is hidden at that moment.
-document.addEventListener('DOMContentLoaded', () => {
-
-    const totalSeconds = js_vars.timeout_seconds;
-    const reminderThreshold = totalSeconds - 5;
-
-    const startTime = Date.now();
-    let reminderTriggered = false;
-
-    const FLASH_TEXT = "⏰ Time's up!";
-    const FLASH_INTERVAL = 800;
-    let originalTitle = document.title;
-    let flashTimer = null;
-
-    const alarm = document.getElementById("alarm-sound");
-
-    function startTabFlash() {
-        if (flashTimer !== null) return;
-
-        flashTimer = setInterval(() => {
-            document.title =
-                document.title === originalTitle ? FLASH_TEXT : originalTitle;
-        }, FLASH_INTERVAL);
-    }
-
-    function stopTabFlash() {
-        if (flashTimer !== null) {
-            clearInterval(flashTimer);
-            flashTimer = null;
-            document.title = originalTitle;
-        }
-    }
-
-    function triggerReminder() {
-        // 1) Play alarm
-        if (alarm) {
-            alarm.play().catch(() => {});   // Autoplay may fail but usually works after user interaction
-        }
-
-        // 2) Start flashing only if tab is hidden
-        if (document.visibilityState === "hidden") {
-            startTabFlash();
-        }
-    }
-
-    // Check once per second
-    const tick = setInterval(() => {
-        const elapsed = (Date.now() - startTime) / 1000;
-
-        if (elapsed >= reminderThreshold && !reminderTriggered) {
-            reminderTriggered = true;
-            triggerReminder();
-            clearInterval(tick);
-        }
-    }, 1000);
-
-    // When user returns to the tab → stop flashing
-    document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") {
-            stopTabFlash();
-        }
-    });
-
-});
-
-// Listen for any link click and mark the hidden field
-document.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', () => {
-    const inp = document.getElementById('link_click_count');
-    const newCount = parseInt(inp.value || "0", 10) + 1;
-    inp.value = newCount;
-    liveSend({ link_click_count: newCount });
-  });
-});
-
-// initialize from hidden input (or zero)
-let workSeconds = parseInt(
-  document.getElementById("work_seconds").value || "0",
-  10
-) || 0;
-
-let lastVisibleStart = null;
-
-// page becomes visible → mark start
-document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-        lastVisibleStart = Date.now();
-    }
-    else {
-        if (lastVisibleStart !== null) {
-            let delta = Math.round((Date.now() - lastVisibleStart) / 1000);
-            liveSend({ add_active_seconds: delta });
-            lastVisibleStart = null;
-        }
-    }
-});
-
-// also record when user leaves the tab or window
-window.addEventListener("blur", () => {
-    if (document.visibilityState === "visible" && lastVisibleStart !== null) {
-        let delta = Math.round((Date.now() - lastVisibleStart) / 1000);
-        liveSend({ add_active_seconds: delta });
-        lastVisibleStart = Date.now();
-    }
-});
-
-// initial entry
-document.addEventListener("DOMContentLoaded", () => {
-    lastVisibleStart = Date.now();
-});
-
 </script>
 
-<!-- BACK-BUTTON-SAFE, PERSISTENT TIMER (like on Signal) -->
+<!-- BACK-BUTTON-SAFE TIMER -->
 <script>
 (function(){
 
-    // These come from vars_for_template in Task page
-    const start_time = {{ task_start_time|json }};  // epoch seconds
-    const total_time = {{ total_time|json }};       // total allowed seconds
+    const start_time = {{ task_start_time|json }};
+    const total_time = {{ total_time|json }};
 
     function seconds_left() {
         const now = Date.now() / 1000;
         return total_time - (now - start_time);
     }
 
-    // Format timer as MM:SS
     function formatTime(seconds) {
         seconds = Math.max(0, Math.floor(seconds));
         const m = Math.floor(seconds / 60);
         const s = seconds % 60;
-        return m.toString().padStart(2, "0") + ":" + s.toString().padStart(2, "0");
+        return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
     }
 
     function tick() {
         const left = seconds_left();
-        const timerEl = document.getElementById("task-timer");
-        if (!timerEl) return;
+        const el = document.getElementById("task-timer");
+
+        if (!el) return;
 
         if (left <= 0) {
-            // auto-click the hidden Next button to submit the page
             document.getElementById("next-button").click();
         } else {
-             timerEl.innerText = "Time remaining: " + formatTime(left);
+            el.innerText = "Time remaining: " + formatTime(left);
         }
     }
 
-    // update ~4x per second
     setInterval(tick, 250);
     tick();
-
-    // If page was restored from back/forward cache, reload so timer is correct
-    window.addEventListener("pageshow", function(event) {
-        if (event.persisted) {
-            window.location.reload();
-        }
-    });
 
 })();
 </script>

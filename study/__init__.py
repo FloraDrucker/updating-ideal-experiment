@@ -1129,9 +1129,12 @@ def build_random_word(k=4):
 
 # This is the Live Send code, so that performance etc can be stored immediately
 def live_update_performance(player: Player, data):
-    own_id = player.id_in_group
 
-    # --- INIT (first page load) ---
+    pid = player.id_in_group
+
+    # ------------------------------------------------------------
+    # INIT (first time the page loads)
+    # ------------------------------------------------------------
     if data.get('init'):
         if not player.field_maybe_none('current_dict') or not player.field_maybe_none('current_word'):
             d = build_random_dict()
@@ -1143,72 +1146,86 @@ def live_update_performance(player: Player, data):
             w = json.loads(player.current_word)
 
         return {
-            player.id_in_group: dict(
+            pid: dict(
                 performance=player.performance,
                 mistakes=player.mistakes,
                 work_seconds=player.work_seconds,
-                dict=d,
-                word=w
-            )
-        }
-
-    # --- REQUEST UPDATE (when tab becomes visible again) ---
-    if data.get('request_update'):
-        d = json.loads(player.current_dict) if player.current_dict else {}
-        w = json.loads(player.current_word) if player.current_word else []
-        return {
-            own_id: dict(
-                performance=player.performance,
-                work_seconds=player.work_seconds,
-                mistakes=player.mistakes,
                 dict=d,
                 word=w,
                 shuffle=False
             )
         }
 
-    # --- INCREMENTAL UPDATES (performance, mistakes, time, clicks) ---
-    shuffle = False
-    if 'performance' in data:
-        player.performance = data['performance']
-        shuffle = True
-    if 'work_seconds' in data:
-        player.work_seconds = data['work_seconds']
-    if 'mistakes' in data:
-        player.mistakes = data['mistakes']
-    if 'add_active_seconds' in data:
-        player.work_seconds += int(data['add_active_seconds'])
+    # ------------------------------------------------------------
+    # REQUEST_UPDATE (tab refocus, but no state changes)
+    # ------------------------------------------------------------
+    if data.get('request_update'):
+        d = json.loads(player.current_dict) if player.current_dict else {}
+        w = json.loads(player.current_word) if player.current_word else []
         return {
-            own_id: dict(
+            pid: dict(
+                performance=player.performance,
+                mistakes=player.mistakes,
                 work_seconds=player.work_seconds,
+                dict=d,
+                word=w,
+                shuffle=False
             )
         }
 
-    # --- If we need to generate a new dictionary/word (after a correct solution) ---
-    if shuffle:
+    # ------------------------------------------------------------
+    # STOP WORKING — final work_seconds is stored and nothing else changes
+    # ------------------------------------------------------------
+    if data.get("stop_work"):
+        player.work_seconds = data["work_seconds"]
+        return {
+            pid: dict(
+                performance=player.performance,
+                mistakes=player.mistakes,
+                work_seconds=player.work_seconds,
+                shuffle=False
+            )
+        }
+
+    # ------------------------------------------------------------
+    # PERFORMANCE update ⇒ increment AND refresh dict/word
+    # ------------------------------------------------------------
+    if 'performance' in data:
+        player.performance = data['performance']
+
         d = build_random_dict()
         w = build_random_word(C.TASK_LENGTH)
         player.current_dict = json.dumps(d)
         player.current_word = json.dumps(w)
+
         return {
-            own_id: dict(
+            pid: dict(
                 performance=player.performance,
-                work_seconds=player.work_seconds,
                 mistakes=player.mistakes,
+                work_seconds=player.work_seconds,
                 dict=d,
                 word=w,
                 shuffle=True
             )
         }
 
-    # --- Otherwise, just echo current state ---
+    # ------------------------------------------------------------
+    # Mistakes only (no word refresh)
+    # ------------------------------------------------------------
+    if 'mistakes' in data:
+        player.mistakes = data['mistakes']
+
+    # ------------------------------------------------------------
+    # DEFAULT: just return current state
+    # ------------------------------------------------------------
     d = json.loads(player.current_dict) if player.current_dict else {}
     w = json.loads(player.current_word) if player.current_word else []
+
     return {
-        own_id: dict(
+        pid: dict(
             performance=player.performance,
-            work_seconds=player.work_seconds,
             mistakes=player.mistakes,
+            work_seconds=player.work_seconds,
             dict=d,
             word=w,
             shuffle=False
@@ -1520,70 +1537,56 @@ class Task(Page):
     form_model = 'player'
     form_fields = ['performance', 'mistakes', 'work_seconds']
 
-    # Keep this so oTree still has a server-side cutoff (even though we hide its timer bar)
-    get_timeout_seconds = get_timeout_seconds
+    get_timeout_seconds = get_timeout_seconds  # keep server cutoff
 
     @staticmethod
     def vars_for_template(player: Player):
-        """
-        This runs every time before the template is rendered.
-        We use it to set a *persistent* start_time once,
-        and then always reuse that value so the timer does not reset
-        when the participant hits Back.
-        """
+        """Provide constant start time & total time for the JS timer."""
 
-        # Set start time only once (first visit to Task in this round)
+        # Only set start time once per round
         if player.task_start_time == 0:
             player.task_start_time = time.time()
 
         letters_per_word = C.TASK_LENGTH
-        task_list = list(range(letters_per_word))
-        legend_list = list(range(26))
-
-        # Total allowed time for the task (in seconds)
-        total_time = player.session.config['work_length_seconds']
 
         return dict(
             letters_per_word=letters_per_word,
-            legend_list=legend_list,
-            task_list=task_list,
+            legend_list=list(range(26)),
+            task_list=list(range(letters_per_word)),
+
             required_tasks=player.ideal_to_do,
 
-            # ⬇️ used by the JS timer in Task.html
-            task_start_time=player.task_start_time,  # Unix seconds
-            total_time=total_time,                   # total allowed time in seconds
+            # JS timer
+            task_start_time=player.task_start_time,          # unix seconds
+            total_time=player.session.config['work_length_seconds']
         )
 
     @staticmethod
     def js_vars(player: Player):
-        """
-        Still used by your bell-reminder logic and active tab timer in Task.html.
-        """
-        config = player.session.config
-        work_length_seconds = config['work_length_seconds']
+        cfg = player.session.config
         return dict(
             required_tasks=player.ideal_to_do,
-            timeout_seconds=work_length_seconds,
+            timeout_seconds=cfg['work_length_seconds']
         )
 
     @staticmethod
     def before_next_page(player: Player, timeout_happened: bool):
-        """
-        1) Enforce the cap that performance cannot exceed ideal_to_do.
-        2) Store all task-related variables in participant.vars.
-        """
+        """Finalize results of this round."""
+
+        # Cap performance
+        if player.performance > player.ideal_to_do:
+            player.performance = player.ideal_to_do
+
         p = player
         pp = p.participant
 
-        # HARD SERVER-SIDE CAP (cannot exceed required_tasks)
-        required = p.ideal_to_do
-        if p.performance > required:
-            p.performance = required
+        # Store outcomes
+        idx = p.round_number - 1
+        pp.vars['actual'][idx] = p.performance
+        pp.vars['mistakes'][idx] = p.mistakes
+        pp.vars['work_seconds'][idx] = p.work_seconds
 
-        # Save everything for this round (0-indexed keys as in your code)
-        pp.vars['actual'][p.round_number - 1] = p.performance
-        pp.vars['mistakes'][p.round_number - 1] = p.mistakes
-        pp.vars['work_seconds'][p.round_number - 1] = p.work_seconds
+        print('performance:', p.performance, 'mistakes:', p.mistakes, 'work seconds:', p.work_seconds)
 
 
 class Results(Page):
