@@ -1147,6 +1147,7 @@ def live_update_performance(player: Player, data):
 
         return {
             pid: dict(
+                init=True,
                 performance=player.performance,
                 mistakes=player.mistakes,
                 work_seconds=player.work_seconds,
@@ -1177,7 +1178,7 @@ def live_update_performance(player: Player, data):
     # STOP WORKING — final work_seconds is stored and nothing else changes
     # ------------------------------------------------------------
     if data.get("stop_work"):
-        player.work_seconds = data["work_seconds"]
+        player.work_seconds = int(data["work_seconds"])
         return {
             pid: dict(
                 performance=player.performance,
