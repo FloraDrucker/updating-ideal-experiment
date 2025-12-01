@@ -198,10 +198,15 @@ td {
     <input type="button" id="submit-solution" onclick="myFunction()" value="Submit">
 
     <!-- Stop working button -->
+    {% if player.do_ideal == 0 %}
     <input type="button" id="stop-working"
            value="Stop working"
            style="background:#ffcccc; font-weight:bold;"
            onclick="stopWorking()">
+    {% else %}
+    <input type="button" id="stop-working"
+           style="display:none;">
+    {% endif %}
 
     <!-- hidden next button -->
     <button type="submit" id="next-button" name="next" style="display:none;"></button>
@@ -250,6 +255,14 @@ function disableTaskInputs() {
 
 // Lockout if already finished required tasks
 document.addEventListener("DOMContentLoaded", () => {
+
+    console.log("do_ideal =", js_vars.do_ideal);   // DEBUG
+
+    if (js_vars.do_ideal === 1) {
+        console.log("HIDING STOP BUTTON");         // DEBUG
+        const stopBtn = document.getElementById("stop-working");
+        if (stopBtn) stopBtn.style.display = "none";
+    }
 
     // 1. Stop-working lockout (persistent)
     if (js_vars.stopped_work === true) {

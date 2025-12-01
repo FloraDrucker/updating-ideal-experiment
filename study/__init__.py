@@ -1536,6 +1536,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
             }
 
 
+
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
@@ -1545,9 +1546,6 @@ class Task(Page):
 
     @staticmethod
     def vars_for_template(player: Player):
-        """Provide constant start time & total time for the JS timer."""
-
-        # Only set start time once per round
         if player.task_start_time == 0:
             player.task_start_time = time.time()
 
@@ -1572,6 +1570,7 @@ class Task(Page):
             required_tasks=player.ideal_to_do,
             timeout_seconds=cfg['work_length_seconds'],
             stopped_work=player.stopped_work,
+            do_ideal=int(player.do_ideal),
         )
 
 
