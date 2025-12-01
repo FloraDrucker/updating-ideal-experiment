@@ -245,15 +245,15 @@ td {
     z-index:9999;
     text-align:center;
     width:300px;
-">
+   ">
     <p id="attention-message" style="font-size:18px;font-weight:bold;"></p>
-    <button id="attention-button" style="
-        margin-top:15px;
-        padding:10px 20px;
-        font-weight:bold;
-        background:#c8ffc8;
+    <button id="attention-button" type="button" style="
+    margin-top:15px;
+    padding:10px 20px;
+    font-weight:bold;
+    background:#c8ffc8;
     ">
-        I'm here
+    I'm here
     </button>
 </div>
 
@@ -499,11 +499,12 @@ function showAttentionCheck() {
 
     const popup = document.getElementById("attention-check");
     const msg   = document.getElementById("attention-message");
+    const btn   = document.getElementById("attention-button");
 
     msg.innerText = "Please press the button below.";
+    btn.style.display = "block";     // <-- IMPORTANT
     popup.style.display = "block";
 
-    // Fail if no click after 5 seconds
     attentionCheckTimer = setTimeout(() => {
         if (attentionCheckActive) {
             failAttentionCheck();
@@ -518,6 +519,10 @@ function failAttentionCheck() {
 
     const popup = document.getElementById("attention-check");
     const msg   = document.getElementById("attention-message");
+    const btn   = document.getElementById("attention-button");
+
+    // HIDE the button for failed warnings
+    btn.style.display = "none";   // <-- NEW
 
     if (attentionChecksFailed === 1) {
         msg.innerText = "You failed an attention check. If you fail the next one, you will not get paid for the non-work option.";
@@ -525,11 +530,11 @@ function failAttentionCheck() {
         msg.innerText = "You failed another attention check. You will not get paid for the non-work option.";
     }
 
-    // Keep warning visible briefly
     setTimeout(() => {
         popup.style.display = "none";
     }, 3000);
 }
+
 
 document.getElementById("attention-button").onclick = function () {
     if (!attentionCheckActive) return;
