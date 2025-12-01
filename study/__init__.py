@@ -57,6 +57,8 @@ class Player(BasePlayer):
     work_seconds = models.IntegerField(initial=0) # This tracks the working time
     nonwork_seconds = models.IntegerField(initial=0)  # Tracking non-work time
     stopped_work = models.BooleanField(initial=False)
+    attention_checks_received = models.IntegerField(initial=0)
+    attention_checks_failed = models.IntegerField(initial=0)
     do_ideal = models.BooleanField(initial=False) # whether the participant has to do the stated ideal number of tasks
     ideal_to_do = models.IntegerField(default=999)
     ideal_index = models.IntegerField(null=True, blank=True, default=None)
@@ -1133,11 +1135,34 @@ def live_update_performance(player: Player, data):
 
     pid = player.id_in_group
 
-    # ------------------------------------------------------------
-    # INIT (first time the page loads)
-    # ------------------------------------------------------------
-    if data.get('init'):
-        if not player.field_maybe_none('current_dict') or not player.field_maybe_none('current_word'):
+    # Convenience shortcuts
+    frozen = player.stopped_work or player.performance >= player.ideal_to_do
+
+    # ============================================================
+    # INIT (first load, refresh, or back-button reload)
+    # ============================================================
+    if data.get("init"):
+
+        # --- If task is frozen, DO NOT generate new dict/word ---
+        if frozen:
+            d = json.loads(player.current_dict) if player.current_dict else {}
+            w = json.loads(player.current_word) if player.current_word else []
+
+            return {
+                pid: dict(
+                    init=True,
+                    performance=player.performance,
+                    mistakes=player.mistakes,
+                    work_seconds=player.work_seconds,
+                    stopped_work=True,
+                    dict=d,
+                    word=w,
+                    shuffle=False
+                )
+            }
+
+        # --- Normal init: load or create task ---
+        if not player.current_dict or not player.current_word:
             d = build_random_dict()
             w = build_random_word(C.TASK_LENGTH)
             player.current_dict = json.dumps(d)
@@ -1152,16 +1177,17 @@ def live_update_performance(player: Player, data):
                 performance=player.performance,
                 mistakes=player.mistakes,
                 work_seconds=player.work_seconds,
+                stopped_work=False,
                 dict=d,
                 word=w,
                 shuffle=False
             )
         }
 
-    # ------------------------------------------------------------
-    # REQUEST_UPDATE (tab refocus, but no state changes)
-    # ------------------------------------------------------------
-    if data.get('request_update'):
+    # ============================================================
+    # REQUEST_UPDATE (you may keep or remove depending on your needs)
+    # ============================================================
+    if data.get("request_update"):
         d = json.loads(player.current_dict) if player.current_dict else {}
         w = json.loads(player.current_word) if player.current_word else []
         return {
@@ -1169,18 +1195,62 @@ def live_update_performance(player: Player, data):
                 performance=player.performance,
                 mistakes=player.mistakes,
                 work_seconds=player.work_seconds,
+                stopped_work=player.stopped_work,
                 dict=d,
                 word=w,
                 shuffle=False
             )
         }
 
-    # ------------------------------------------------------------
-    # STOP WORKING — final work_seconds is stored and nothing else changes
-    # ------------------------------------------------------------
+    # ============================================================
+    # STOP WORKING  → freeze permanently
+    # ============================================================
     if data.get("stop_work"):
-        player.work_seconds = int(data["work_seconds"])
         player.stopped_work = True
+        player.work_seconds = int(data["work_seconds"])
+
+        # Keep current task frozen
+        d = json.loads(player.current_dict) if player.current_dict else {}
+        w = json.loads(player.current_word) if player.current_word else []
+
+        return {
+            pid: dict(
+                performance=player.performance,
+                mistakes=player.mistakes,
+                work_seconds=player.work_seconds,
+                stopped_work=True,
+                dict=d,
+                word=w,
+                shuffle=False
+            )
+        }
+
+    # ============================================================
+    # PERFORMANCE update → increment + refresh dict/word (only if NOT frozen)
+    # ============================================================
+    if "performance" in data:
+        if not frozen:
+            player.performance = data["performance"]
+
+            d = build_random_dict()
+            w = build_random_word(C.TASK_LENGTH)
+
+            player.current_dict = json.dumps(d)
+            player.current_word = json.dumps(w)
+
+            return {
+                pid: dict(
+                    performance=player.performance,
+                    mistakes=player.mistakes,
+                    work_seconds=player.work_seconds,
+                    stopped_work=False,
+                    dict=d,
+                    word=w,
+                    shuffle=True
+                )
+            }
+
+        # If frozen, ignore new performance submissions silently
         return {
             pid: dict(
                 performance=player.performance,
@@ -1191,37 +1261,29 @@ def live_update_performance(player: Player, data):
             )
         }
 
-    # ------------------------------------------------------------
-    # PERFORMANCE update ⇒ increment AND refresh dict/word
-    # ------------------------------------------------------------
-    if 'performance' in data:
-        player.performance = data['performance']
+    # ============================================================
+    # Mistakes-only update
+    # ============================================================
+    if "mistakes" in data:
+        if not frozen:
+            player.mistakes = data["mistakes"]
+        # if frozen: ignore silently
 
-        d = build_random_dict()
-        w = build_random_word(C.TASK_LENGTH)
-        player.current_dict = json.dumps(d)
-        player.current_word = json.dumps(w)
+    # ============================================================
+    # Attention check handlers
+    # ============================================================
+    if data.get("attention_check_received"):
+        player.attention_checks_received += 1
 
-        return {
-            pid: dict(
-                performance=player.performance,
-                mistakes=player.mistakes,
-                work_seconds=player.work_seconds,
-                dict=d,
-                word=w,
-                shuffle=True
-            )
-        }
+    if data.get("attention_check_failed"):
+        player.attention_checks_failed += 1
 
-    # ------------------------------------------------------------
-    # Mistakes only (no word refresh)
-    # ------------------------------------------------------------
-    if 'mistakes' in data:
-        player.mistakes = data['mistakes']
+    if data.get("attention_check_passed"):
+        pass  # nothing to store server-side, but message is acknowledged
 
-    # ------------------------------------------------------------
-    # DEFAULT: just return current state
-    # ------------------------------------------------------------
+    # ============================================================
+    # DEFAULT: return current state unchanged
+    # ============================================================
     d = json.loads(player.current_dict) if player.current_dict else {}
     w = json.loads(player.current_word) if player.current_word else []
 
@@ -1230,11 +1292,13 @@ def live_update_performance(player: Player, data):
             performance=player.performance,
             mistakes=player.mistakes,
             work_seconds=player.work_seconds,
+            stopped_work=player.stopped_work,
             dict=d,
             word=w,
             shuffle=False
         )
     }
+
 
 def get_timeout_seconds(player):
     config = player.session.config
@@ -1536,7 +1600,6 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
             }
 
 
-
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
@@ -1571,6 +1634,8 @@ class Task(Page):
             timeout_seconds=cfg['work_length_seconds'],
             stopped_work=player.stopped_work,
             do_ideal=int(player.do_ideal),
+            checks_received=player.attention_checks_received,
+            checks_failed=player.attention_checks_failed,
         )
 
 
@@ -1609,7 +1674,9 @@ class Task(Page):
             'performance:', p.performance,
             'mistakes:', p.mistakes,
             'work seconds:', p.work_seconds,
-            'nonwork seconds:', p.nonwork_seconds
+            'nonwork seconds:', p.nonwork_seconds,
+            'total attention checks received:', p.attention_checks_received,
+            'total attention checks failed:', p.attention_checks_failed
         )
 
 
