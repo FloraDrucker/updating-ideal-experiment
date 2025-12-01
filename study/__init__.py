@@ -1535,7 +1535,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
-    form_fields = ['performance', 'mistakes', 'work_seconds']
+    form_fields = ['performance', 'mistakes', 'work_seconds', 'nonwork_seconds']
 
     get_timeout_seconds = get_timeout_seconds  # keep server cutoff
 
@@ -1582,11 +1582,13 @@ class Task(Page):
 
         # Store outcomes
         idx = p.round_number - 1
+        p.nonwork_seconds = p.session.config['work_length_seconds'] - p.work_seconds
         pp.vars['actual'][idx] = p.performance
         pp.vars['mistakes'][idx] = p.mistakes
         pp.vars['work_seconds'][idx] = p.work_seconds
+        pp.vars['nonwork_seconds'][idx] = p.nonwork_seconds
 
-        print('performance:', p.performance, 'mistakes:', p.mistakes, 'work seconds:', p.work_seconds)
+        print('performance:', p.performance, 'mistakes:', p.mistakes, 'work seconds:', p.work_seconds, 'nonwork seconds:', p.nonwork_seconds)
 
 
 class Results(Page):
