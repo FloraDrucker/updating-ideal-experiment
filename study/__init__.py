@@ -1536,7 +1536,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
-    form_fields = ['performance', 'mistakes', 'work_seconds', 'nonwork_seconds']
+    form_fields = ['performance', 'mistakes']
 
     get_timeout_seconds = get_timeout_seconds  # keep server cutoff
 
