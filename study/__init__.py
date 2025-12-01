@@ -57,6 +57,8 @@ class Player(BasePlayer):
     work_seconds = models.IntegerField(initial=0) # This tracks the working time
     nonwork_seconds = models.IntegerField(initial=0)  # Tracking non-work time
     stopped_work = models.BooleanField(initial=False)
+    attention_checks_received = models.IntegerField(initial=0)
+    attention_checks_failed = models.IntegerField(initial=0)
     do_ideal = models.BooleanField(initial=False) # whether the participant has to do the stated ideal number of tasks
     ideal_to_do = models.IntegerField(default=999)
     ideal_index = models.IntegerField(null=True, blank=True, default=None)
@@ -1225,6 +1227,20 @@ def live_update_performance(player: Player, data):
     d = json.loads(player.current_dict) if player.current_dict else {}
     w = json.loads(player.current_word) if player.current_word else []
 
+    # ------------------------------------------------------------
+    # ATTENTION CHECKS
+    # ------------------------------------------------------------
+    if data.get("attention_check_received"):
+        player.attention_checks_received += 1
+        return {player.id_in_group: dict()}
+
+    if data.get("attention_check_failed"):
+        player.attention_checks_failed += 1
+        return {player.id_in_group: dict()}
+
+    if data.get("attention_check_passed"):
+        return {player.id_in_group: dict()}
+
     return {
         pid: dict(
             performance=player.performance,
@@ -1571,6 +1587,8 @@ class Task(Page):
             timeout_seconds=cfg['work_length_seconds'],
             stopped_work=player.stopped_work,
             do_ideal=int(player.do_ideal),
+            checks_received=player.attention_checks_received,
+            checks_failed=player.attention_checks_failed,
         )
 
 
@@ -1609,7 +1627,9 @@ class Task(Page):
             'performance:', p.performance,
             'mistakes:', p.mistakes,
             'work seconds:', p.work_seconds,
-            'nonwork seconds:', p.nonwork_seconds
+            'nonwork seconds:', p.nonwork_seconds,
+            'attention checks received:', p.attention_checks_received,
+            'attention checks failed:', p.attention_checks_failed
         )
 
 

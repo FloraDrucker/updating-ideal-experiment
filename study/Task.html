@@ -233,6 +233,30 @@ td {
 <br><br>
 </div>
 
+<div id="attention-check" style="
+    display:none;
+    position:fixed;
+    top:20%;
+    left:50%;
+    transform:translateX(-50%);
+    background:white;
+    border:3px solid #f0c000;
+    padding:20px;
+    z-index:9999;
+    text-align:center;
+    width:300px;
+">
+    <p id="attention-message" style="font-size:18px;font-weight:bold;"></p>
+    <button id="attention-button" style="
+        margin-top:15px;
+        padding:10px 20px;
+        font-weight:bold;
+        background:#c8ffc8;
+    ">
+        I'm here
+    </button>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -256,40 +280,47 @@ function disableTaskInputs() {
 // Lockout if already finished required tasks
 document.addEventListener("DOMContentLoaded", () => {
 
-    console.log("do_ideal =", js_vars.do_ideal);   // DEBUG
-
+    // Hide stop working button if do_ideal = 1
     if (js_vars.do_ideal === 1) {
-        console.log("HIDING STOP BUTTON");         // DEBUG
         const stopBtn = document.getElementById("stop-working");
         if (stopBtn) stopBtn.style.display = "none";
     }
 
-    // 1. Stop-working lockout (persistent)
+    // 1. Load frozen state if Stop Working was pressed earlier
     if (js_vars.stopped_work === true) {
         disableTaskInputs();
         document.getElementById("submit-solution").disabled = true;
-        document.getElementById("stop-working").disabled = true;
+        const stopBtn = document.getElementById("stop-working");
+        if (stopBtn) stopBtn.disabled = true;
 
         const msg = document.getElementById("error-form");
         msg.classList.remove("otree-form-errors");
         msg.classList.add("success-message");
         msg.innerText = "You stopped working earlier. Leisure time continues.";
         msg.style.display = "block";
-        return;  // prevents the required-tasks check from overwriting this
+
+        startAttentionChecksIfNeeded();   // NEW
+
+        return;
     }
 
-    // 2. Required tasks lockout (existing behavior)
+    // 2. Required Tasks Completion Freeze
     const perf = Number("{{ player.performance }}");
     if (perf >= required_tasks) {
         disableTaskInputs();
         document.getElementById("submit-solution").disabled = true;
-        document.getElementById("stop-working").disabled = true;
+        const stopBtn = document.getElementById("stop-working");
+        if (stopBtn) stopBtn.disabled = true;
 
         const msg = document.getElementById("error-form");
         msg.classList.remove("otree-form-errors");
         msg.classList.add("success-message");
         msg.innerText = "You have completed all required tasks. Flat-fee time has begun.";
         msg.style.display = "block";
+
+        startAttentionChecksIfNeeded();   // NEW
+
+        return;
     }
 });
 
@@ -440,12 +471,97 @@ function stopWorking() {
         stop_work: true,
         work_seconds: work
     });
+
+    startAttentionChecks();
 }
 
 
 // PAGE TITLE
 document.title = "Task";
 let originalTitle = document.title;
+
+// ============================================
+// ATTENTION CHECK SYSTEM
+// ============================================
+
+let attentionCheckActive = false;
+let attentionCheckTimer = null;
+let attentionCheckInterval = null;
+
+let attentionChecksReceived = js_vars.checks_received;
+let attentionChecksFailed   = js_vars.checks_failed;
+
+function showAttentionCheck() {
+    attentionChecksReceived++;
+    liveSend({ attention_check_received: true });
+
+    attentionCheckActive = true;
+
+    const popup = document.getElementById("attention-check");
+    const msg   = document.getElementById("attention-message");
+
+    msg.innerText = "Please press the button below.";
+    popup.style.display = "block";
+
+    // Fail if no click after 5 seconds
+    attentionCheckTimer = setTimeout(() => {
+        if (attentionCheckActive) {
+            failAttentionCheck();
+        }
+    }, 5000);
+}
+
+function failAttentionCheck() {
+    attentionCheckActive = false;
+    attentionChecksFailed++;
+    liveSend({ attention_check_failed: true });
+
+    const popup = document.getElementById("attention-check");
+    const msg   = document.getElementById("attention-message");
+
+    if (attentionChecksFailed === 1) {
+        msg.innerText = "You failed an attention check. If you fail the next one, you will not get paid for the non-work option.";
+    } else {
+        msg.innerText = "You failed another attention check. You will not get paid for the non-work option.";
+    }
+
+    // Keep warning visible briefly
+    setTimeout(() => {
+        popup.style.display = "none";
+    }, 3000);
+}
+
+document.getElementById("attention-button").onclick = function () {
+    if (!attentionCheckActive) return;
+    attentionCheckActive = false;
+
+    const popup = document.getElementById("attention-check");
+    popup.style.display = "none";
+
+    clearTimeout(attentionCheckTimer);
+
+    liveSend({ attention_check_passed: true });
+};
+
+function startAttentionChecks() {
+    if (attentionCheckInterval) return; // avoid duplicates
+
+    // Every 60 sec
+    attentionCheckInterval = setInterval(() => {
+        showAttentionCheck();
+    }, 60000);
+}
+
+// Start checks whenever task is frozen
+function startAttentionChecksIfNeeded() {
+    if (attentionCheckInterval) return;
+
+    const perf = Number(document.getElementById("performance").value);
+
+    if (js_vars.stopped_work === true || perf >= required_tasks) {
+        startAttentionChecks();
+    }
+}
 
 </script>
 
