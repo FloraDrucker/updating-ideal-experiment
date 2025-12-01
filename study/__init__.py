@@ -56,6 +56,7 @@ class Player(BasePlayer):
     mistakes = models.IntegerField(initial=0, blank=False)
     work_seconds = models.IntegerField(initial=0) # This tracks the working time
     nonwork_seconds = models.IntegerField(initial=0)  # Tracking non-work time
+    stopped_work = models.BooleanField(initial=False)
     do_ideal = models.BooleanField(initial=False) # whether the participant has to do the stated ideal number of tasks
     ideal_to_do = models.IntegerField(default=999)
     ideal_index = models.IntegerField(null=True, blank=True, default=None)
@@ -1179,11 +1180,13 @@ def live_update_performance(player: Player, data):
     # ------------------------------------------------------------
     if data.get("stop_work"):
         player.work_seconds = int(data["work_seconds"])
+        player.stopped_work = True
         return {
             pid: dict(
                 performance=player.performance,
                 mistakes=player.mistakes,
                 work_seconds=player.work_seconds,
+                stopped_work=True,
                 shuffle=False
             )
         }
@@ -1567,7 +1570,8 @@ class Task(Page):
         cfg = player.session.config
         return dict(
             required_tasks=player.ideal_to_do,
-            timeout_seconds=cfg['work_length_seconds']
+            timeout_seconds=cfg['work_length_seconds'],
+            stopped_work=player.stopped_work,
         )
 
 

@@ -250,6 +250,22 @@ function disableTaskInputs() {
 
 // Lockout if already finished required tasks
 document.addEventListener("DOMContentLoaded", () => {
+
+    // 1. Stop-working lockout (persistent)
+    if (js_vars.stopped_work === true) {
+        disableTaskInputs();
+        document.getElementById("submit-solution").disabled = true;
+        document.getElementById("stop-working").disabled = true;
+
+        const msg = document.getElementById("error-form");
+        msg.classList.remove("otree-form-errors");
+        msg.classList.add("success-message");
+        msg.innerText = "You stopped working earlier. Leisure time continues.";
+        msg.style.display = "block";
+        return;  // prevents the required-tasks check from overwriting this
+    }
+
+    // 2. Required tasks lockout (existing behavior)
     const perf = Number("{{ player.performance }}");
     if (perf >= required_tasks) {
         disableTaskInputs();
