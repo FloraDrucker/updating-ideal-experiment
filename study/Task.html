@@ -398,28 +398,20 @@ function stopWorking() {
     msg.innerText = "You chose to stop working. Leisure time begins now.";
     msg.style.display = "block";
 
-    // Compute work time
+    // Compute work time (so far)
     const now = Math.floor(Date.now() / 1000);
     const start = {{ task_start_time|json }};
     const work = Math.floor(now - start);
 
-    // Update hidden field for form submission fallback
+    // Save in hidden form field
     document.getElementById("work_seconds").value = work;
 
-    // Send work time immediately to server
+    // Send to server via websockets
     liveSend({
         stop_work: true,
         work_seconds: work
     });
-
-    // Wait a moment so the liveSend round trip does not get interrupted
-    setTimeout(() => {
-        // Auto submit the page to trigger before_next_page()
-        document.getElementById("next-button").click();
-    }, 300);
 }
-
-
 
 
 // PAGE TITLE

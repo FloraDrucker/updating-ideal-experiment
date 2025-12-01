@@ -1570,9 +1570,23 @@ class Task(Page):
             timeout_seconds=cfg['work_length_seconds']
         )
 
+
     @staticmethod
     def before_next_page(player: Player, timeout_happened: bool):
-        """Finalize results of this round."""
+
+        total = player.session.config['work_length_seconds']
+
+        # CASE 1: Stop working was pressed -> work_seconds already stored
+        if player.work_seconds > 0:
+            pass  # keep stored value
+
+        # CASE 2: Stop working NOT pressed
+        else:
+            # They worked until timeout
+            player.work_seconds = total
+
+        # Nonwork seconds always the remainder
+        player.nonwork_seconds = total - player.work_seconds
 
         # Cap performance
         if player.performance > player.ideal_to_do:
@@ -1580,16 +1594,20 @@ class Task(Page):
 
         p = player
         pp = p.participant
-
-        # Store outcomes
         idx = p.round_number - 1
-        p.nonwork_seconds = p.session.config['work_length_seconds'] - p.work_seconds
+
+        # Save round results
         pp.vars['actual'][idx] = p.performance
         pp.vars['mistakes'][idx] = p.mistakes
         pp.vars['work_seconds'][idx] = p.work_seconds
         pp.vars['nonwork_seconds'][idx] = p.nonwork_seconds
 
-        print('performance:', p.performance, 'mistakes:', p.mistakes, 'work seconds:', p.work_seconds, 'nonwork seconds:', p.nonwork_seconds)
+        print(
+            'performance:', p.performance,
+            'mistakes:', p.mistakes,
+            'work seconds:', p.work_seconds,
+            'nonwork seconds:', p.nonwork_seconds
+        )
 
 
 class Results(Page):
