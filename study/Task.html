@@ -351,6 +351,10 @@ function myFunction() {
             msg.classList.add("success-message");
             msg.innerText = "You have completed all required tasks. Flat-fee time has begun.";
             msg.style.display = "block";
+
+            js_vars.stopped_work = true;
+            startAttentionChecksIfNeeded();
+
             return;
         }
     }
@@ -563,7 +567,10 @@ function startAttentionChecksIfNeeded() {
 
     const perf = Number(document.getElementById("performance").value);
 
-    if (js_vars.stopped_work === true || perf >= required_tasks) {
+    const stopped_client_side =
+    document.getElementById("submit-solution").disabled === true;
+
+    if (stopped_client_side) {
         startAttentionChecks();
     }
 }
