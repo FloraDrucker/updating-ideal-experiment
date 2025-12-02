@@ -296,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const msg = document.getElementById("error-form");
         msg.classList.remove("otree-form-errors");
         msg.classList.add("success-message");
-        msg.innerText = "You stopped working earlier. Leisure time continues.";
+        msg.innerText = "You chose to stop working. Non-work time begins now.";
         msg.style.display = "block";
 
         startAttentionChecksIfNeeded();   // NEW
@@ -349,11 +349,16 @@ function myFunction() {
             const msg = document.getElementById("error-form");
             msg.classList.remove("otree-form-errors");
             msg.classList.add("success-message");
-            msg.innerText = "You have completed all required tasks. Flat-fee time has begun.";
+            msg.innerText = "You have completed all required tasks. Non-work time has begun.";
             msg.style.display = "block";
 
             js_vars.stopped_work = true;
             startAttentionChecksIfNeeded();
+
+            // Force a reload so the Back button cannot restore work mode
+            setTimeout(() => {
+            window.location.reload();
+            }, 300);
 
             return;
         }
@@ -459,7 +464,7 @@ function stopWorking() {
     const msg = document.getElementById("error-form");
     msg.classList.remove("otree-form-errors");
     msg.classList.add("success-message");
-    msg.innerText = "You chose to stop working. Leisure time begins now.";
+    msg.innerText = "You chose to stop working. Non-work time begins now.";
     msg.style.display = "block";
 
     // Compute work time (so far)
@@ -477,6 +482,11 @@ function stopWorking() {
     });
 
     startAttentionChecks();
+
+    // Force a reload so the Back button cannot restore work mode
+    setTimeout(() => {
+    window.location.reload();
+    }, 300);
 }
 
 
