@@ -202,9 +202,19 @@ td {
 <!-- Hidden: final work time -->
 <input type="hidden" name="work_seconds" id="work_seconds" value="{{ player.work_seconds }}">
 
+{% if player.do_ideal == 1 %}
 <p>
-    Your performance so far: <span id="performance-display">{{ player.performance }}</span> tasks.
+    Your performance so far:
+    <span id="performance-display">{{ player.performance }}</span>
+    out of {{ required_tasks }} tasks.
 </p>
+{% else %}
+<p>
+    Your performance so far:
+    <span id="performance-display">{{ player.performance }}</span> tasks.
+</p>
+{% endif %}
+
 
 <div class="test" id="hide_task">
 
@@ -374,6 +384,7 @@ function myFunction() {
         document.getElementById("performance").value = temp;
 
         document.getElementById("performance-display").innerText = temp;
+
         document.getElementById("error-form").style.display = "none";
 
         liveSend({ performance: temp });
@@ -436,6 +447,7 @@ function liveRecv(data) {
     if (typeof data.performance === 'number') {
         document.getElementById("performance").value = data.performance;
         document.getElementById("performance-display").innerText = data.performance;
+
     }
     if (typeof data.mistakes === 'number') {
         document.getElementById("mistakes").value = data.mistakes;
