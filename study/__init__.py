@@ -1044,6 +1044,8 @@ def creating_session(subsession: Subsession):
         ppvars['ideal_index'] = None
         ppvars['work_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
         ppvars['nonwork_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
+        ppvars['attention_checks_received'] = {i: 0 for i in range(C.NUM_ROUNDS)}
+        ppvars['attention_checks_failed'] = {i: 0 for i in range(C.NUM_ROUNDS)}
 
         # Risk preferences
         ppvars['risk_choices'] = {i: None for i in range(21)}
@@ -1621,6 +1623,8 @@ class Task(Page):
         pp.vars['mistakes'][idx] = p.mistakes
         pp.vars['work_seconds'][idx] = p.work_seconds
         pp.vars['nonwork_seconds'][idx] = p.nonwork_seconds
+        pp.vars['attention_checks_received'][idx] = p.attention_checks_received
+        pp.vars['attention_checks_failed'][idx] = p.attention_checks_failed
 
         print(
             'performance:', p.performance,
