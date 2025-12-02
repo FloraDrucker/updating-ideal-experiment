@@ -161,7 +161,32 @@ td {
 <br>
 
 <!-- Our custom timer display -->
-<div id="task-timer" class="pretty-timer"></div>
+<div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+
+    <!-- Timer -->
+    <div id="task-timer" class="pretty-timer"></div>
+
+    <!-- Smaller Stop Working button -->
+    {% if player.do_ideal == 0 %}
+        <button id="stop-working"
+                type="button"
+                onclick="stopWorking()"
+                style="
+                    padding:4px 10px;
+                    font-size:13px;
+                    background:#ffcccc;
+                    border:1px solid #cc9999;
+                    border-radius:4px;
+                    font-weight:bold;
+                ">
+            Stop working
+        </button>
+    {% else %}
+        <button id="stop-working" style="display:none;"></button>
+    {% endif %}
+
+</div>
+
 
 <input type="hidden" name="performance" id="performance">
 <span hidden>{{ form.performance.errors }}</span>
@@ -196,17 +221,6 @@ td {
 
     <!-- Submit -->
     <input type="button" id="submit-solution" onclick="myFunction()" value="Submit">
-
-    <!-- Stop working button -->
-    {% if player.do_ideal == 0 %}
-    <input type="button" id="stop-working"
-           value="Stop working"
-           style="background:#ffcccc; font-weight:bold;"
-           onclick="stopWorking()">
-    {% else %}
-    <input type="button" id="stop-working"
-           style="display:none;">
-    {% endif %}
 
     <!-- hidden next button -->
     <button type="submit" id="next-button" name="next" style="display:none;"></button>
