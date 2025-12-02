@@ -1838,18 +1838,19 @@ class Payment(Page):
         config = player.session.config
         chosen_part = C.PARTS[player.task_chosen_part]
         performance_in_part = player.participant.vars['actual'][player.task_chosen_part]
-        not_done_ideal = 0
+        not_done_ideal = False
+        failed_attention_checks = False
         if player.task_chosen_part == 5 and player.participant.vars['do_ideal'] and performance_in_part < player.participant.vars['ideal_to_do']:
-            not_done_ideal = 1
+            not_done_ideal = True
             performance_to_pay = 0
         else:
             performance_to_pay = performance_in_part
 
         payoff_for_work = base_constants.TRUE_PAYOFF*performance_to_pay
         payoff_in_usd = cu(config['real_world_currency_per_point']*payoff_for_work)
-        work_length_seconds = config['work_length_seconds']
-        leisure_minutes = round((work_length_seconds - player.participant.vars['work_seconds'][player.task_chosen_part])/60, 2)
-        if not_done_ideal:
+        leisure_minutes = round((player.participant.vars['nonwork_seconds'][player.task_chosen_part])/60, 2)
+        failed_attention_checks = (player.participant.vars['failed_attention_checks'][player.task_chosen_part] > 1)
+        if not_done_ideal or failed_attention_checks:
             leisure_to_pay = 0
         else:
             leisure_to_pay = leisure_minutes
@@ -1887,6 +1888,7 @@ class Payment(Page):
             'percent_ideal': base_constants.PERCENT_IDEAL,
             'do_ideal': ppvars['do_ideal'],
             'not_done_ideal': not_done_ideal,
+            'failed_attention_checks': failed_attention_checks,
             'true_payoff': base_constants.TRUE_PAYOFF,
             'payoff_for_work': payoff_for_work,
             'payoff_for_work_usd': payoff_in_usd,
