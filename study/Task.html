@@ -149,6 +149,12 @@ td {
     display: none;
 }
 
+@keyframes pulseAttention {
+    0% { box-shadow:0 0 10px rgba(255,0,0,0.4); }
+    50% { box-shadow:0 0 25px rgba(255,0,0,0.9); }
+    100% { box-shadow:0 0 10px rgba(255,0,0,0.4); }
+}
+
 </style>
 {% endblock %}
 
@@ -250,25 +256,42 @@ td {
 <div id="attention-check" style="
     display:none;
     position:fixed;
-    top:20%;
+    top:18%;
     left:50%;
     transform:translateX(-50%);
     background:white;
-    border:3px solid #f0c000;
-    padding:20px;
+    border:4px solid #cc0000;          /* red border */
+    padding:30px 25px;
     z-index:9999;
     text-align:center;
-    width:300px;
-   ">
-    <p id="attention-message" style="font-size:18px;font-weight:bold;"></p>
-    <button id="attention-button" type="button" style="
-    margin-top:15px;
-    padding:10px 20px;
-    font-weight:bold;
-    background:#c8ffc8;
-    ">
-    I'm here
-    </button>
+    width:380px;
+    border-radius:12px;
+    box-shadow:0px 0px 25px rgba(255,0,0,0.5);
+    animation: pulseAttention 1s infinite;
+">
+    <p id="attention-message" style="
+        font-size:22px;
+        font-weight:400;               /* NORMAL weight */
+        color:black;
+        margin-bottom:22px;
+    "></p>
+
+    <div style="display:flex; justify-content:center;">
+        <button id="attention-button" type="button" style="
+            padding:12px 30px;
+            font-size:18px;
+            font-weight:400;           /* NORMAL weight */
+            background:#e6e6e6;        /* light grey */
+            border:2px solid #cc0000;  /* red border */
+            color:black;
+            border-radius:6px;
+            cursor:pointer;
+            box-shadow:0px 0px 10px rgba(0,0,0,0.15);
+            text-align:center;
+        ">
+            I'm here
+        </button>
+    </div>
 </div>
 
 {% endblock %}
