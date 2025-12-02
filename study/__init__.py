@@ -1537,6 +1537,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
     def vars_for_template(player):
         config = player.session.config
         work_length_minutes = round(config['work_length_seconds'] / 60)
+
         if player.do_ideal:
             part_ideal_elicited = {8: 'first part', 12: 'last part'}
             treatment = player.participant.vars['treatment']
@@ -1839,7 +1840,6 @@ class Payment(Page):
         chosen_part = C.PARTS[player.task_chosen_part]
         performance_in_part = player.participant.vars['actual'][player.task_chosen_part]
         not_done_ideal = False
-        failed_attention_checks = False
         if player.task_chosen_part == 5 and player.participant.vars['do_ideal'] and performance_in_part < player.participant.vars['ideal_to_do']:
             not_done_ideal = True
             performance_to_pay = 0
@@ -1849,7 +1849,7 @@ class Payment(Page):
         payoff_for_work = base_constants.TRUE_PAYOFF*performance_to_pay
         payoff_in_usd = cu(config['real_world_currency_per_point']*payoff_for_work)
         leisure_minutes = round((player.participant.vars['nonwork_seconds'][player.task_chosen_part])/60, 2)
-        failed_attention_checks = (player.participant.vars['failed_attention_checks'][player.task_chosen_part] > 1)
+        failed_attention_checks = (player.participant.vars['attention_checks_failed'][player.task_chosen_part] > 1)
         if not_done_ideal or failed_attention_checks:
             leisure_to_pay = 0
         else:
