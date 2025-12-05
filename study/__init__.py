@@ -619,6 +619,7 @@ class Player(BasePlayer):
 
     ballsremembered1 = models.IntegerField(
         choices=[
+            [-1, 'I cannot remember how many times I have seen a ball with this number on it.'],
             [0, '0'],
             [1, '1'],
             [2, '2'],
@@ -630,7 +631,6 @@ class Player(BasePlayer):
             [8, '8'],
             [9, '9'],
             [10, '10'],
-            [11, 'I cannot remember how many times I have seen a ball with this number on it.'],
         ],
         blank=False,
         label='How many times have you seen a ball with the number 137 on it over the course of the experiment?'
@@ -638,6 +638,7 @@ class Player(BasePlayer):
 
     ballsremembered2 = models.IntegerField(
         choices=[
+            [-1, 'I cannot remember how many times I have seen a ball with this number on it.'],
             [0, '0'],
             [1, '1'],
             [2, '2'],
@@ -649,7 +650,6 @@ class Player(BasePlayer):
             [8, '8'],
             [9, '9'],
             [10, '10'],
-            [11, 'I cannot remember how many times I have seen a ball with this number on it.'],
         ],
         blank=False,
         label='How many times have you seen a ball with the number 109 on it over the course of the experiment?'
@@ -657,6 +657,7 @@ class Player(BasePlayer):
 
     ballsremembered3 = models.IntegerField(
         choices=[
+            [-1, 'I cannot remember how many times I have seen a ball with this number on it.'],
             [0, '0'],
             [1, '1'],
             [2, '2'],
@@ -668,7 +669,6 @@ class Player(BasePlayer):
             [8, '8'],
             [9, '9'],
             [10, '10'],
-            [11, 'I cannot remember how many times I have seen a ball with this number on it.'],
         ],
         blank=False,
         label='How many times have you seen a ball with the number 122 on it over the course of the experiment?'
