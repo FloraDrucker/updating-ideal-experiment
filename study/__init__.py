@@ -726,7 +726,7 @@ class Player(BasePlayer):
         label='Imagine the following situation: Today you unexpectedly received 1,600 U.S. dollars. How much of this amount would you donate to a good cause? (Values between 0 and 1,600 are allowed)'
     )
 
-    GPS_postpone = models.IntegerField(
+    GPS_timediscounting = models.IntegerField(
         label="Do you tend to postpone tasks even if you know it would be better to do them right away on a scale from 0 'Completely unwilling to do so' to 10 'Very willing to do so'?",
         choices=[
             [0, '0'],
@@ -1089,7 +1089,7 @@ def creating_session(subsession: Subsession):
         ppvars['GPS_patience'] = None
         ppvars['GPS_altruism1'] = None
         ppvars['GPS_altruism2'] = None
-        ppvars['GPS_postpone'] = None
+        ppvars['GPS_timediscounting'] = None
 
         # Big five
         ppvars['big5_openness1'] = None
@@ -1745,7 +1745,7 @@ class Survey4(Page):
 
     form_model = 'player'
     form_fields = [
-        'GPS_patience', 'GPS_altruism1', 'GPS_altruism2', 'GPS_postpone',
+        'GPS_patience', 'GPS_altruism1', 'GPS_altruism2', 'GPS_timediscounting',
         'big5_agreeable1', 'big5_agreeable2', 'big5_agreeable3',
         'big5_neuroticism1', 'big5_neuroticism2', 'big5_neuroticism3'
     ]
@@ -1756,7 +1756,7 @@ class Survey4(Page):
         ppvars['GPS_patience'] = player.GPS_patience
         ppvars['GPS_altruism1'] = player.GPS_altruism1
         ppvars['GPS_altruism2'] = player.GPS_altruism2
-        ppvars['GPS_postpone'] = player.GPS_postpone
+        ppvars['GPS_timediscounting'] = player.GPS_timediscounting
         ppvars['big5_agreeable1'] = player.big5_agreeable1
         ppvars['big5_agreeable2'] = player.big5_agreeable2
         ppvars['big5_agreeable3'] = player.big5_agreeable3

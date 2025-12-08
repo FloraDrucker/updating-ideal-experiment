@@ -9,7 +9,7 @@ class C(BaseConstants):
     NAME_IN_URL = 'instructions_consent'
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 1
-    TOTAL_DURATION = 90
+    TOTAL_DURATION = 75
     AVG_ADD_INCOME = cu(7.0)  # average extra income they can earn from the tasks
     BELIEF_BONUS = 670  # bonus for correct beliefs
     SCALING_PAR = 900
