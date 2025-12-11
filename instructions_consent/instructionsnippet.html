@@ -3,11 +3,11 @@
 <div class="text">
 
 <p>
-    In the trial and in all five consecutive parts, you will work on the task you just saw for at most 10 minutes. You will receive <b> a fixed payoff {{ if not player.treatment }} of {{ C.TRUE_PAYOFF }} points {{ endif }} </b> for each correctly solved encryption task in the part that will be randomly chosen for payment. {{ if player.treatment }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: we chose <b> a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }}</b>, and you will have to guess this number. {{ endif }}
+    In the trial and in all five consecutive parts, you will work on the task you just saw for at most 8 minutes. You will receive <b> a fixed payoff {{ if not player.treatment }} of {{ C.TRUE_PAYOFF }} points {{ endif }} </b> for each correctly solved encryption task in the part that will be randomly chosen for payment. {{ if player.treatment }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: we chose <b> a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }}</b>, and you will have to guess this number. {{ endif }}
 </p>
 
 <p>
-    After the trial, at the beginning of the first part, we will ask you to state how many tasks you would <b>ideally want to do</b> within the 10 minutes <b>{{ if player.treatment }}for different levels of the task payoff{{ else }}for {{C.TRUE_PAYOFF }} points per task{{ endif }},</b> given your experience with the trial task and the alternative options you have. Additionally, we will ask you to <b>predict how many tasks you {{ if player.treatment }}would actually do</b> for these payoff levels{{ else }}will actually do{{ endif }}</b>. There is a {{ C.PERCENT_IDEAL }}% chance that in part 5 you will have to do as many tasks as you stated as ideal {{ if player.treatment }}for the payoff per task {{ endif }}. {{ if player.treatment }}Should the true payoff per task be different from the payoffs for which you stated your ideal work amounts, we will extrapolate the ideal amount of work at the true payoff level from your answers.{{ endif }} With {{ percent_normal }}% probability, however, you will be able to complete as many tasks as you want in part five, too.
+    After the trial, at the beginning of the first part, we will ask you to state how many tasks you would <b>ideally want to do</b> within the 8 minutes <b>{{ if player.treatment }}for different levels of the task payoff{{ else }}for {{C.TRUE_PAYOFF }} points per task{{ endif }},</b> given your experience with the trial task and the alternative options you have. Additionally, we will ask you to <b>predict how many tasks you {{ if player.treatment }}would actually do</b> for these payoff levels{{ else }}will actually do{{ endif }}</b>. There is a {{ C.PERCENT_IDEAL }}% chance that in part 5 you will have to do as many tasks as you stated as ideal{{ if player.treatment }} for the payoff per task{{ endif }}. {{ if player.treatment }}Should the true payoff per task be different from the payoffs for which you stated your ideal work amounts, we will extrapolate the ideal amount of work at the true payoff level from your answers.{{ endif }} With {{ percent_normal }}% probability, however, you will be able to complete as many tasks as you want in part five, too.
 </p>
 
     <br>
@@ -57,7 +57,7 @@
 <h5> 2. Further information about the {{ guess_about }} </h5>
 
 <p>
-    During the course of the study, you will get more and more information that will allow you to obtain more precise knowledge of the {{ guess_about }}. This will work in the following way: The {{ guess_about }} is <b> the average of 120 numbers</b> that lie <b>between {{ C.BENEFIT_RANGE_MIN }} {{ if player.treatment }}points{{ endif }} and {{ C.BENEFIT_RANGE_MAX }}{{ if player.treatment }} points{{ endif }}.</b> The same number can occur several times. <b>At the beginning of parts two to four,</b> we will briefly <b>display 40 of these 120 numbers</b> (represented by balls) on the screen. Each of the 120 balls will be displayed only once, so <b>you will have seen all the balls after part four.</b>
+    During the course of the study, you will get more and more information that will allow you to obtain more precise knowledge of the {{ guess_about }}. This will work in the following way: The {{ guess_about }} is <b> the average of 150 numbers</b> that lie <b>between {{ C.BENEFIT_RANGE_MIN }} {{ if player.treatment }}points{{ endif }} and {{ C.BENEFIT_RANGE_MAX }}{{ if player.treatment }} points{{ endif }}.</b> The same number can occur several times. <b>At the beginning of parts two to four,</b> we will briefly <b>display 50 of these 150 numbers</b> (represented by balls) on the screen. Each of the 150 balls will be displayed only once, so <b>you will have seen all the balls after part four.</b>
 </p>
 
 <script>
@@ -79,13 +79,12 @@
 <h5> 3. Working on the encryption task </h5>
 
 <p>
-    After receiving the information about the {{ guess_about }}, you will <b>work on the task for 10 minutes.</b> Your payment for the encryption task will be <b>{{ if player.treatment }}the fixed payoff {{ else }} {{C.TRUE_PAYOFF }} points {{ endif }}times the number of tasks you completed correctly.</b>
+    After receiving the information about the {{ guess_about }}, you will <b>work on the task for 8 minutes.</b> Your payment for the encryption task will be <b>{{ if player.treatment }}the fixed payoff {{ else }} {{C.TRUE_PAYOFF }} points {{ endif }}times the number of tasks you completed correctly.</b>
 </p>
     <p>
-    However, you do not have to work for the full 10 minutes. At any point during the 10 minutes, <b>you can stop working on the encryption task</b> by clicking on the "Stop working" button and go to the non-work activity instead for the remainder of the 10 minutes. You will receive a flat fee of <b>{{ C.FLAT_LEISURE_FEE }} points for every minute in the non-work activity</b> as long as you show you are still active in the assignment by completing <b>attention checks.</b> To do this, you need to click a button that pops up roughly once every 60 seconds and remains on the screen for 5 seconds. If you fail to click the button before it disappears, you will receive a warning message. If you fail more than one attention check, you will not get paid for the non-work activity in that part. Please note that <b>once you decide to stop working, you will NOT be able to return to the encryption task.</b>
+    However, you do not have to work for the full 8 minutes. At any point during the 8 minutes, <b>you can stop working on the encryption task</b> by clicking on the "Stop working" button and go to any non-work activity that you wish to do (e.g., using your smartphone) instead for the remainder of the 8 minutes. You will receive a flat fee of <b>{{ C.FLAT_LEISURE_FEE }} points for every minute in the non-work activity</b> as long as you show you are still active in the assignment by completing <b>attention checks.</b> To do this, you need to click a button that pops up roughly once every 60 seconds and remains on the screen for 5 seconds. If you fail to click the button before it disappears, you will receive a warning message. If you fail more than one attention check, you will not get paid for the non-work activity in that part. Please note that <b>once you decide to stop working, you will NOT be able to return to the encryption task in this part.</b>
 </p>
     <p>
-    From the second to the fifth part, before asking about your guess regarding the {{ guess_about }}, we will <b>first remind you of how many tasks you completed correctly in the previous part.</b> In the fifth part, you will not receive any new information about the {{ guess_about }} anymore, but you will still have to guess it and work on the encryption task.
     From the second to the fifth part, before asking about your guess regarding the {{ guess_about }}, we will <b>first remind you of how many tasks you completed correctly in the previous part.</b> In the fifth part, you will not receive any new information about the {{ guess_about }} anymore, but you will still have to guess it and work on the encryption task.
 </p>
 
@@ -126,7 +125,7 @@
 </p>
 
 <p>
-    If you accept to participate in the study, you may still change your mind and quit at any time. However, please note that <b>you only receive the completion bonus and the additional income if you complete the whole study.</b>
+    If you accept to participate in the study, you may still change your mind and quit at any time. However, please note that <b>you only receive a payment if you complete the whole study.</b>
 </p>
 
 <p>

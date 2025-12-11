@@ -619,6 +619,7 @@ class Player(BasePlayer):
 
     ballsremembered1 = models.IntegerField(
         choices=[
+            [-1, 'I cannot remember how many times I have seen a ball with this number on it.'],
             [0, '0'],
             [1, '1'],
             [2, '2'],
@@ -630,14 +631,14 @@ class Player(BasePlayer):
             [8, '8'],
             [9, '9'],
             [10, '10'],
-            [11, 'I cannot remember how many times I have seen a ball with this number on it.'],
         ],
         blank=False,
-        label='How many times have you seen a ball with the number 137 on it over the course of the experiment?'
+        label='How many times have you seen a ball with the number 128 on it over the course of the experiment?'
     )
 
     ballsremembered2 = models.IntegerField(
         choices=[
+            [-1, 'I cannot remember how many times I have seen a ball with this number on it.'],
             [0, '0'],
             [1, '1'],
             [2, '2'],
@@ -649,14 +650,14 @@ class Player(BasePlayer):
             [8, '8'],
             [9, '9'],
             [10, '10'],
-            [11, 'I cannot remember how many times I have seen a ball with this number on it.'],
         ],
         blank=False,
-        label='How many times have you seen a ball with the number 109 on it over the course of the experiment?'
+        label='How many times have you seen a ball with the number 102 on it over the course of the experiment?'
     )
 
     ballsremembered3 = models.IntegerField(
         choices=[
+            [-1, 'I cannot remember how many times I have seen a ball with this number on it.'],
             [0, '0'],
             [1, '1'],
             [2, '2'],
@@ -668,10 +669,9 @@ class Player(BasePlayer):
             [8, '8'],
             [9, '9'],
             [10, '10'],
-            [11, 'I cannot remember how many times I have seen a ball with this number on it.'],
         ],
         blank=False,
-        label='How many times have you seen a ball with the number 122 on it over the course of the experiment?'
+        label='How many times have you seen a ball with the number 136 on it over the course of the experiment?'
     )
 
     screenshot = models.BooleanField(
@@ -726,7 +726,7 @@ class Player(BasePlayer):
         label='Imagine the following situation: Today you unexpectedly received 1,600 U.S. dollars. How much of this amount would you donate to a good cause? (Values between 0 and 1,600 are allowed)'
     )
 
-    GPS_postpone = models.IntegerField(
+    GPS_timediscounting = models.IntegerField(
         label="Do you tend to postpone tasks even if you know it would be better to do them right away on a scale from 0 'Completely unwilling to do so' to 10 'Very willing to do so'?",
         choices=[
             [0, '0'],
@@ -1089,7 +1089,7 @@ def creating_session(subsession: Subsession):
         ppvars['GPS_patience'] = None
         ppvars['GPS_altruism1'] = None
         ppvars['GPS_altruism2'] = None
-        ppvars['GPS_postpone'] = None
+        ppvars['GPS_timediscounting'] = None
 
         # Big five
         ppvars['big5_openness1'] = None
@@ -1373,6 +1373,71 @@ class Predicted(Page):
             'treatment': treatment,
             'payoff': payoff,
         }
+
+    @staticmethod
+    def error_message(player, values):
+        """Ensure predicted ≤ ideal for every payoff level."""
+
+        payoff_map = {
+            50: ('ideal50', 'predicted50'),
+            60: ('ideal60', 'predicted60'),
+            70: ('ideal70', 'predicted70'),
+            80: ('ideal80', 'predicted80'),
+            90: ('ideal90', 'predicted90'),
+            100: ('ideal100', 'predicted100'),
+            110: ('ideal110', 'predicted110'),
+            120: ('ideal120', 'predicted120'),
+            130: ('ideal130', 'predicted130'),
+            140: ('ideal140', 'predicted140'),
+            150: ('ideal150', 'predicted150'),
+        }
+
+        # Round 2
+        if player.round_number == 2:
+
+            # --- Treatment: multiple payoff levels ---
+            if player.participant.vars['treatment']:
+                for payoff, (ideal_field, pred_field) in payoff_map.items():
+
+                    if pred_field in values:
+                        ideal_val = getattr(player, ideal_field)
+                        predicted_val = values[pred_field]
+
+                        if predicted_val > ideal_val:
+                            return (
+                                f"For payoff {payoff}, your predicted tasks "
+                                f"({predicted_val}) exceed your ideal tasks ({ideal_val})."
+                            )
+
+            # --- No treatment: only payoff 120 ---
+            else:
+                ideal_val = player.ideal120
+                predicted_val = values['predicted120']
+
+                if predicted_val > ideal_val:
+                    return (
+                        f"Your predicted number of tasks ({predicted_val}) "
+                        f"cannot exceed your ideal number ({ideal_val})."
+                    )
+
+        # Round 6
+        if player.round_number == 6:
+
+            # --- Treatment ---
+            if player.participant.vars['treatment']:
+                ideal_val = player.lastideal_t
+                predicted_val = values['lastpredicted_t']
+
+            # --- No treatment ---
+            else:
+                ideal_val = player.lastideal_c
+                predicted_val = values['lastpredicted_c']
+
+            if predicted_val > ideal_val:
+                return (
+                    f"Your predicted number of tasks ({predicted_val}) "
+                    f"cannot exceed your ideal number ({ideal_val})."
+                )
 
     @staticmethod
     def before_next_page(player, timeout_happened):
@@ -1745,7 +1810,7 @@ class Survey4(Page):
 
     form_model = 'player'
     form_fields = [
-        'GPS_patience', 'GPS_altruism1', 'GPS_altruism2', 'GPS_postpone',
+        'GPS_patience', 'GPS_altruism1', 'GPS_altruism2', 'GPS_timediscounting',
         'big5_agreeable1', 'big5_agreeable2', 'big5_agreeable3',
         'big5_neuroticism1', 'big5_neuroticism2', 'big5_neuroticism3'
     ]
@@ -1756,7 +1821,7 @@ class Survey4(Page):
         ppvars['GPS_patience'] = player.GPS_patience
         ppvars['GPS_altruism1'] = player.GPS_altruism1
         ppvars['GPS_altruism2'] = player.GPS_altruism2
-        ppvars['GPS_postpone'] = player.GPS_postpone
+        ppvars['GPS_timediscounting'] = player.GPS_timediscounting
         ppvars['big5_agreeable1'] = player.big5_agreeable1
         ppvars['big5_agreeable2'] = player.big5_agreeable2
         ppvars['big5_agreeable3'] = player.big5_agreeable3
