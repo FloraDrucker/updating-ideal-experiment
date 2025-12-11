@@ -1277,11 +1277,8 @@ class Ideal(Page):
     @staticmethod
     def get_form_fields(player):
         if player.round_number == 2:
-            if player.participant.vars['treatment']:
-                return ['ideal50', 'ideal60', 'ideal70', 'ideal80', 'ideal90', 'ideal100',
-                        'ideal110', 'ideal120', 'ideal130', 'ideal140', 'ideal150']
-            else:
-                return ['ideal120']
+            return ['ideal50', 'ideal60', 'ideal70', 'ideal80', 'ideal90', 'ideal100',
+                    'ideal110', 'ideal120', 'ideal130', 'ideal140', 'ideal150']
         elif player.round_number == 6:
             if player.participant.vars['treatment']:
                 return['lastideal_t']
