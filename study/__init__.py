@@ -633,7 +633,7 @@ class Player(BasePlayer):
             [10, '10'],
         ],
         blank=False,
-        label='How many times have you seen a ball with the number 137 on it over the course of the experiment?'
+        label='How many times have you seen a ball with the number 128 on it over the course of the experiment?'
     )
 
     ballsremembered2 = models.IntegerField(
@@ -652,7 +652,7 @@ class Player(BasePlayer):
             [10, '10'],
         ],
         blank=False,
-        label='How many times have you seen a ball with the number 109 on it over the course of the experiment?'
+        label='How many times have you seen a ball with the number 102 on it over the course of the experiment?'
     )
 
     ballsremembered3 = models.IntegerField(
@@ -671,7 +671,7 @@ class Player(BasePlayer):
             [10, '10'],
         ],
         blank=False,
-        label='How many times have you seen a ball with the number 122 on it over the course of the experiment?'
+        label='How many times have you seen a ball with the number 136 on it over the course of the experiment?'
     )
 
     screenshot = models.BooleanField(
