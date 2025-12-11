@@ -10,7 +10,7 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 1
     TOTAL_DURATION = 75
-    AVG_ADD_INCOME = cu(7.0)  # average extra income they can earn from the tasks
+    AVG_ADD_INCOME = cu(5.7)  # average extra income they can earn from the tasks
     BELIEF_BONUS = 670  # bonus for correct beliefs
     SCALING_PAR = 900
     FLAT_LEISURE_FEE = 70  # flat fee per minute of leisure
