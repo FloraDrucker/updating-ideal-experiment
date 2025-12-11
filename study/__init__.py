@@ -1375,6 +1375,71 @@ class Predicted(Page):
         }
 
     @staticmethod
+    def error_message(player, values):
+        """Ensure predicted ≤ ideal for every payoff level."""
+
+        payoff_map = {
+            50: ('ideal50', 'predicted50'),
+            60: ('ideal60', 'predicted60'),
+            70: ('ideal70', 'predicted70'),
+            80: ('ideal80', 'predicted80'),
+            90: ('ideal90', 'predicted90'),
+            100: ('ideal100', 'predicted100'),
+            110: ('ideal110', 'predicted110'),
+            120: ('ideal120', 'predicted120'),
+            130: ('ideal130', 'predicted130'),
+            140: ('ideal140', 'predicted140'),
+            150: ('ideal150', 'predicted150'),
+        }
+
+        # Round 2
+        if player.round_number == 2:
+
+            # --- Treatment: multiple payoff levels ---
+            if player.participant.vars['treatment']:
+                for payoff, (ideal_field, pred_field) in payoff_map.items():
+
+                    if pred_field in values:
+                        ideal_val = getattr(player, ideal_field)
+                        predicted_val = values[pred_field]
+
+                        if predicted_val > ideal_val:
+                            return (
+                                f"For payoff {payoff}, your predicted tasks "
+                                f"({predicted_val}) exceed your ideal tasks ({ideal_val})."
+                            )
+
+            # --- No treatment: only payoff 120 ---
+            else:
+                ideal_val = player.ideal120
+                predicted_val = values['predicted120']
+
+                if predicted_val > ideal_val:
+                    return (
+                        f"Your predicted number of tasks ({predicted_val}) "
+                        f"cannot exceed your ideal number ({ideal_val})."
+                    )
+
+        # Round 6
+        if player.round_number == 6:
+
+            # --- Treatment ---
+            if player.participant.vars['treatment']:
+                ideal_val = player.lastideal_t
+                predicted_val = values['lastpredicted_t']
+
+            # --- No treatment ---
+            else:
+                ideal_val = player.lastideal_c
+                predicted_val = values['lastpredicted_c']
+
+            if predicted_val > ideal_val:
+                return (
+                    f"Your predicted number of tasks ({predicted_val}) "
+                    f"cannot exceed your ideal number ({ideal_val})."
+                )
+
+    @staticmethod
     def before_next_page(player, timeout_happened):
         if player.round_number == 2:
             if player.participant.vars['treatment']:
