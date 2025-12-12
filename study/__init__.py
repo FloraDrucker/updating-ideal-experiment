@@ -1036,7 +1036,7 @@ def creating_session(subsession: Subsession):
         # Task
         ppvars['actual'] = {i: None for i in range(C.NUM_ROUNDS)}
         ppvars['mistakes'] = {i: None for i in range(C.NUM_ROUNDS)}
-        ppvars['belief'] = {i+1: None for i in range(C.NUM_ROUNDS-1)}
+        ppvars['belief'] = {i: None for i in [0,2,3,4,5]}
         ppvars['ideal'] = {i+1: None for i in range(12)}
         ppvars['predicted'] = {i+1: None for i in range(12)}
         ppvars['do_ideal'] = False
@@ -1449,7 +1449,16 @@ class Predicted(Page):
 class Interval(Page):
     @staticmethod
     def is_displayed(player):
-        return player.round_number == 2  # only shown in the first real round
+        return player.round_number == 1  # only shown in the trial
+
+    form_model = 'player'
+
+    @staticmethod
+    def get_form_fields(player):
+        if player.participant.vars['treatment']:
+            return ['belief_t']
+        else:
+            return ['belief_c']
 
     @staticmethod
     def vars_for_template(player):
@@ -1461,6 +1470,16 @@ class Interval(Page):
             'guess_about': guess_about,
             'treatment': treatment,
         }
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        ppvars = player.participant.vars
+        if ppvars['treatment']:
+            ppvars['belief'][0] = player.belief_t
+            player.belief_c = 50
+        else:
+            ppvars['belief'][0] = player.belief_c
+            player.belief_t = 50
 
 
 class Performance(Page):  # display performance from the previous round
@@ -1479,7 +1498,7 @@ class Performance(Page):  # display performance from the previous round
 class Belief(Page):
     @staticmethod
     def is_displayed(player):
-        return player.round_number > 1
+        return player.round_number > 2
 
     form_model = 'player'
 
@@ -1505,7 +1524,7 @@ class Belief(Page):
 
     @staticmethod
     def before_next_page(player, timeout_happened):
-        if player.round_number > 1:
+        if player.round_number > 2:
             if player.participant.vars['treatment']:
                 player.participant.vars['belief'][player.round_number-1] = player.belief_t
                 player.belief_c = 50
@@ -1846,7 +1865,7 @@ class Survey5(Page):
         # Randomize and calculate final payment
         # Chosen part for payment for task and beliefs:
         parts = [i for i in range(C.NUM_ROUNDS)]
-        parts_belief = parts[1:C.NUM_ROUNDS]
+        parts_belief = [0,2,3,4,5]
         player.task_chosen_part = random.choice(parts)
         player.belief_chosen_part = random.choice(parts_belief)
 
@@ -1967,10 +1986,10 @@ class FinalPage(Page):
 
 
 page_sequence = [
+    Interval,
     PartStart,
     Ideal,
     Predicted,
-    Interval,
     Performance,
     Belief,
     Signal,

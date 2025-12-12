@@ -2,17 +2,24 @@
 {% load otree %}
 
 {% block title %}
-    First information about the {{ guess_about }}
+    First belief about the {{ guess_about }}
 {% endblock %}
 
 {% block content %}
 
+<style>
+    input[type=number] {
+        width: 60px;
+        text-align: center;
+    }
+</style>
+
 <p>
-    Right now, you only know that the {{ guess_about }} is between {{ benefit_min }} and {{ benefit_max}}{{ if treatment }} points{{ endif }}.
+    Right now, you only know that <b>the {{ guess_about }} is between {{ benefit_min }} and {{ benefit_max}}{{ if treatment }} points{{ endif }}</b>.
 </p>
 
+{% formfields %}
 
 {% next_button %}
-
 
 {% endblock %}

@@ -17,7 +17,7 @@
 {{ if player.round_number == 2 }}
 
 <p>
-    Before you start the first part, we ask you to <b>state how many tasks you would ideally want to do</b> within the
+    Before you start working, we ask you to <b>state how many tasks you would ideally want to do</b> within the
     {{ work_length_minutes }} minutes <b>for different potential levels of the task payoff,</b> given your experience with the trial task and the alternative options you have. There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance that in part five, you will have to do as many tasks as you stated as ideal</b> for the true payoff per task{{ if not treatment }} ({{ payoff }} points){{ endif }}. {{ if treatment }}Should the true payoff per task be different from the payoffs for which you stated your ideal work amounts, we will extrapolate the ideal amount of work at the true payoff level from your answers.{{ endif }} With {{ percent_normal }}% probability, however, you will be able to complete as many tasks as you want in part five, too.
 </p>
 
