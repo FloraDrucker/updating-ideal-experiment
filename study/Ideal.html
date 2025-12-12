@@ -24,7 +24,7 @@
 {{ elif player.round_number == 6 }}
 
 <p>
-    {{ if treatment }}Please think of what you think the task payoff is,{{ else }}Please think of the task payoff of {{ payoff }} points again,{{ endif }} and answer the following question. There is a {{ C.PERCENT_IDEAL_PART5 }} percent chance that you will have to do as many tasks in this part as you state as ideal now, on top of the {{ C.PERCENT_IDEAL_PART5 }}
+    {{ if treatment }}Please <b>think of what you think the task payoff is,</b>{{ else }}Please <b>think of the task payoff of {{ payoff }} points</b> again,{{ endif }} and answer the following question. There is a <b>{{ C.PERCENT_IDEAL_PART5 }} percent chance</b> that you will have to do as many tasks in this part as <b>you state as ideal now</b>, and a {{ C.PERCENT_IDEAL_PART5 }} percent chance of having to do as many as you stated as ideal in the first part{{ if treatment }} for the true task payoff{{ endif }}.
 </p>
 
 {{ endif }}
