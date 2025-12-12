@@ -1988,10 +1988,10 @@ class FinalPage(Page):
 page_sequence = [
     Interval,
     PartStart,
-    Ideal,
-    Predicted,
     Performance,
     Belief,
+    Ideal,
+    Predicted,
     Signal,
     Work,
     Task,
