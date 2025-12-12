@@ -2,7 +2,7 @@
 {% load otree %}
 
 {% block title %}
-    {{ if not treatment or player.round_number == 6 }}Question {{ else }}Questions {{ endif }} about predicted number of tasks
+    Questions about predicted number of tasks
 {% endblock %}
 
 {% block content %}
@@ -17,7 +17,7 @@
 {{ if player.round_number == 2 }}
 
 <p>
-    Now we ask you to <b> predict how many tasks you would actually do</b>{{ if treatment }} for the different levels of task payoff shown below{{ endif }}.
+    Now we ask you to <b> predict how many tasks you would actually do</b> for the different potential levels of task payoff shown below.
 </p>
 
 {{ elif player.round_number == 6 }}

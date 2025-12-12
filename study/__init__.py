@@ -1265,9 +1265,15 @@ class PartStart(Page):
     def vars_for_template(player):
         config = player.session.config
         work_length_minutes = round(config['work_length_seconds']/60)
+        flat_fee = base_constants.FLAT_LEISURE_FEE
+        treatment = player.participant.vars['treatment']
+        true_benefit = base_constants.TRUE_PAYOFF
         return {
             'part': C.PARTS[player.round_number-1],
             'work_length_minutes': work_length_minutes,
+            'flat_fee': flat_fee,
+            'treatment': treatment,
+            'true_benefit': true_benefit,
         }
 
 
@@ -1297,34 +1303,29 @@ class Ideal(Page):
         payoff = base_constants.TRUE_PAYOFF
         config = player.session.config
         work_length_minutes = round(config['work_length_seconds']/60)
+        percent_normal = 100 - C.PERCENT_IDEAL_PART5
         return {
             'percent_ideal': base_constants.PERCENT_IDEAL,
             'treatment': treatment,
             'payoff': payoff,
             'work_length_minutes': work_length_minutes,
+            'percent_normal': percent_normal
         }
 
     @staticmethod
     def before_next_page(player, timeout_happened):
         if player.round_number == 2:
-            if player.participant.vars['treatment']:
-                player.participant.vars['ideal'][1] = player.ideal50
-                player.participant.vars['ideal'][2] = player.ideal60
-                player.participant.vars['ideal'][3] = player.ideal70
-                player.participant.vars['ideal'][4] = player.ideal80
-                player.participant.vars['ideal'][5] = player.ideal90
-                player.participant.vars['ideal'][6] = player.ideal100
-                player.participant.vars['ideal'][7] = player.ideal110
-                player.participant.vars['ideal'][8] = player.ideal120
-                player.participant.vars['ideal'][9] = player.ideal130
-                player.participant.vars['ideal'][10] = player.ideal140
-                player.participant.vars['ideal'][11] = player.ideal150
-            else:
-                player.participant.vars['ideal'][8] = player.ideal120
-                # Fill all other "ideal" fields with safe placeholder values
-                # so blank=False validation never fails
-                for i in [1, 2, 3, 4, 5, 6, 7, 9, 10, 11]:
-                    setattr(player, f'ideal{50 + 10 * (i - 1)}', 999)
+            player.participant.vars['ideal'][1] = player.ideal50
+            player.participant.vars['ideal'][2] = player.ideal60
+            player.participant.vars['ideal'][3] = player.ideal70
+            player.participant.vars['ideal'][4] = player.ideal80
+            player.participant.vars['ideal'][5] = player.ideal90
+            player.participant.vars['ideal'][6] = player.ideal100
+            player.participant.vars['ideal'][7] = player.ideal110
+            player.participant.vars['ideal'][8] = player.ideal120
+            player.participant.vars['ideal'][9] = player.ideal130
+            player.participant.vars['ideal'][10] = player.ideal140
+            player.participant.vars['ideal'][11] = player.ideal150
         elif player.round_number == 6:
             if player.participant.vars['treatment']:
                 player.participant.vars['ideal'][12] = player.lastideal_t
@@ -1344,12 +1345,9 @@ class Predicted(Page):
     @staticmethod
     def get_form_fields(player):
         if player.round_number == 2:
-            if player.participant.vars['treatment']:
-                return ['predicted50', 'predicted60', 'predicted70', 'predicted80', 'predicted90',
-                        'predicted100', 'predicted110', 'predicted120', 'predicted130', 'predicted140',
-                        'predicted150']
-            else:
-                return ['predicted120']
+            return ['predicted50', 'predicted60', 'predicted70', 'predicted80', 'predicted90',
+                    'predicted100', 'predicted110', 'predicted120', 'predicted130', 'predicted140',
+                    'predicted150']
         elif player.round_number == 6:
             if player.participant.vars['treatment']:
                 return ['lastpredicted_t']
@@ -1392,33 +1390,20 @@ class Predicted(Page):
         # Round 2
         if player.round_number == 2:
 
-            # --- Treatment: multiple payoff levels ---
-            if player.participant.vars['treatment']:
-                for payoff, (ideal_field, pred_field) in payoff_map.items():
+            for payoff, (ideal_field, pred_field) in payoff_map.items():
 
-                    if pred_field in values:
-                        ideal_val = getattr(player, ideal_field)
-                        predicted_val = values[pred_field]
+                if pred_field in values:
+                    ideal_val = getattr(player, ideal_field)
+                    predicted_val = values[pred_field]
 
-                        if predicted_val > ideal_val:
-                            return (
-                                f"For payoff {payoff}, your predicted tasks "
-                                f"({predicted_val}) exceed your ideal tasks ({ideal_val})."
-                            )
-
-            # --- No treatment: only payoff 120 ---
-            else:
-                ideal_val = player.ideal120
-                predicted_val = values['predicted120']
-
-                if predicted_val > ideal_val:
-                    return (
-                        f"Your predicted number of tasks ({predicted_val}) "
-                        f"cannot exceed your ideal number ({ideal_val})."
-                    )
+                    if predicted_val > ideal_val:
+                        return (
+                            f"For payoff {payoff}, your predicted tasks "
+                            f"({predicted_val}) exceed your ideal tasks ({ideal_val})."
+                        )
 
         # Round 6
-        if player.round_number == 6:
+        elif player.round_number == 6:
 
             # --- Treatment ---
             if player.participant.vars['treatment']:
@@ -1439,24 +1424,17 @@ class Predicted(Page):
     @staticmethod
     def before_next_page(player, timeout_happened):
         if player.round_number == 2:
-            if player.participant.vars['treatment']:
-                player.participant.vars['predicted'][1] = player.predicted50
-                player.participant.vars['predicted'][2] = player.predicted60
-                player.participant.vars['predicted'][3] = player.predicted70
-                player.participant.vars['predicted'][4] = player.predicted80
-                player.participant.vars['predicted'][5] = player.predicted90
-                player.participant.vars['predicted'][6] = player.predicted100
-                player.participant.vars['predicted'][7] = player.predicted110
-                player.participant.vars['predicted'][8] = player.predicted120
-                player.participant.vars['predicted'][9] = player.predicted130
-                player.participant.vars['predicted'][10] = player.predicted140
-                player.participant.vars['predicted'][11] = player.predicted150
-            else:
-                player.participant.vars['predicted'][8] = player.predicted120
-                # Fill all other "predicted" fields with safe placeholder values
-                # so blank=False validation never fails
-                for i in [1, 2, 3, 4, 5, 6, 7, 9, 10, 11]:
-                    setattr(player, f'predicted{50 + 10 * (i - 1)}', 999)
+            player.participant.vars['predicted'][1] = player.predicted50
+            player.participant.vars['predicted'][2] = player.predicted60
+            player.participant.vars['predicted'][3] = player.predicted70
+            player.participant.vars['predicted'][4] = player.predicted80
+            player.participant.vars['predicted'][5] = player.predicted90
+            player.participant.vars['predicted'][6] = player.predicted100
+            player.participant.vars['predicted'][7] = player.predicted110
+            player.participant.vars['predicted'][8] = player.predicted120
+            player.participant.vars['predicted'][9] = player.predicted130
+            player.participant.vars['predicted'][10] = player.predicted140
+            player.participant.vars['predicted'][11] = player.predicted150
         elif player.round_number == 6:
             if player.participant.vars['treatment']:
                 player.participant.vars['predicted'][12] = player.lastpredicted_t
