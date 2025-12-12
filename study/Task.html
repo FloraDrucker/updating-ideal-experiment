@@ -16,12 +16,24 @@
     background: #fff7c2;
     border: 2px solid #f5d768;
     border-radius: 6px;
-    padding: 6px 14px;
-    font-size: 14px;
+    padding: 15px 20px;
+    font-size: 16px;
     font-weight: 600;
     color: #6a4d00;
     margin-bottom: 12px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+/* Submit button */
+#submit-solution{
+    padding: 15px 25px;      /* smaller */
+    font-size: 20px;
+    border-radius: 8px;
+    background: #e5e7eb;    /* light grey */
+    border: 1px solid #9ca3af;
+    color: #111827;         /* dark text */
+    font-weight: 600;
+    cursor: pointer;
 }
 
 .otree-content.container,
@@ -58,10 +70,15 @@
 }
 
 .success-message {
-    border: 1px solid rgb(204, 238, 204);
-    background-color: rgb(217, 255, 217);
-    color: rgb(0, 100, 0);
+    border: 2px solid #93c5fd;
+    background-color: #bfdbfe;
+    color: #172554;          /* darker blue text */
     text-align: center;
+
+    padding: 12px 16px;      /* bigger box */
+    font-size: 18px;         /* bigger text */
+    border-radius: 8px;      /* optional */
+    font-weight: 600;        /* optional */
 }
 
 .task-container{
@@ -140,9 +157,9 @@ td {
 }
 
 .button-container{
-    display: grid;
-    grid-template-columns: auto auto auto;
-    grid-column-gap: 1vw;
+    display: flex;
+    gap: 1vw;
+    align-items: center;
 }
 
 #next-button{
@@ -168,31 +185,9 @@ td {
 
 <!-- Our custom timer display -->
 <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-
     <!-- Timer -->
     <div id="task-timer" class="pretty-timer"></div>
-
-    <!-- Smaller Stop Working button -->
-    {% if player.do_ideal == 0 %}
-        <button id="stop-working"
-                type="button"
-                onclick="stopWorking()"
-                style="
-                    padding:4px 10px;
-                    font-size:13px;
-                    background:#ffcccc;
-                    border:1px solid #cc9999;
-                    border-radius:4px;
-                    font-weight:bold;
-                ">
-            Stop working
-        </button>
-    {% else %}
-        <button id="stop-working" style="display:none;"></button>
-    {% endif %}
-
 </div>
-
 
 <input type="hidden" name="performance" id="performance">
 <span hidden>{{ form.performance.errors }}</span>
@@ -214,6 +209,27 @@ td {
     <span id="performance-display">{{ player.performance }}</span> tasks.
 </p>
 {% endif %}
+
+<!-- Smaller Stop Working button -->
+    {% if player.do_ideal == 0 %}
+        <button id="stop-working"
+        type="button"
+        onclick="stopWorking()"
+        style="
+            padding:15px 20px;
+            font-size:16px;
+            background:#bfdbfe;       /* light blue */
+            border:1px solid #3b82f6; /* blue border */
+            border-radius:6px;
+            font-weight:bold;
+            color:#1e3a8a;            /* dark blue text */
+            cursor:pointer;
+        ">
+        Stop working
+        </button>
+    {% else %}
+        <button id="stop-working" style="display:none;"></button>
+    {% endif %}
 
 
 <div class="test" id="hide_task">
@@ -595,7 +611,7 @@ function failAttentionCheck() {
 
     setTimeout(() => {
         popup.style.display = "none";
-    }, 3000);
+    }, 8000);
 }
 
 
