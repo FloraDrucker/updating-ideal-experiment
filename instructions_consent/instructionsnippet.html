@@ -98,7 +98,7 @@
     <li>A fixed <b>completion fee of {{ participation_fee }}</b> if you complete the whole study.</li>
     <li>Payoff from your <b>performance in a part randomly chosen by the computer</b> (including the trial): number of tasks completed times {{ if player.treatment }}the true payoff per task{{ else }} {{C.TRUE_PAYOFF }} points{{ endif }}. Note that if you have to do your ideal amount of tasks in the fifth part but fail to do them and this part gets selected for payment, you will not be paid for your performance. </li>
     <li> <b>{{ C.FLAT_LEISURE_FEE }} points per minute spent on the non-work activity</b> in the same randomly chosen part. Note that you only receive payment for the non-work activity if you fail no more than one attention check. </li>
-    <li><b>Bonus payment based on the accuracy of your guess</b> about the {{ guess_about }} in another part randomly chosen by the computer (from parts 1 to 5).</li>
+    <li><b>Bonus payment based on the accuracy of your guess</b> about the {{ guess_about }} in another part randomly chosen by the computer (from trial part or parts 2 to 5).</li>
     <li>In one of the questionnaires between two parts, you will make a <b>lottery decision</b>. At the end, you will also get paid based on this decision.</li>
 </ol>
 
