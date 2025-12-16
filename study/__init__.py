@@ -25,7 +25,7 @@ class C(BaseConstants):
     # TIMEOUT_SECONDS = 600
     # TIMEOUT_MINUTES = round(TIMEOUT_SECONDS / 60)
     TASK_LENGTH = 4
-    SIGNAL_TIMEOUT = 8  # seconds signal is shown
+    SIGNAL_TIMEOUT = 10  # seconds signal is shown
     RISK_LARGE = 1000
     RISK_STEP = 50
     RISK_FIXED = {}

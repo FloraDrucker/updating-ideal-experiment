@@ -2,7 +2,7 @@
 {% load otree %}
 
 {% block title %}
-    Questions about predicted number of tasks
+    {{ if player.round_number == 2 }}Questions {{ else }} Question {{ endif }}about predicted number of tasks
 {% endblock %}
 
 {% block content %}
@@ -23,7 +23,7 @@
 {{ elif player.round_number == 6 }}
 
 <p>
-    Now please think again of what you think the task payoff is, and answer the following question.
+    Now please {{ if treatment }}think again of what you think the task payoff is, and {{ endif }}answer the following question.
 </p>
 
 {{ endif }}

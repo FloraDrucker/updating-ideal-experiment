@@ -3,7 +3,7 @@
 <div class="text">
 
 <p>
-    In the trial and in all five consecutive parts, you will work on the task you just saw for at most eight minutes. You will receive <b> a fixed payoff {{ if not player.treatment }} of {{ C.TRUE_PAYOFF }} points {{ endif }} </b> for each correctly solved encryption task in the part that will be randomly chosen for payment. {{ if player.treatment }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: we chose <b> a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }}</b>, and you will have to guess this number. {{ endif }}
+    In the trial and in all five consecutive parts, you will work on the task you just saw for at most eight minutes. You will receive <b> a fixed payoff {{ if not player.treatment }} of {{ C.TRUE_PAYOFF }} points {{ endif }} for each correctly solved encryption task</b> in the part that will be randomly chosen for payment. {{ if player.treatment }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: we chose <b> a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }}</b>, and you will have to guess this number. {{ endif }}
 </p>
 
     <p>Each part of the study will have the following stages:</p>
@@ -51,7 +51,7 @@
 <h5> 2. Further information about the {{ guess_about }} </h5>
 
 <p>
-    During the course of the study, you will get more and more information that will allow you to obtain more precise knowledge of the {{ guess_about }}. This will work in the following way: The {{ guess_about }} is <b> the average of 150 numbers</b> that lie <b>between {{ C.BENEFIT_RANGE_MIN }} {{ if player.treatment }}points{{ endif }} and {{ C.BENEFIT_RANGE_MAX }}{{ if player.treatment }} points{{ endif }}.</b> The same number can occur several times. <b>At the beginning of parts two to four,</b> we will briefly <b>display 50 of these 150 numbers</b> (represented by balls) on the screen. Each of the 150 balls will be displayed only once, so <b>you will have seen all the balls after part four.</b>
+    During the course of the study, you will get more and more information that will allow you to obtain more precise knowledge of the {{ guess_about }}. This will work in the following way: The {{ guess_about }} is <b> the average of 150 numbers</b> that lie <b>between {{ C.BENEFIT_RANGE_MIN }} {{ if player.treatment }}points{{ endif }} and {{ C.BENEFIT_RANGE_MAX }}{{ if player.treatment }} points{{ endif }}.</b> The same number can occur several times. <b>At the beginning of parts two to four,</b> we will briefly <b>display 50 of these 150 numbers (represented by balls)</b> on the screen. <b>Each of the 150 balls will be displayed only once, so you will have seen all the balls after part four.</b>
 </p>
 
 <script>
@@ -73,7 +73,7 @@
 <h5> 3. Working on the encryption task </h5>
 
 <p>
-    After receiving the information about the {{ guess_about }}, you will <b>work on the task for eight minutes.</b> Your payment for the encryption task will be <b>{{ if player.treatment }}the fixed payoff {{ else }} {{C.TRUE_PAYOFF }} points {{ endif }}times the number of tasks you completed correctly.</b>
+    <b>In every part, you will work on the encryption task for eight minutes.</b> In parts two to four, the work will come after receiving further information about the {{ guess_about }}. Your payment for the encryption task will be <b>{{ if player.treatment }}the fixed payoff {{ else }} {{C.TRUE_PAYOFF }} points {{ endif }}times the number of tasks you completed correctly.</b>
 </p>
     <p>
     However, you do not have to work for the full eight minutes. At any point during the eight minutes, <b>you can stop working on the encryption task</b> by clicking on the "Stop working" button and go to any non-work activity that you wish to do (e.g., using your smartphone) instead for the remainder of the eight minutes. You will receive a flat fee of <b>{{ C.FLAT_LEISURE_FEE }} points for every minute in the non-work activity</b> as long as you show you are still active in the assignment by completing <b>attention checks.</b> To do this, you need to <b>click a button that pops up roughly once every 60 seconds</b> and remains on the screen for 5 seconds. If you fail to click the button before it disappears, you will receive a warning message. If you fail more than one attention check, you will not get paid for the non-work activity in that part. Please note that <b>once you decide to stop working, you will NOT be able to return to the encryption task in this part.</b>
@@ -96,9 +96,9 @@
 
 <ol>
     <li>A fixed <b>completion fee of {{ participation_fee }}</b> if you complete the whole study.</li>
-    <li>Payoff from your <b>performance in a part randomly chosen by the computer</b> (including the trial): number of tasks completed times {{ if player.treatment }}the true payoff per task{{ else }} {{C.TRUE_PAYOFF }} points{{ endif }}. </li>
+    <li>Payoff from your <b>performance in a part randomly chosen by the computer</b> (including the trial): number of <b>tasks completed times {{ if player.treatment }}the true payoff</b> per task{{ else }} {{C.TRUE_PAYOFF }} points</b>{{ endif }}. </li>
     <li> <b>{{ C.FLAT_LEISURE_FEE }} points per minute spent on the non-work activity</b> in the same randomly chosen part. Note that you only receive payment for the non-work activity if you fail no more than one attention check. </li>
-    <li><b>Bonus payment based on the accuracy of your guess</b> about the {{ guess_about }} in another part randomly chosen by the computer (from trial part or parts 2 to 5).</li>
+    <li><b>Bonus payment based on the accuracy of your guess</b> about the {{ guess_about }} in another part randomly chosen by the computer (from the trial part and parts two to five).</li>
     <li>In one of the questionnaires between two parts, you will make a <b>lottery decision</b>. At the end, you will also get paid based on this decision.</li>
 </ol>
 
