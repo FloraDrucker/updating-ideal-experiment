@@ -19,12 +19,13 @@
 <p>
     Before you start working, we ask you to <b>state how many tasks you would ideally want to do</b> within the
     {{ work_length_minutes }} minutes <b>for different potential levels of the task payoff,</b> given your experience with the trial task and the alternative options you have. There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance that in part five, you will have to do as many tasks as you stated as ideal</b> for the true payoff per task{{ if not treatment }} ({{ payoff }} points){{ endif }}. {{ if treatment }}Should the true payoff per task be different from the payoffs for which you stated your ideal work amounts, we will extrapolate the ideal amount of work at the true payoff level from your answers.{{ endif }}
+    Note that if you have to do your ideal amount of tasks in the fifth part but fail to do them and this part gets selected for payment, you will not be paid for your performance.
 </p>
 
 {{ elif player.round_number == 6 }}
 
 <p>
-    {{ if treatment }}Please <b>think of what you think the task payoff is,</b>{{ else }}Please <b>think of the task payoff of {{ payoff }} points</b> again,{{ endif }} and answer the following question. There is a <b>{{ C.PERCENT_IDEAL_PART5 }} percent chance</b> that you will have to do as many tasks in this part as <b>you state as ideal now</b>, and a {{ C.PERCENT_IDEAL_PART5 }} percent chance of having to do as many as you stated as ideal in the first part{{ if treatment }} for the true task payoff{{ endif }}.
+    {{ if treatment }}Please <b>think of what you think the task payoff is,</b>{{ else }}Please <b>think of the task payoff of {{ payoff }} points</b> again,{{ endif }} and answer the following question. There is a <b>{{ C.PERCENT_IDEAL_PART5 }} percent chance</b> that you will have to do as many tasks in this part as <b>you state as ideal now</b>, and a {{ C.PERCENT_IDEAL_PART5 }} percent chance of having to do as many as you stated as ideal in the first part{{ if treatment }} for the true task payoff{{ endif }}. Note that if you have to do your ideal amount of tasks in this part but fail to do them and this part gets selected for payment, you will not be paid for your performance.
 </p>
 
 {{ endif }}

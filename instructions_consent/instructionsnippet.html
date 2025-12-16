@@ -11,7 +11,7 @@
 <h5> 1. Guessing the {{ guess_about }} </h5>
 
 <p>
-    In all parts, including the trial, but expect the first part, you will have to <b>state how large you think the {{ guess_about }} is</b> based on your current information. You can earn a <b>bonus payment of {{C.BELIEF_BONUS}} points if your guess</b> in the randomly chosen part <b>is close to the true {{ guess_about }}.</b> The more precise your guess – i.e., the closer it is to the true {{ guess_about }} -, the more likely it is that you win {{C.BELIEF_BONUS}} points. Given this payment rule, <b>you should state your best guess</b> to ensure the largest chance of receiving the {{C.BELIEF_BONUS}} points. If you are interested in the exact mathematical formula stating the precise payment rule, please click on the button “Show mathematical formula”.
+    Before the trial, and in all parts from two to five, you will have to <b>state how large you think the {{ guess_about }} is</b> based on your current information. You can earn a <b>bonus payment of {{C.BELIEF_BONUS}} points if your guess</b> in the randomly chosen part <b>is close to the true {{ guess_about }}.</b> The more precise your guess – i.e., the closer it is to the true {{ guess_about }} -, the more likely it is that you win {{C.BELIEF_BONUS}} points. Given this payment rule, <b>you should state your best guess</b> to ensure the largest chance of receiving the {{C.BELIEF_BONUS}} points. If you are interested in the exact mathematical formula stating the precise payment rule, please click on the button “Show mathematical formula”.
 </p>
 
 <br>
@@ -96,7 +96,7 @@
 
 <ol>
     <li>A fixed <b>completion fee of {{ participation_fee }}</b> if you complete the whole study.</li>
-    <li>Payoff from your <b>performance in a part randomly chosen by the computer</b> (including the trial): number of tasks completed times {{ if player.treatment }}the true payoff per task{{ else }} {{C.TRUE_PAYOFF }} points{{ endif }}. Note that if you have to do your ideal amount of tasks in the fifth part but fail to do them and this part gets selected for payment, you will not be paid for your performance. </li>
+    <li>Payoff from your <b>performance in a part randomly chosen by the computer</b> (including the trial): number of tasks completed times {{ if player.treatment }}the true payoff per task{{ else }} {{C.TRUE_PAYOFF }} points{{ endif }}. </li>
     <li> <b>{{ C.FLAT_LEISURE_FEE }} points per minute spent on the non-work activity</b> in the same randomly chosen part. Note that you only receive payment for the non-work activity if you fail no more than one attention check. </li>
     <li><b>Bonus payment based on the accuracy of your guess</b> about the {{ guess_about }} in another part randomly chosen by the computer (from trial part or parts 2 to 5).</li>
     <li>In one of the questionnaires between two parts, you will make a <b>lottery decision</b>. At the end, you will also get paid based on this decision.</li>
