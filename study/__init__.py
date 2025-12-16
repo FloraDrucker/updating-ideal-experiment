@@ -1596,6 +1596,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
     def vars_for_template(player):
         config = player.session.config
         work_length_minutes = round(config['work_length_seconds'] / 60)
+        percent_ideal_total = round(2*base_constants.PERCENT_IDEAL)
 
         if player.do_ideal:
             part_ideal_elicited = {8: 'first part', 12: 'last part'}
@@ -1603,7 +1604,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
             guess_about = base_constants.GUESS_ABOUT[treatment]
             return {
                 'ideal_to_do': player.ideal_to_do,
-                'percent_ideal': base_constants.PERCENT_IDEAL,
+                'percent_ideal_total': percent_ideal_total,
                 'part_ideal_elicited': part_ideal_elicited[player.ideal_index],
                 'guess_about': guess_about,
                 'work_length_minutes': work_length_minutes,
@@ -1611,6 +1612,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
         else:
             return {
                 'work_length_minutes': work_length_minutes,
+                'percent_ideal_total': percent_ideal_total,
             }
 
 
