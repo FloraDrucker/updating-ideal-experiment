@@ -5,15 +5,20 @@
     Survey Three.
 {% endblock %}
 
-
 {% block content %}
 
-<h5> Please choose between the two options in each row. </h5>
+<h5> Please choose one option in each row. </h5>
 
-<p> At the end of the study, <b>one row will be randomly selected, and your choice in this random row will be implemented.</b> If, in that row, you chose a safe payment of x points, you will receive x points. <b>If you chose the lottery option, the computer will randomly draw your payment,</b> which is 1000 points with 50% probability, and 0 points with 50% probability. </p>
+<p> To simplify the task and ensure consistent responses, your selections are constrained to have <b>a single switching point:</b> once you select an option in a given row, all rows below will be set to the safe payment and all rows above will be set to the lottery. This allows us to identify the safe payment level at which you switch from the lottery to the guaranteed payment. </p>
+
+<p>
+    At the end of the study, <b>one row will be randomly selected, and your choice in this random row will be implemented.</b>
+    If, in that row, you chose a safe payment of x points, you will receive x points.
+    <b>If you chose the lottery option, the computer will randomly draw your payment,</b>
+    which is 1000 points with 50% probability, and 0 points with 50% probability.
+</p>
 
 <p> Remember that the conversion rate of points to USD is 1000 points = {{ thousand_points }}.</p>
-
 
 <style>
     table.TheTable td.buttonGroup {
@@ -28,7 +33,7 @@
     }
 </style>
 
-<table class="table TheTable">
+<table class="table TheTable" id="risk-table">
     <colgroup>
         <col style="width: 50%;">
         <col style="width: 50%;">
@@ -57,7 +62,6 @@
 </table>
 
 <hr>
-
 <br>
 
 <h5>Please also answer the following questions.</h5>
@@ -70,5 +74,81 @@
 
 {% next_button %}
 
-
 {% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    function getRiskRows() {
+        const table = document.getElementById('risk-table');
+        if (!table) return [];
+        const trs = Array.from(table.querySelectorAll('tbody tr'));
+
+        // Each risk row should contain exactly 2 radio inputs (LHS and RHS)
+        const rows = trs.map(tr => {
+            const radios = Array.from(tr.querySelectorAll('input[type="radio"]'));
+            return radios.length === 2 ? radios : null;
+        }).filter(Boolean);
+
+        return rows; // array of [lhsRadio, rhsRadio]
+    }
+
+    function setChecked(radio) {
+        if (radio) radio.checked = true;
+    }
+
+    function enforceSingleSwitch(rows, clickedRowIndex, clickedSide) {
+        // clickedSide: 0 = LHS, 1 = RHS
+        for (let r = 0; r < rows.length; r++) {
+            const lhs = rows[r][0];
+            const rhs = rows[r][1];
+
+            // Rule: rows ABOVE = RHS, rows BELOW = LHS
+            if (r < clickedRowIndex) {
+                setChecked(rhs);
+            } else if (r > clickedRowIndex) {
+                setChecked(lhs);
+            } else {
+                // clicked row: respect what they clicked
+                if (clickedSide === 0) setChecked(lhs);
+                else setChecked(rhs);
+            }
+        }
+    }
+
+    function normalizeFromExisting(rows) {
+        // On reload/back, coerce to: top block RHS, bottom block LHS.
+        // Use the first LHS encountered as the "switch" point; everything above it -> RHS, from it down -> LHS.
+        const anyChecked = rows.some(([lhs, rhs]) => lhs.checked || rhs.checked);
+        if (!anyChecked) return;
+
+        const firstLHS = rows.findIndex(([lhs, rhs]) => lhs.checked);
+        if (firstLHS === -1) {
+            // No LHS selected -> make all RHS
+            rows.forEach(([lhs, rhs]) => setChecked(rhs));
+        } else {
+            rows.forEach(([lhs, rhs], idx) => {
+                if (idx < firstLHS) setChecked(rhs);
+                else setChecked(lhs);
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const rows = getRiskRows();
+        if (!rows.length) return;
+
+        normalizeFromExisting(rows);
+
+        rows.forEach((pair, rowIndex) => {
+            pair.forEach((radio, sideIndex) => {
+                radio.addEventListener('change', () => {
+                    enforceSingleSwitch(rows, rowIndex, sideIndex);
+                });
+            });
+        });
+    });
+})();
+</script>
+{% endblock %}
+
