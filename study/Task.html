@@ -4,6 +4,14 @@
 {% block styles %}
 <style type="text/css">
 
+/* Optional: reduce manual copying by disabling selection in task/legend areas */
+.task-container, .task-subcontainer, table, #attention-check {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 /* Hide the built-in oTree timer bar completely */
 .otree-timer,
 .otree-timer.alert {
@@ -324,6 +332,21 @@ td {
 
 {% block scripts %}
 <script>
+
+/* =========================================================
+   SITE-WIDE: Disable copy/cut/paste + common shortcuts
+   ========================================================= */
+['copy', 'cut', 'paste'].forEach(evt => {
+    document.addEventListener(evt, (e) => {
+        e.preventDefault();
+    });
+});
+document.addEventListener('keydown', (e) => {
+    const key = (e.key || '').toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'v' || key === 'x')) {
+        e.preventDefault();
+    }
+});
 
 let dict = {};
 let word = [];
