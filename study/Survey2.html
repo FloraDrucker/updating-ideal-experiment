@@ -7,6 +7,16 @@ Survey Two.
 
 {% block content %}
 
+<style>
+    /* Prevent selecting the shown sequence (helps reduce manual copying). */
+    #display-box {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+</style>
+
 <!-- INSTRUCTIONS -->
 <div id="instructions" style="font-size:1.2em; line-height:1.4; margin-bottom:2em;">
     <h5>This is a memory test.</h5>
@@ -187,10 +197,24 @@ Survey Two.
         showTrial();
     });
 
-    // Disable Enter
+    // Disable Enter (except when Next is focused)
     document.addEventListener("keydown", function(e) {
         if (e.key === "Enter") {
             if (document.activeElement === nextBtn) return;
+            e.preventDefault();
+        }
+    });
+
+    // --- Site-wide: disable copy/cut/paste + common keyboard shortcuts ---
+    ['copy', 'cut', 'paste'].forEach(evt => {
+        document.addEventListener(evt, (e) => {
+            e.preventDefault();
+        });
+    });
+
+    document.addEventListener('keydown', (e) => {
+        const key = (e.key || '').toLowerCase();
+        if ((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'v' || key === 'x')) {
             e.preventDefault();
         }
     });
