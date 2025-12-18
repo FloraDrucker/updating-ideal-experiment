@@ -1533,9 +1533,7 @@ class Belief(Page):
                 player.belief_t = 50
 
         if player.round_number == 6:
-            # for testing
-            prob_ideal = 1
-            #prob_ideal = round((base_constants.PERCENT_IDEAL+C.PERCENT_IDEAL_PART5)/100, 2)
+            prob_ideal = round((base_constants.PERCENT_IDEAL+C.PERCENT_IDEAL_PART5)/100, 2)
             player.do_ideal = bool(np.random.choice([True, False],
                                                p=[prob_ideal, 1-prob_ideal]))
             player.participant.vars['do_ideal'] = player.do_ideal
@@ -1699,10 +1697,6 @@ class Task(Page):
             'attention checks received:', p.attention_checks_received,
             'attention checks failed:', p.attention_checks_failed
         )
-
-
-class Results(Page):
-    pass
 
 
 class Survey1(Page):
@@ -2000,7 +1994,6 @@ page_sequence = [
     Signal,
     Work,
     Task,
-    Results,
     Survey1,
     Survey2,
     Survey3,
