@@ -1533,7 +1533,9 @@ class Belief(Page):
                 player.belief_t = 50
 
         if player.round_number == 6:
-            prob_ideal = round((base_constants.PERCENT_IDEAL+C.PERCENT_IDEAL_PART5)/100, 2)
+            # for testing
+            prob_ideal = 1
+            #prob_ideal = round((base_constants.PERCENT_IDEAL+C.PERCENT_IDEAL_PART5)/100, 2)
             player.do_ideal = bool(np.random.choice([True, False],
                                                p=[prob_ideal, 1-prob_ideal]))
             player.participant.vars['do_ideal'] = player.do_ideal
@@ -1544,6 +1546,7 @@ class Belief(Page):
                 player.ideal_to_do = player.participant.vars['ideal'][player.ideal_index]
                 player.participant.vars['ideal_to_do'] = player.ideal_to_do
                 player.participant.vars['ideal_index'] = player.ideal_index
+                print ('Ideal to do:', player.ideal_to_do, 'index:', player.ideal_index)
 
 
 class Signal(Page):
