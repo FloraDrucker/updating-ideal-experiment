@@ -1698,6 +1698,9 @@ class Task(Page):
             'attention checks failed:', p.attention_checks_failed
         )
 
+class EndOfWork(Page):
+    pass
+
 
 class Survey1(Page):
     @staticmethod
@@ -1994,6 +1997,7 @@ page_sequence = [
     Signal,
     Work,
     Task,
+    EndOfWork,
     Survey1,
     Survey2,
     Survey3,
