@@ -42,7 +42,7 @@ class Group(BaseGroup):
 
 class Player(BasePlayer):
     # Treatment
-    treatment = models.BooleanField(blank=False)  # False = Control, True = Main
+    treatment = models.BooleanField(blank=False)
 
     # Consent
     consent = models.BooleanField(label="Do you wish to participate in the study?", blank=False)
@@ -121,11 +121,15 @@ class Player(BasePlayer):
 
 def creating_session(subsession: Subsession):
     import itertools
-    treatments = itertools.cycle([True, False])
+    treatments = itertools.cycle([True, False]) # False = Control, True = Main
+    config = subsession.session.config
 
-    # define participant variables
+    # define treatment and participant variables
     for p in subsession.get_players():
-        p.treatment = next(treatments)
+        if config['set_treatment'] is False:
+            p.treatment = next(treatments)
+        else:
+            p.treatment = config['treatment']
         p.participant.vars['treatment'] = p.treatment
         p.participant.vars['consent'] = False
         p.participant.vars['total_wrong'] = None
