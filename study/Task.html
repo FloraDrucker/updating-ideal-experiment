@@ -197,9 +197,9 @@ td {
     <div id="task-timer" class="pretty-timer"></div>
 </div>
 
-<input type="hidden" name="performance" id="performance">
+<input type="hidden" name="performance" id="performance" value="{{ player.performance }}">
 <span hidden>{{ form.performance.errors }}</span>
-<input type="hidden" name="mistakes" id="mistakes">
+<input type="hidden" name="mistakes" id="mistakes" value="{{ player.mistakes }}">
 <span hidden>{{ form.mistakes.errors }}</span>
 
 <!-- Hidden: final work time -->

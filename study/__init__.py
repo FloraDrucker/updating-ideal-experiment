@@ -1206,6 +1206,7 @@ def live_update_performance(player: Player, data):
         player.current_dict = json.dumps(d)
         player.current_word = json.dumps(w)
 
+        print("Performance updated:", player.performance)
         return {
             pid: dict(
                 performance=player.performance,
@@ -1216,6 +1217,7 @@ def live_update_performance(player: Player, data):
                 shuffle=True
             )
         }
+
 
     # ------------------------------------------------------------
     # Mistakes only (no word refresh)
@@ -1620,6 +1622,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
+    form_fields = ['performance', 'mistakes']
 
     get_timeout_seconds = get_timeout_seconds  # keep server cutoff
 
