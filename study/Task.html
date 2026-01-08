@@ -412,6 +412,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Request first word/dict from server
 document.addEventListener("DOMContentLoaded", () => {
+
+    // DL-03: restore client-side backup (optional defense-in-depth)
+    const perfKey = 'task_performance_' + js_vars.round_number;
+    const storedPerf = sessionStorage.getItem(perfKey);
+    if (storedPerf !== null) {
+        document.getElementById("performance").value = storedPerf;
+        const perfDisplay = document.getElementById("performance-display");
+        if (perfDisplay) perfDisplay.innerText = storedPerf;
+    }
+
     liveSend({ init: true });
 });
 
@@ -421,6 +431,7 @@ function myFunction() {
     if (errors === 0) {
         let temp = Number(document.getElementById("performance").value || 0) + 1;
         document.getElementById("performance").value = temp;
+        sessionStorage.setItem('task_performance_' + js_vars.round_number, temp);
 
         document.getElementById("performance-display").innerText = temp;
 
