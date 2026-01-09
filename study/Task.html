@@ -488,6 +488,11 @@ function myFunction() {
             js_vars.stopped_work = true;
             startAttentionChecksIfNeeded();
 
+            // Force a reload so the Back button cannot restore work mode
+            setTimeout(() => {
+            window.location.reload();
+            }, 1000);
+
             return;
         }
     }
