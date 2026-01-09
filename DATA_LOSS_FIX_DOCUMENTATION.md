@@ -186,10 +186,9 @@ if data.get('init'):
 
     if client_perf > player.performance:
         player.performance = client_perf
-        logger.info(
-            f"[RECONCILE] participant={participant_code} round={player.round_number} "
-            f"performance: server={old_perf} -> client={client_perf} (client wins)"
-        )
+
+    if client_mistakes > player.mistakes:
+        player.mistakes = client_mistakes
     # ... rest of init
 ```
 
@@ -221,29 +220,6 @@ setTimeout(() => {
 
 ---
 
-### 7. Added Server-Side Logging (Audit Trail)
-
-**File:** `study/__init__.py`
-
-**Added logging for:**
-- `[TASK_INIT]` - When page loads, logs initial performance state
-- `[RECONCILE]` - When client value is higher than server (indicates recovered data)
-- `[PERF_UPDATE]` - Each time a correct answer is recorded
-- `[STOP_WORK]` - When participant clicks "Stop working"
-- `[PAGE_SUBMIT]` - When form submits (timeout or page advance)
-
-**Example log output:**
-```
-[TASK_INIT] participant=abc123 round=3 performance=5 mistakes=2
-[PERF_UPDATE] participant=abc123 round=3 performance=6
-[STOP_WORK] participant=abc123 round=3 work_seconds=245 performance=6
-[PAGE_SUBMIT] participant=abc123 round=3 timeout=False performance=6 mistakes=2 work_seconds=245
-```
-
-**Why:** Provides an audit trail for debugging and verifying data integrity. If any issues occur in future pilots, logs can be checked to trace exactly what happened.
-
----
-
 ## Data Flow After Fix
 
 ### Normal Operation
@@ -252,7 +228,6 @@ setTimeout(() => {
 3. JS calls liveSend → server saves performance
 4. Server responds → liveRecv updates display
 5. Timer expires → form submits (backup save)
-6. Server logs `[PAGE_SUBMIT]` with final values
 
 ### WebSocket Failure
 1. Participant completes task → JS increments hidden input
@@ -295,11 +270,6 @@ setTimeout(() => {
 6. Check oTree admin data export
 7. **Expected:** performance=5, stopped_work=True, work_seconds < total_time
 
-### Manual Test 3: Check Logs
-1. Run a test session
-2. Check server logs for `[TASK_INIT]`, `[PERF_UPDATE]`, `[PAGE_SUBMIT]` entries
-3. Verify log entries match expected participant actions
-
 ---
 
 ## Files Modified
@@ -307,14 +277,14 @@ setTimeout(() => {
 | File | Changes |
 |------|---------|
 | `study/Task.html` | Added value attributes, sessionStorage logic, removed forced reloads, timer optimization |
-| `study/__init__.py` | Added logging, server-side reconciliation |
+| `study/__init__.py` | Added server-side reconciliation |
 | `instructions_consent/instructionsnippet.html` | Deferred MathJax loading |
 
 ---
 
 ## Summary
 
-These changes implement a defense-in-depth strategy with three independent persistence mechanisms. Even if one or two mechanisms fail, the participant's work is preserved. The logging provides an audit trail for verifying data integrity in future studies.
+These changes implement a defense-in-depth strategy with three independent persistence mechanisms. Even if one or two mechanisms fail, the participant's work is preserved.
 
 ---
 

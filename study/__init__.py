@@ -3,10 +3,6 @@ import random, string, json
 from instructions_consent import C as base_constants
 import numpy as np
 import time
-import logging
-
-# Logger for task performance audit trail
-logger = logging.getLogger('study.task')
 
 doc = """
 Study
@@ -1140,7 +1136,6 @@ def build_random_word(k=4):
 def live_update_performance(player: Player, data):
 
     pid = player.id_in_group
-    participant_code = player.participant.code
 
     # ------------------------------------------------------------
     # INIT (first time the page loads)
@@ -1150,23 +1145,11 @@ def live_update_performance(player: Player, data):
         client_perf = data.get('client_performance', 0)
         client_mistakes = data.get('client_mistakes', 0)
 
-        old_perf = player.performance
-        old_mistakes = player.mistakes
-
         if client_perf > player.performance:
             player.performance = client_perf
-            logger.info(
-                f"[RECONCILE] participant={participant_code} round={player.round_number} "
-                f"performance: server={old_perf} -> client={client_perf} (client wins)"
-            )
 
         if client_mistakes > player.mistakes:
             player.mistakes = client_mistakes
-
-        logger.info(
-            f"[TASK_INIT] participant={participant_code} round={player.round_number} "
-            f"performance={player.performance} mistakes={player.mistakes}"
-        )
 
         if not player.field_maybe_none('current_dict') or not player.field_maybe_none('current_word'):
             d = build_random_dict()
@@ -1212,10 +1195,6 @@ def live_update_performance(player: Player, data):
     if data.get("stop_work"):
         player.work_seconds = int(data["work_seconds"])
         player.stopped_work = True
-        logger.info(
-            f"[STOP_WORK] participant={participant_code} round={player.round_number} "
-            f"work_seconds={player.work_seconds} performance={player.performance}"
-        )
         return {
             pid: dict(
                 performance=player.performance,
@@ -1231,10 +1210,6 @@ def live_update_performance(player: Player, data):
     # ------------------------------------------------------------
     if 'performance' in data:
         player.performance = data['performance']
-        logger.info(
-            f"[PERF_UPDATE] participant={participant_code} round={player.round_number} "
-            f"performance={player.performance}"
-        )
 
         d = build_random_dict()
         w = build_random_word(C.TASK_LENGTH)
@@ -1724,10 +1699,13 @@ class Task(Page):
         pp.vars['attention_checks_received'][idx] = p.attention_checks_received
         pp.vars['attention_checks_failed'][idx] = p.attention_checks_failed
 
-        logger.info(
-            f"[PAGE_SUBMIT] participant={pp.code} round={p.round_number} "
-            f"timeout={timeout_happened} performance={p.performance} mistakes={p.mistakes} "
-            f"work_seconds={p.work_seconds} nonwork_seconds={p.nonwork_seconds}"
+        print(
+            'performance:', p.performance,
+            'mistakes:', p.mistakes,
+            'work seconds:', p.work_seconds,
+            'nonwork seconds:', p.nonwork_seconds,
+            'attention checks received:', p.attention_checks_received,
+            'attention checks failed:', p.attention_checks_failed
         )
 
 class EndOfWork(Page):
