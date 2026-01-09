@@ -616,6 +616,11 @@ function stopWorking() {
         work_seconds: work
     });
 
+    // Force a reload so the Back button cannot restore work mode
+    setTimeout(() => {
+    window.location.reload();
+    }, 1000);
+
     startAttentionChecks();
 }
 
