@@ -197,9 +197,9 @@ td {
     <div id="task-timer" class="pretty-timer"></div>
 </div>
 
-<input type="hidden" name="performance" id="performance">
+<input type="hidden" name="performance" id="performance" value="{{ player.performance }}">
 <span hidden>{{ form.performance.errors }}</span>
-<input type="hidden" name="mistakes" id="mistakes">
+<input type="hidden" name="mistakes" id="mistakes" value="{{ player.mistakes }}">
 <span hidden>{{ form.mistakes.errors }}</span>
 
 <!-- Hidden: final work time -->
@@ -355,6 +355,28 @@ const letters_per_word = {{ letters_per_word|safe }};
 const alphabet = genCharArray('A', 'Z');
 const required_tasks = js_vars.required_tasks;
 
+// Session storage keys for backup persistence (survives page refresh)
+const STORAGE_KEY_PERF = 'task_perf_round_{{ player.round_number }}';
+const STORAGE_KEY_MISTAKES = 'task_mistakes_round_{{ player.round_number }}';
+
+// Helper to safely read from sessionStorage
+function getStoredValue(key) {
+    try {
+        return parseInt(sessionStorage.getItem(key)) || 0;
+    } catch (e) {
+        return 0;  // sessionStorage unavailable
+    }
+}
+
+// Helper to safely write to sessionStorage
+function setStoredValue(key, value) {
+    try {
+        sessionStorage.setItem(key, value);
+    } catch (e) {
+        // sessionStorage unavailable, continue without backup
+    }
+}
+
 // --- Disable inputs ---
 function disableTaskInputs() {
     for (let i = 0; i < letters_per_word; i++) {
@@ -410,9 +432,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// Request first word/dict from server
+// Request first word/dict from server + reconcile sessionStorage
 document.addEventListener("DOMContentLoaded", () => {
-    liveSend({ init: true });
+    // Reconcile sessionStorage with server value (take max to never lose progress)
+    const storedPerf = getStoredValue(STORAGE_KEY_PERF);
+    const serverPerf = {{ player.performance }};
+    const reconciledPerf = Math.max(storedPerf, serverPerf);
+
+    const storedMistakes = getStoredValue(STORAGE_KEY_MISTAKES);
+    const serverMistakes = {{ player.mistakes }};
+    const reconciledMistakes = Math.max(storedMistakes, serverMistakes);
+
+    // Update hidden inputs with reconciled values
+    document.getElementById("performance").value = reconciledPerf;
+    document.getElementById("performance-display").innerText = reconciledPerf;
+    document.getElementById("mistakes").value = reconciledMistakes;
+
+    // Update sessionStorage with reconciled values
+    setStoredValue(STORAGE_KEY_PERF, reconciledPerf);
+    setStoredValue(STORAGE_KEY_MISTAKES, reconciledMistakes);
+
+    // Send init with client's known values for server-side reconciliation
+    liveSend({
+        init: true,
+        client_performance: reconciledPerf,
+        client_mistakes: reconciledMistakes
+    });
 });
 
 function myFunction() {
@@ -421,6 +466,7 @@ function myFunction() {
     if (errors === 0) {
         let temp = Number(document.getElementById("performance").value || 0) + 1;
         document.getElementById("performance").value = temp;
+        setStoredValue(STORAGE_KEY_PERF, temp);  // Backup to sessionStorage
 
         document.getElementById("performance-display").innerText = temp;
 
@@ -442,11 +488,6 @@ function myFunction() {
             js_vars.stopped_work = true;
             startAttentionChecksIfNeeded();
 
-            // Force a reload so the Back button cannot restore work mode
-            setTimeout(() => {
-            window.location.reload();
-            }, 300);
-
             return;
         }
     }
@@ -454,6 +495,7 @@ function myFunction() {
     else if (errors > 0) {
         let temp = Number(document.getElementById("mistakes").value || 0) + 1;
         document.getElementById("mistakes").value = temp;
+        setStoredValue(STORAGE_KEY_MISTAKES, temp);  // Backup to sessionStorage
         liveSend({ mistakes: temp });
 
         const msg = document.getElementById("error-form");
@@ -570,11 +612,6 @@ function stopWorking() {
     });
 
     startAttentionChecks();
-
-    // Force a reload so the Back button cannot restore work mode
-    setTimeout(() => {
-    window.location.reload();
-    }, 300);
 }
 
 
@@ -707,7 +744,7 @@ function startAttentionChecksIfNeeded() {
         }
     }
 
-    setInterval(tick, 250);
+    setInterval(tick, 1000);  // Update every 1 second (was 250ms)
     tick();
 
 })();
