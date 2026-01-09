@@ -482,6 +482,11 @@ function genCharArray(a, z) {
 
 function liveRecv(data) {
 
+    if (data.stop_work_ack === true) {
+        window.location.reload();
+        return;
+    }
+
     // --- Always update counters ---
     if (typeof data.performance === 'number') {
         document.getElementById("performance").value = data.performance;
@@ -563,18 +568,13 @@ function stopWorking() {
     // Save in hidden form field
     document.getElementById("work_seconds").value = work;
 
-    // Send to server via websockets
     liveSend({
         stop_work: true,
-        work_seconds: work
+        work_seconds: work,
+        _ack_required: true
     });
 
     startAttentionChecks();
-
-    // Force a reload so the Back button cannot restore work mode
-    setTimeout(() => {
-    window.location.reload();
-    }, 300);
 }
 
 
