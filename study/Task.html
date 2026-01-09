@@ -355,6 +355,28 @@ const letters_per_word = {{ letters_per_word|safe }};
 const alphabet = genCharArray('A', 'Z');
 const required_tasks = js_vars.required_tasks;
 
+// Session storage keys for backup persistence (survives page refresh)
+const STORAGE_KEY_PERF = 'task_perf_round_{{ player.round_number }}';
+const STORAGE_KEY_MISTAKES = 'task_mistakes_round_{{ player.round_number }}';
+
+// Helper to safely read from sessionStorage
+function getStoredValue(key) {
+    try {
+        return parseInt(sessionStorage.getItem(key)) || 0;
+    } catch (e) {
+        return 0;  // sessionStorage unavailable
+    }
+}
+
+// Helper to safely write to sessionStorage
+function setStoredValue(key, value) {
+    try {
+        sessionStorage.setItem(key, value);
+    } catch (e) {
+        // sessionStorage unavailable, continue without backup
+    }
+}
+
 // --- Disable inputs ---
 function disableTaskInputs() {
     for (let i = 0; i < letters_per_word; i++) {
@@ -410,29 +432,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// --- DL-05: wrapper around liveSend for logging + basic safety ---
-function safeLiveSend(data) {
-    console.log('[Task] Sending:', JSON.stringify(data));
-    try {
-        liveSend(data);
-    } catch (e) {
-        console.error('[Task] liveSend failed:', e, 'payload=', data);
-    }
-}
-
-// Request first word/dict from server
+// Request first word/dict from server + reconcile sessionStorage
 document.addEventListener("DOMContentLoaded", () => {
+    // Reconcile sessionStorage with server value (take max to never lose progress)
+    const storedPerf = getStoredValue(STORAGE_KEY_PERF);
+    const serverPerf = {{ player.performance }};
+    const reconciledPerf = Math.max(storedPerf, serverPerf);
 
-    // DL-03: restore client-side backup (optional defense-in-depth)
-    const perfKey = 'task_performance_' + js_vars.round_number;
-    const storedPerf = sessionStorage.getItem(perfKey);
-    if (storedPerf !== null) {
-        document.getElementById("performance").value = storedPerf;
-        const perfDisplay = document.getElementById("performance-display");
-        if (perfDisplay) perfDisplay.innerText = storedPerf;
-    }
+    const storedMistakes = getStoredValue(STORAGE_KEY_MISTAKES);
+    const serverMistakes = {{ player.mistakes }};
+    const reconciledMistakes = Math.max(storedMistakes, serverMistakes);
 
-    safeLiveSend({ init: true });
+    // Update hidden inputs with reconciled values
+    document.getElementById("performance").value = reconciledPerf;
+    document.getElementById("performance-display").innerText = reconciledPerf;
+    document.getElementById("mistakes").value = reconciledMistakes;
+
+    // Update sessionStorage with reconciled values
+    setStoredValue(STORAGE_KEY_PERF, reconciledPerf);
+    setStoredValue(STORAGE_KEY_MISTAKES, reconciledMistakes);
+
+    // Send init with client's known values for server-side reconciliation
+    liveSend({
+        init: true,
+        client_performance: reconciledPerf,
+        client_mistakes: reconciledMistakes
+    });
 });
 
 function myFunction() {
@@ -441,13 +466,13 @@ function myFunction() {
     if (errors === 0) {
         let temp = Number(document.getElementById("performance").value || 0) + 1;
         document.getElementById("performance").value = temp;
-        sessionStorage.setItem('task_performance_' + js_vars.round_number, temp);
+        setStoredValue(STORAGE_KEY_PERF, temp);  // Backup to sessionStorage
 
         document.getElementById("performance-display").innerText = temp;
 
         document.getElementById("error-form").style.display = "none";
 
-        safeLiveSend({ performance: temp });
+        liveSend({ performance: temp });
 
         if (temp >= required_tasks) {
             disableTaskInputs();
@@ -475,7 +500,8 @@ function myFunction() {
     else if (errors > 0) {
         let temp = Number(document.getElementById("mistakes").value || 0) + 1;
         document.getElementById("mistakes").value = temp;
-        safeLiveSend({ mistakes: temp });
+        setStoredValue(STORAGE_KEY_MISTAKES, temp);  // Backup to sessionStorage
+        liveSend({ mistakes: temp });
 
         const msg = document.getElementById("error-form");
         msg.classList.remove("success-message");
@@ -585,7 +611,7 @@ function stopWorking() {
     document.getElementById("work_seconds").value = work;
 
     // Send to server via websockets
-    safeLiveSend({
+    liveSend({
         stop_work: true,
         work_seconds: work
     });
@@ -616,7 +642,7 @@ let attentionChecksFailed   = js_vars.checks_failed;
 
 function showAttentionCheck() {
     attentionChecksReceived++;
-    safeLiveSend({ attention_check_received: true });
+    liveSend({ attention_check_received: true });
 
     attentionCheckActive = true;
 
@@ -638,7 +664,7 @@ function showAttentionCheck() {
 function failAttentionCheck() {
     attentionCheckActive = false;
     attentionChecksFailed++;
-    safeLiveSend({ attention_check_failed: true });
+    liveSend({ attention_check_failed: true });
 
     const popup = document.getElementById("attention-check");
     const msg   = document.getElementById("attention-message");
@@ -668,7 +694,7 @@ document.getElementById("attention-button").onclick = function () {
 
     clearTimeout(attentionCheckTimer);
 
-    safeLiveSend({ attention_check_passed: true });
+    liveSend({ attention_check_passed: true });
 };
 
 function startAttentionChecks() {
@@ -728,7 +754,7 @@ function startAttentionChecksIfNeeded() {
         }
     }
 
-    setInterval(tick, 1000);
+    setInterval(tick, 1000);  // Update every 1 second (was 250ms)
     tick();
 
 })();
