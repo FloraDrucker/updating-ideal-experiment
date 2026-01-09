@@ -410,6 +410,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+// --- DL-05: wrapper around liveSend for logging + basic safety ---
+function safeLiveSend(data) {
+    console.log('[Task] Sending:', JSON.stringify(data));
+    try {
+        liveSend(data);
+    } catch (e) {
+        console.error('[Task] liveSend failed:', e, 'payload=', data);
+    }
+}
+
 // Request first word/dict from server
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -422,7 +432,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (perfDisplay) perfDisplay.innerText = storedPerf;
     }
 
-    liveSend({ init: true });
+    safeLiveSend({ init: true });
 });
 
 function myFunction() {
@@ -437,7 +447,7 @@ function myFunction() {
 
         document.getElementById("error-form").style.display = "none";
 
-        liveSend({ performance: temp });
+        safeLiveSend({ performance: temp });
 
         if (temp >= required_tasks) {
             disableTaskInputs();
@@ -465,7 +475,7 @@ function myFunction() {
     else if (errors > 0) {
         let temp = Number(document.getElementById("mistakes").value || 0) + 1;
         document.getElementById("mistakes").value = temp;
-        liveSend({ mistakes: temp });
+        safeLiveSend({ mistakes: temp });
 
         const msg = document.getElementById("error-form");
         msg.classList.remove("success-message");
@@ -575,7 +585,7 @@ function stopWorking() {
     document.getElementById("work_seconds").value = work;
 
     // Send to server via websockets
-    liveSend({
+    safeLiveSend({
         stop_work: true,
         work_seconds: work
     });
@@ -606,7 +616,7 @@ let attentionChecksFailed   = js_vars.checks_failed;
 
 function showAttentionCheck() {
     attentionChecksReceived++;
-    liveSend({ attention_check_received: true });
+    safeLiveSend({ attention_check_received: true });
 
     attentionCheckActive = true;
 
@@ -628,7 +638,7 @@ function showAttentionCheck() {
 function failAttentionCheck() {
     attentionCheckActive = false;
     attentionChecksFailed++;
-    liveSend({ attention_check_failed: true });
+    safeLiveSend({ attention_check_failed: true });
 
     const popup = document.getElementById("attention-check");
     const msg   = document.getElementById("attention-message");
@@ -658,7 +668,7 @@ document.getElementById("attention-button").onclick = function () {
 
     clearTimeout(attentionCheckTimer);
 
-    liveSend({ attention_check_passed: true });
+    safeLiveSend({ attention_check_passed: true });
 };
 
 function startAttentionChecks() {
