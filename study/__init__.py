@@ -1216,6 +1216,8 @@ def live_update_performance(player: Player, data):
         player.current_dict = json.dumps(d)
         player.current_word = json.dumps(w)
 
+        print("Updated performance to ", player.performance)
+
         return {
             pid: dict(
                 performance=player.performance,
