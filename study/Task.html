@@ -547,8 +547,8 @@ function liveRecv(data) {
     // ------------------------------------------------------------
     if (data.shuffle === true || data.init === true) {
 
-        dict = data.dict;
-        word = data.word;
+        dict = data.encryption_dict;
+        word = data.word_list;
 
         const server_letters = Object.keys(dict);
 

@@ -1166,8 +1166,8 @@ def live_update_performance(player: Player, data):
                 performance=player.performance,
                 mistakes=player.mistakes,
                 work_seconds=player.work_seconds,
-                dict=d,
-                word=w,
+                encryption_dict=d,
+                word_list=w,
                 shuffle=False
             )
         }
@@ -1183,8 +1183,8 @@ def live_update_performance(player: Player, data):
                 performance=player.performance,
                 mistakes=player.mistakes,
                 work_seconds=player.work_seconds,
-                dict=d,
-                word=w,
+                encryption_dict=d,
+                word_list=w,
                 shuffle=False
             )
         }
@@ -1223,8 +1223,8 @@ def live_update_performance(player: Player, data):
                 performance=player.performance,
                 mistakes=player.mistakes,
                 work_seconds=player.work_seconds,
-                dict=d,
-                word=w,
+                encryption_dict=d,
+                word_list=w,
                 shuffle=True
             )
         }
@@ -1260,8 +1260,8 @@ def live_update_performance(player: Player, data):
             performance=player.performance,
             mistakes=player.mistakes,
             work_seconds=player.work_seconds,
-            dict=d,
-            word=w,
+            encryption_dict=d,
+            word_list=w,
             shuffle=False
         )
     }
