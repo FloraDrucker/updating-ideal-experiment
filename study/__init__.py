@@ -1470,7 +1470,7 @@ class Predicted(Page):
                 print('Ideal to do:', player.ideal_to_do, 'index:', player.ideal_index)
         else:
             pass
-        
+
 
 class Interval(Page):
     @staticmethod
