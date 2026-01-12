@@ -1454,9 +1454,23 @@ class Predicted(Page):
             else:
                 player.participant.vars['predicted'][12] = player.lastpredicted_c
                 player.lastpredicted_t = 999
+
+            # randomly select whether participant has to do ideal number of tasks
+            prob_ideal = round((base_constants.PERCENT_IDEAL + C.PERCENT_IDEAL_PART5) / 100, 2)
+            player.do_ideal = bool(np.random.choice([True, False],
+                                                    p=[prob_ideal, 1 - prob_ideal]))
+            player.participant.vars['do_ideal'] = player.do_ideal
+
+            # do either the ideal stated in the first round or in the last round:
+            if player.do_ideal:
+                player.ideal_index = int(np.random.choice([8, 12]))
+                player.ideal_to_do = player.participant.vars['ideal'][player.ideal_index]
+                player.participant.vars['ideal_to_do'] = player.ideal_to_do
+                player.participant.vars['ideal_index'] = player.ideal_index
+                print('Ideal to do:', player.ideal_to_do, 'index:', player.ideal_index)
         else:
             pass
-
+        
 
 class Interval(Page):
     @staticmethod
@@ -1543,20 +1557,6 @@ class Belief(Page):
             else:
                 player.participant.vars['belief'][player.round_number-1] = player.belief_c
                 player.belief_t = 50
-
-        if player.round_number == 6:
-            prob_ideal = round((base_constants.PERCENT_IDEAL+C.PERCENT_IDEAL_PART5)/100, 2)
-            player.do_ideal = bool(np.random.choice([True, False],
-                                               p=[prob_ideal, 1-prob_ideal]))
-            player.participant.vars['do_ideal'] = player.do_ideal
-
-        # do either the ideal stated in the first round or in the last round:
-            if player.do_ideal:
-                player.ideal_index = int(np.random.choice([8, 12]))
-                player.ideal_to_do = player.participant.vars['ideal'][player.ideal_index]
-                player.participant.vars['ideal_to_do'] = player.ideal_to_do
-                player.participant.vars['ideal_index'] = player.ideal_index
-                print ('Ideal to do:', player.ideal_to_do, 'index:', player.ideal_index)
 
 
 class Signal(Page):
