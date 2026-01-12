@@ -1141,6 +1141,16 @@ def live_update_performance(player: Player, data):
     # INIT (first time the page loads)
     # ------------------------------------------------------------
     if data.get('init'):
+        # Reconcile client values with server (take max to never lose progress)
+        client_perf = data.get('client_performance', 0)
+        client_mistakes = data.get('client_mistakes', 0)
+
+        if client_perf > player.performance:
+            player.performance = client_perf
+
+        if client_mistakes > player.mistakes:
+            player.mistakes = client_mistakes
+
         if not player.field_maybe_none('current_dict') or not player.field_maybe_none('current_word'):
             d = build_random_dict()
             w = build_random_word(C.TASK_LENGTH)
@@ -1205,6 +1215,8 @@ def live_update_performance(player: Player, data):
         w = build_random_word(C.TASK_LENGTH)
         player.current_dict = json.dumps(d)
         player.current_word = json.dumps(w)
+
+        print("Updated performance to ", player.performance)
 
         return {
             pid: dict(

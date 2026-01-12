@@ -34,7 +34,7 @@
         The probability of receiving the payment is
     </p>
 
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
+    <!-- MathJax loaded dynamically when user clicks button (saves 1-3MB on page load) -->
     {{ if player.treatment }}
     $$ {p = 1- \frac{(\text{your guess} - \text{actual payoff per task})^2}{900}.} $$
     {{ else }}
@@ -55,12 +55,27 @@
 </p>
 
 <script>
+    let mathJaxLoaded = false;
+
     function toggleMathFormula() {
         const section = document.getElementById('mathFormula');
         const button = event.target;
         if (section.style.display === 'none') {
             section.style.display = 'block';
             button.textContent = 'Hide mathematical formula';
+
+            // Load MathJax only when formula is first shown (deferred loading)
+            if (!mathJaxLoaded) {
+                mathJaxLoaded = true;
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default';
+                script.onload = function() {
+                    if (window.MathJax) {
+                        MathJax.Hub.Queue(["Typeset", MathJax.Hub, "mathFormula"]);
+                    }
+                };
+                document.head.appendChild(script);
+            }
         } else {
             section.style.display = 'none';
             button.textContent = 'Show mathematical formula';
