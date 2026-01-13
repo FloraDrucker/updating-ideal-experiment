@@ -213,11 +213,11 @@ class PlayerBot(Bot):
             yield Work
 
         # 9) Task (live page)
-        # Submit the Task page with required form fields (otherwise validation fails)
-        yield Task, dict(performance=0, mistakes=0)
-
-        # Then interact with the live method to simulate solving tasks
+        # Play the task first to populate performance and mistakes
         play_encryption_task(self, n_tasks=3, work_seconds=5)
+        
+        # Submit the Task page with correct performance values
+        yield Submission(Task, dict(performance=self.player.performance, mistakes=self.player.mistakes), check_html=False)
 
         # 10) EndOfWork
         yield EndOfWork
