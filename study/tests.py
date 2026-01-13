@@ -12,7 +12,7 @@ def solve_word(enc_dict, word):
     return [enc_dict[l] for l in word]
 
 
-def play_encryption_task(bot, n_tasks=3, work_seconds=5):
+def play_encryption_task(bot, n_tasks=20, work_seconds=120):
     """
     Plays the live encryption task by directly calling the live_method function.
     This is compatible with oTree versions whose Bot API has no live_send().
@@ -46,7 +46,7 @@ def play_encryption_task(bot, n_tasks=3, work_seconds=5):
             payload = list(resp.values())[0]
 
     # STOP WORK
-    live_update_performance(player, {'stop_work': True, 'work_seconds': work_seconds})
+    # live_update_performance(player, {'stop_work': True, 'work_seconds': work_seconds})
 
 
 # ======================================================
@@ -220,7 +220,7 @@ class PlayerBot(Bot):
 
         # 9) Task (live page)
         # Play the task first to populate performance and mistakes
-        play_encryption_task(self, n_tasks=3, work_seconds=5)
+        play_encryption_task(self, n_tasks=20, work_seconds=120)
         
         # Submit the Task page with correct performance values
         yield Submission(Task, dict(performance=self.player.performance, mistakes=self.player.mistakes), check_html=False)
