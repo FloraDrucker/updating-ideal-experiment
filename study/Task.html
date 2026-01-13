@@ -460,18 +460,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// Auto-submit form on page unload to ensure data is saved
-window.addEventListener("beforeunload", () => {
-    const form = document.querySelector("form");
-    if (form && !form.hidden) {
-        // Update form fields with current values from DOM
-        document.getElementById("performance").value = Number(document.getElementById("performance").value || 0);
-        document.getElementById("mistakes").value = Number(document.getElementById("mistakes").value || 0);
-        // Submit form asynchronously (don't wait for response)
-        navigator.sendBeacon(form.action, new FormData(form));
-    }
-});
-
 function myFunction() {
     let errors = checkSolution(letters_per_word);
 
@@ -632,7 +620,7 @@ function stopWorking() {
 
     // Force a reload so the Back button cannot restore work mode
     setTimeout(() => {
-    window.location.reload();
+        window.location.reload();
     }, 1000);
 }
 
