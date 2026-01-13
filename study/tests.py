@@ -29,8 +29,8 @@ def play_encryption_task(bot, n_tasks=3, work_seconds=5):
 
     # solve a few tasks: each "performance" update refreshes dict/word
     for _ in range(n_tasks):
-        enc_dict = payload['dict']
-        word = payload['word']
+        enc_dict = payload['encryption_dict']
+        word = payload['word_list']
 
         # compute solution (not sent anywhere yet, but exercises mapping logic)
         solve_word(enc_dict, word)
