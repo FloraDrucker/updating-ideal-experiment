@@ -16,6 +16,7 @@ def play_encryption_task(bot, n_tasks=3, work_seconds=5):
     """
     Plays the live encryption task by directly calling the live_method function.
     This is compatible with oTree versions whose Bot API has no live_send().
+    Includes periodic page refreshes to simulate real participant behavior.
     """
 
     player = bot.player
@@ -28,7 +29,7 @@ def play_encryption_task(bot, n_tasks=3, work_seconds=5):
     mistakes = payload.get('mistakes', 0)
 
     # solve a few tasks: each "performance" update refreshes dict/word
-    for _ in range(n_tasks):
+    for task_num in range(n_tasks):
         enc_dict = payload['encryption_dict']
         word = payload['word_list']
 
@@ -38,6 +39,11 @@ def play_encryption_task(bot, n_tasks=3, work_seconds=5):
         performance += 1
         resp = live_update_performance(player, {'performance': performance})
         payload = list(resp.values())[0]
+        
+        # Simulate page refresh every other task (real participants may refresh)
+        if task_num % 2 == 1:
+            resp = live_update_performance(player, {'request_update': True, 'client_performance': performance, 'client_mistakes': mistakes})
+            payload = list(resp.values())[0]
 
     # STOP WORK
     live_update_performance(player, {'stop_work': True, 'work_seconds': work_seconds})
