@@ -39,9 +39,25 @@ REAL_WORLD_CURRENCY_CODE = 'USD'
 USE_POINTS = False
 
 ADMIN_USERNAME = 'admin'
-# for security, best to set admin password in an environment variable
+
+# Security: ADMIN_PASSWORD must be set via environment variable
 ADMIN_PASSWORD = environ.get('OTREE_ADMIN_PASSWORD')
+if not ADMIN_PASSWORD:
+    import warnings
+    warnings.warn(
+        "OTREE_ADMIN_PASSWORD not set. Admin access may be unrestricted.",
+        RuntimeWarning
+    )
 
 DEMO_PAGE_INTRO_HTML = """ """
 
-SECRET_KEY = '1054327041868'
+# Security: SECRET_KEY must be set via environment variable in production
+# Fallback provided for local development only
+SECRET_KEY = environ.get('OTREE_SECRET_KEY', environ.get('SECRET_KEY'))
+if not SECRET_KEY:
+    import warnings
+    warnings.warn(
+        "OTREE_SECRET_KEY not set. Using insecure default for development only.",
+        RuntimeWarning
+    )
+    SECRET_KEY = '1054327041868'
