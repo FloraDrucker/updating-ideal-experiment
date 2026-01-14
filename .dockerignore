@@ -1,0 +1,43 @@
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Git
+.git/
+.gitignore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# oTree database (will be created fresh)
+db.sqlite3
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation/review artifacts
+ai-review/
+CLAUDE.md
+*.md
+!README.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files (secrets should be passed at runtime)
+.env
+.env.*
