@@ -8,6 +8,7 @@ SESSION_CONFIGS = [
         num_demo_participants=10,
         participation_fee=11.0,
         work_length_seconds=120,
+        use_browser_bots=False,
         set_treatment=False,
         treatment=False,
         prolific_completion_url='FILL THIS IN!',
