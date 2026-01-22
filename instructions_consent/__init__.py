@@ -136,6 +136,8 @@ def creating_session(subsession: Subsession):
         p.participant.vars['success_attempt'] = None
         p.participant.vars['attempt_number'] = 0
         p.participant.vars['excluded'] = False
+        p.participant.vars['wrong_questions_attempt1'] = ""
+        p.participant.vars['wrong_questions_attempt2'] = ""
 
 
 # PAGES
@@ -220,6 +222,12 @@ class ComprehensionCheck(Page):
 
         player.num_wrong = len(wrong_list)
         player.wrong_questions = ','.join(wrong_list)
+
+        # Store wrong questions for each attempt
+        if player.attempt_number == 1:
+            player.participant.vars['wrong_questions_attempt1'] = player.wrong_questions
+        elif player.attempt_number == 2:
+            player.participant.vars['wrong_questions_attempt2'] = player.wrong_questions
 
         # Exclusion / success logic
         if player.num_wrong >= 4:
