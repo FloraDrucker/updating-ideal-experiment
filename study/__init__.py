@@ -1610,10 +1610,11 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
         config = player.session.config
         work_length_minutes = round(config['work_length_seconds'] / 60)
         percent_ideal_total = round(2*base_constants.PERCENT_IDEAL)
+        treatment = player.participant.vars['treatment']
+        flat_fee = base_constants.FLAT_LEISURE_FEE
 
         if player.do_ideal:
             part_ideal_elicited = {8: 'first part', 12: 'last part'}
-            treatment = player.participant.vars['treatment']
             guess_about = base_constants.GUESS_ABOUT[treatment]
             return {
                 'ideal_to_do': player.ideal_to_do,
@@ -1621,11 +1622,15 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
                 'part_ideal_elicited': part_ideal_elicited[player.ideal_index],
                 'guess_about': guess_about,
                 'work_length_minutes': work_length_minutes,
+                'treatment': treatment,
+                'flat_fee': flat_fee,
             }
         else:
             return {
                 'work_length_minutes': work_length_minutes,
                 'percent_ideal_total': percent_ideal_total,
+                'treatment': treatment,
+                'flat_fee': flat_fee,
             }
 
 

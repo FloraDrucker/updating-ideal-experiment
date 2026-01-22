@@ -9,10 +9,10 @@
 
 {{ if player.round_number == 1 }}
 <p>
-    On the next page, you can work on the task for {{ work_length_minutes }} minutes. You can also choose to stop working at any time and switch to the non-work activity (e.g. using your smartphone). Remember that <b>this part can also be selected at the end of the study for payment</b> based on your <b>performance in the task</b> (earning {{ if treatment }}the true payoff{{ else }}{{ true_benefit }} points{{ endif }} per task) and <b>minutes spent on the non-work activity</b> (earning the flat fee of {{ flat_fee }} points per minute).
+    On the next page, you will work on the task for {{ work_length_minutes }} minutes. Remember that <b>this part can also be selected at the end of the study for payment</b> based on your <b>performance in the task</b> (earning {{ if treatment }}the true payoff{{ else }}{{ true_benefit }} points{{ endif }} per task).
 </p>
-{{ endif }}
 
+{{ endif }}
 <p>
     Please click on the "Next" button to start {{ part }}.
 </p>

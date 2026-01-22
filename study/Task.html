@@ -219,7 +219,7 @@ td {
 {% endif %}
 
 <!-- Smaller Stop Working button -->
-    {% if player.do_ideal == 0 %}
+    {% if player.do_ideal == 0 and player.round_number > 1 %}
         <button id="stop-working"
         type="button"
         onclick="stopWorking()"
