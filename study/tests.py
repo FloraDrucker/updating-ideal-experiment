@@ -12,11 +12,17 @@ def solve_word(enc_dict, word):
     return [enc_dict[l] for l in word]
 
 
-def play_encryption_task(bot, n_tasks=20, work_seconds=120):
+def play_encryption_task(bot, should_work=True, n_tasks=20, work_seconds=120):
     """
     Plays the live encryption task by directly calling the live_method function.
     This is compatible with oTree versions whose Bot API has no live_send().
     Includes periodic page refreshes to simulate real participant behavior.
+    
+    Args:
+        bot: The bot player
+        should_work: If True, completes tasks. If False, stops working immediately.
+        n_tasks: Number of tasks to complete (if should_work=True)
+        work_seconds: Seconds worked before stopping
     """
 
     player = bot.player
@@ -27,6 +33,11 @@ def play_encryption_task(bot, n_tasks=20, work_seconds=120):
 
     performance = payload.get('performance', 0)
     mistakes = payload.get('mistakes', 0)
+
+    if not should_work:
+        # Stop working immediately
+        live_update_performance(player, {'stop_work': True, 'work_seconds': 4})
+        return
 
     # solve a few tasks: each "performance" update refreshes dict/word
     for task_num in range(n_tasks):
@@ -219,8 +230,11 @@ class PlayerBot(Bot):
             yield Work
 
         # 9) Task (live page)
+        # Bot behavior: work in round 1 and 4, stop immediately in rounds 2,3,5,6
+        should_work = self.round_number in [1, 4]
+        
         # Play the task first to populate performance and mistakes
-        play_encryption_task(self, n_tasks=20, work_seconds=120)
+        play_encryption_task(self, should_work=should_work, n_tasks=20, work_seconds=120)
         
         # Submit the Task page with correct performance values
         yield Submission(Task, dict(performance=self.player.performance, mistakes=self.player.mistakes), check_html=False)

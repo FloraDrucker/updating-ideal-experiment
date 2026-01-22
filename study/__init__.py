@@ -1612,6 +1612,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
         percent_ideal_total = round(2*base_constants.PERCENT_IDEAL)
         treatment = player.participant.vars['treatment']
         flat_fee = base_constants.FLAT_LEISURE_FEE
+        true_benefit = base_constants.TRUE_PAYOFF
 
         if player.do_ideal:
             part_ideal_elicited = {8: 'first part', 12: 'last part'}
@@ -1624,6 +1625,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
                 'work_length_minutes': work_length_minutes,
                 'treatment': treatment,
                 'flat_fee': flat_fee,
+                'true_benefit': true_benefit,
             }
         else:
             return {
@@ -1631,6 +1633,7 @@ class Work(Page):  # in period 5, we tell the participants the number of tasks t
                 'percent_ideal_total': percent_ideal_total,
                 'treatment': treatment,
                 'flat_fee': flat_fee,
+                'true_benefit': true_benefit,
             }
 
 
