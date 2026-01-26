@@ -242,7 +242,7 @@ class PlayerBot(Bot):
             play_encryption_task(self, n_tasks=20, work_seconds=120)
         
         # Submit the Task page with correct performance values
-        yield Submission(Task, dict(performance=self.player.performance, mistakes=self.player.mistakes), check_html=False)
+        yield Submission(Task, dict(performance=self.player.performance, mistakes=self.player.mistakes, work_seconds=self.player.work_seconds), check_html=False)
 
         # 10) EndOfWork
         yield EndOfWork
