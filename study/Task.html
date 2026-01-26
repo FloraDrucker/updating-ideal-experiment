@@ -358,6 +358,7 @@ const required_tasks = js_vars.required_tasks;
 // Session storage keys for backup persistence (survives page refresh)
 const STORAGE_KEY_PERF = 'task_perf_round_{{ player.round_number }}';
 const STORAGE_KEY_MISTAKES = 'task_mistakes_round_{{ player.round_number }}';
+const STORAGE_KEY_WORK = 'task_work_seconds_round_{{ player.round_number }}';
 
 // Helper to safely read from sessionStorage
 function getStoredValue(key) {
@@ -452,6 +453,13 @@ document.addEventListener("DOMContentLoaded", () => {
     setStoredValue(STORAGE_KEY_PERF, reconciledPerf);
     setStoredValue(STORAGE_KEY_MISTAKES, reconciledMistakes);
 
+    // Reconcile work_seconds (same pattern as perf/mistakes)
+    const storedWork = getStoredValue(STORAGE_KEY_WORK);
+    const serverWork = {{ player.work_seconds }};
+    const reconciledWork = Math.max(storedWork, serverWork);
+    document.getElementById("work_seconds").value = reconciledWork;
+    setStoredValue(STORAGE_KEY_WORK, reconciledWork);
+
     // Send init with client's known values for server-side reconciliation
     liveSend({
         init: true,
@@ -539,7 +547,11 @@ function liveRecv(data) {
         document.getElementById("mistakes").value = data.mistakes;
     }
     if (typeof data.work_seconds === 'number') {
-        document.getElementById("work_seconds").value = data.work_seconds;
+        // Reconcile with sessionStorage to prevent server overwriting valid local value
+        const storedWork = getStoredValue(STORAGE_KEY_WORK);
+        const reconciledWork = Math.max(storedWork, data.work_seconds);
+        document.getElementById("work_seconds").value = reconciledWork;
+        setStoredValue(STORAGE_KEY_WORK, reconciledWork);
     }
 
     // ------------------------------------------------------------
@@ -609,6 +621,9 @@ function stopWorking() {
 
     // Save in hidden form field
     document.getElementById("work_seconds").value = work;
+
+    // Backup to sessionStorage BEFORE async liveSend (survives page reload)
+    setStoredValue(STORAGE_KEY_WORK, work);
 
     // Send to server via websockets
     liveSend({
