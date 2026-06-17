@@ -324,6 +324,18 @@ const required_tasks = js_vars.required_tasks;
 const STORAGE_KEY_PERF = 'task_perf_round_{{ player.round_number }}';
 const STORAGE_KEY_MISTAKES = 'task_mistakes_round_{{ player.round_number }}';
 const STORAGE_KEY_WORK = 'task_work_seconds_round_{{ player.round_number }}';
+const STORAGE_KEY_STOPPED = 'task_stopped_round_{{ player.round_number }}';
+
+// Re-freeze UI if Back button restores this page from bfcache
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted && sessionStorage.getItem(STORAGE_KEY_STOPPED) === '1') {
+        disableTaskInputs();
+        document.getElementById("submit-solution").disabled = true;
+        const stopBtn = document.getElementById("stop-working");
+        if (stopBtn) stopBtn.style.display = "none";
+        startBreakVideos();
+    }
+});
 
 // Helper to safely read from sessionStorage
 function getStoredValue(key) {
@@ -361,7 +373,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 1. Load frozen state if Stop Working was pressed earlier
-    if (js_vars.stopped_work === true) {
+    // Check both server flag AND sessionStorage (covers race condition where Back button fires before liveSend is processed)
+    if (js_vars.stopped_work === true || sessionStorage.getItem(STORAGE_KEY_STOPPED) === '1') {
         disableTaskInputs();
         document.getElementById("submit-solution").disabled = true;
         const stopBtn = document.getElementById("stop-working");
@@ -459,12 +472,8 @@ function myFunction() {
             msg.style.display = "block";
 
             js_vars.stopped_work = true;
+            sessionStorage.setItem(STORAGE_KEY_STOPPED, '1');
             startBreakVideos();
-
-            // Force a reload so the Back button cannot restore work mode
-            setTimeout(() => {
-            window.location.reload();
-            }, 1000);
 
             return;
         }
@@ -589,6 +598,7 @@ function stopWorking() {
 
     // Backup to sessionStorage BEFORE async liveSend (survives page reload)
     setStoredValue(STORAGE_KEY_WORK, work);
+    sessionStorage.setItem(STORAGE_KEY_STOPPED, '1');
 
     // Send to server via websockets
     liveSend({
@@ -597,11 +607,6 @@ function stopWorking() {
     });
 
     startBreakVideos();
-
-    // Force a reload so the Back button cannot restore work mode
-    setTimeout(() => {
-        window.location.reload();
-    }, 1000);
 }
 
 
