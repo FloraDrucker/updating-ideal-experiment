@@ -1,8 +1,9 @@
 from otree.api import *
-import random, string, json
+import random, string, json, re
 from instructions_consent import C as base_constants
 import numpy as np
 import time
+from pathlib import Path
 
 doc = """
 Study
@@ -57,8 +58,6 @@ class Player(BasePlayer):
     work_seconds = models.IntegerField(initial=0) # This tracks the working time
     nonwork_seconds = models.IntegerField(initial=0)  # Tracking non-work time
     stopped_work = models.BooleanField(initial=False)
-    attention_checks_received = models.IntegerField(initial=0)
-    attention_checks_failed = models.IntegerField(initial=0)
     do_ideal = models.BooleanField(initial=False) # whether the participant has to do the stated ideal number of tasks
     ideal_to_do = models.IntegerField(default=999)
     ideal_index = models.IntegerField(null=True, blank=True, default=None)
@@ -1005,6 +1004,15 @@ class Player(BasePlayer):
     )
 
 
+def get_break_videos():
+    path = Path(__file__).parent.parent / '_static' / 'videos.json'
+    with open(path) as file:
+        data = json.loads(file.read())
+    data_list = [dict(size=v['size'], id=re.search(r'video/(\d+)', v['url']).group(1)) for k, v in data.items()]
+
+    random.shuffle(data_list)
+    return {str(i): v for i, v in enumerate(data_list, 1)}
+
 def belief_t_error_message(player, value):
     if not base_constants.BENEFIT_RANGE_MIN <= value <= base_constants.BENEFIT_RANGE_MAX:
         return f"Please enter a number between {base_constants.BENEFIT_RANGE_MIN} and {base_constants.BENEFIT_RANGE_MAX}."
@@ -1044,8 +1052,6 @@ def creating_session(subsession: Subsession):
         ppvars['ideal_index'] = None
         ppvars['work_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
         ppvars['nonwork_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
-        ppvars['attention_checks_received'] = {i: 0 for i in range(C.NUM_ROUNDS)}
-        ppvars['attention_checks_failed'] = {i: 0 for i in range(C.NUM_ROUNDS)}
 
         # Risk preferences
         ppvars['risk_choices'] = {i: None for i in range(21)}
@@ -1240,20 +1246,6 @@ def live_update_performance(player: Player, data):
     # ------------------------------------------------------------
     d = json.loads(player.current_dict) if player.current_dict else {}
     w = json.loads(player.current_word) if player.current_word else []
-
-    # ------------------------------------------------------------
-    # ATTENTION CHECKS
-    # ------------------------------------------------------------
-    if data.get("attention_check_received"):
-        player.attention_checks_received += 1
-        return {player.id_in_group: dict()}
-
-    if data.get("attention_check_failed"):
-        player.attention_checks_failed += 1
-        return {player.id_in_group: dict()}
-
-    if data.get("attention_check_passed"):
-        return {player.id_in_group: dict()}
 
     return {
         pid: dict(
@@ -1671,8 +1663,7 @@ class Task(Page):
             timeout_seconds=cfg['work_length_seconds'],
             stopped_work=player.stopped_work,
             do_ideal=int(player.do_ideal),
-            checks_received=player.attention_checks_received,
-            checks_failed=player.attention_checks_failed,
+            break_videos=get_break_videos(),
         )
 
 
@@ -1706,16 +1697,12 @@ class Task(Page):
         pp.vars['mistakes'][idx] = p.mistakes
         pp.vars['work_seconds'][idx] = p.work_seconds
         pp.vars['nonwork_seconds'][idx] = p.nonwork_seconds
-        pp.vars['attention_checks_received'][idx] = p.attention_checks_received
-        pp.vars['attention_checks_failed'][idx] = p.attention_checks_failed
 
         print(
             'performance:', p.performance,
             'mistakes:', p.mistakes,
             'work seconds:', p.work_seconds,
             'nonwork seconds:', p.nonwork_seconds,
-            'attention checks received:', p.attention_checks_received,
-            'attention checks failed:', p.attention_checks_failed
         )
 
 class EndOfWork(Page):
@@ -1930,8 +1917,7 @@ class Payment(Page):
         payoff_for_work = base_constants.TRUE_PAYOFF*performance_to_pay
         payoff_in_usd = cu(config['real_world_currency_per_point']*payoff_for_work)
         leisure_minutes = round((player.participant.vars['nonwork_seconds'][player.task_chosen_part])/60, 2)
-        failed_attention_checks = (player.participant.vars['attention_checks_failed'][player.task_chosen_part] > 1)
-        if not_done_ideal or failed_attention_checks:
+        if not_done_ideal:
             leisure_to_pay = 0
         else:
             leisure_to_pay = leisure_minutes
@@ -1969,7 +1955,6 @@ class Payment(Page):
             'percent_ideal': base_constants.PERCENT_IDEAL,
             'do_ideal': ppvars['do_ideal'],
             'not_done_ideal': not_done_ideal,
-            'failed_attention_checks': failed_attention_checks,
             'true_payoff': base_constants.TRUE_PAYOFF,
             'payoff_for_work': payoff_for_work,
             'payoff_for_work_usd': payoff_in_usd,
