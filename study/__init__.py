@@ -617,6 +617,7 @@ class Player(BasePlayer):
         label='What is the average of the following five numbers? 123, 88, 147, 102, 95. Please do not use a calculator.'
     )
 
+    # ballsremembered1 correct answer is 2
     ballsremembered1 = models.IntegerField(
         choices=[
             [-1, 'I cannot remember how many times I have seen a ball with this number on it.'],
@@ -633,9 +634,10 @@ class Player(BasePlayer):
             [10, '10'],
         ],
         blank=False,
-        label='How many times have you seen a ball with the number 128 on it over the course of the experiment?'
+        label='How many times have you seen a ball with the number 135 on it over the course of the experiment?'
     )
 
+    # ballsremembered2 correct answer is 0
     ballsremembered2 = models.IntegerField(
         choices=[
             [-1, 'I cannot remember how many times I have seen a ball with this number on it.'],
@@ -655,6 +657,7 @@ class Player(BasePlayer):
         label='How many times have you seen a ball with the number 102 on it over the course of the experiment?'
     )
 
+    # ballsremembered3 correct answer is 1
     ballsremembered3 = models.IntegerField(
         choices=[
             [-1, 'I cannot remember how many times I have seen a ball with this number on it.'],
@@ -671,7 +674,7 @@ class Player(BasePlayer):
             [10, '10'],
         ],
         blank=False,
-        label='How many times have you seen a ball with the number 136 on it over the course of the experiment?'
+        label='How many times have you seen a ball with the number 109 on it over the course of the experiment?'
     )
 
     screenshot = models.BooleanField(
@@ -996,6 +999,28 @@ class Player(BasePlayer):
         blank=False
     )
 
+    task_like = models.IntegerField(
+        label="How did you like working on the task?",
+        choices=[
+            [1, '1 - I did not enjoy it at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - I enjoyed it very much'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    task_more = models.BooleanField(
+        choices=[[True, 'Yes'], [False, 'No']],
+        widget=widgets.RadioSelect,
+        label="Would you like to work on five more tasks without getting paid for this?",
+        blank=False
+    )
+
     #Wechsler Level
     digitspan_max_level = models.IntegerField(
         initial=0,
@@ -1081,6 +1106,8 @@ def creating_session(subsession: Subsession):
         ppvars['ballsremembered3'] = None
         ppvars['screenshot'] = None
         ppvars['ai_integral'] = None
+        ppvars['task_like'] = None
+        ppvars['task_more'] = None
 
         # Wechsler
         ppvars['digitspan_max_level'] = None
@@ -1857,7 +1884,7 @@ class Survey5(Page):
         'BSCS_dobadthings', 'BSCS_refusebad', 'BSCS_morediscipline', 'BSCS_irondiscipline',
         'BSCS_pleasure', 'BSCS_concentrating', 'BSCS_work', 'BSCS_stop',
         'BSCS_alternatives', 'averagetask', 'ballsremembered1', 'ballsremembered2',
-        'ballsremembered3','screenshot', 'ai_integral'
+        'ballsremembered3','screenshot','ai_integral','task_like','task_more',
     ]
 
     @staticmethod
@@ -1882,6 +1909,8 @@ class Survey5(Page):
         ppvars['ballsremembered3'] = player.ballsremembered3
         ppvars['screenshot'] = player.screenshot
         ppvars['ai_integral'] = player.ai_integral
+        ppvars['task_like'] = player.task_like
+        ppvars['task_more'] = player.task_more
 
 
         # Randomize and calculate final payment
