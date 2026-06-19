@@ -139,17 +139,23 @@ def creating_session(subsession: Subsession):
         p.participant.vars['wrong_questions_attempt1'] = ""
         p.participant.vars['wrong_questions_attempt2'] = ""
 
+def page_timeout(timeout_key):
+    def get_timeout_seconds(player):
+        return player.session.config['page_timeouts'][timeout_key]
 
+    return staticmethod(get_timeout_seconds)
 # PAGES
 class Welcome(Page):
-    pass
+    get_timeout_seconds = page_timeout('welcome')
 
 
 class EncryptionTask(Page):
-    pass
+    get_timeout_seconds = page_timeout('encryption_task')
 
 
 class Instructions(Page):
+    get_timeout_seconds = page_timeout('instructions')
+
     @staticmethod
     def vars_for_template(player: Player):
         participation_fee = player.session.config['participation_fee']
@@ -165,6 +171,8 @@ class Instructions(Page):
 
 
 class ComprehensionCheck(Page):
+    get_timeout_seconds = page_timeout('comprehension_check')
+
     form_model = 'player'
 
     @staticmethod
@@ -248,6 +256,7 @@ class ComprehensionCheck(Page):
 
 
 class ShowCorrectAnswers(Page):
+    get_timeout_seconds = page_timeout('show_correct_answer')
     @staticmethod
     def is_displayed(player):
         # Show correct answers only if they failed twice but are not excluded
@@ -270,6 +279,7 @@ class Excluded(Page):
 
 
 class Consent(Page):
+    get_timeout_seconds = page_timeout('consent')
     form_model = 'player'
     form_fields = ['consent']
 

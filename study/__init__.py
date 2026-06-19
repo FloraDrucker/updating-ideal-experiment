@@ -1298,9 +1298,15 @@ def get_timeout_seconds(player):
     config = player.session.config
     return config['work_length_seconds']
 
+def page_timeout(timeout_key):
+    def get_timeout_seconds(player):
+        return player.session.config['page_timeouts'][timeout_key]
+
+    return staticmethod(get_timeout_seconds)
 
 # PAGES
 class PartStart(Page):
+    get_timeout_seconds = page_timeout('part_start')
     @staticmethod
     def vars_for_template(player):
         config = player.session.config
@@ -1319,6 +1325,12 @@ class PartStart(Page):
 
 class Ideal(Page):
     form_model = 'player'
+
+    @staticmethod
+    def get_timeout_seconds(player):
+        if player.round_number == 2:
+            return player.session.config['page_timeouts']['ideal_round_2']
+        return player.session.config['page_timeouts']['ideal_round_6']
 
     @staticmethod
     def get_form_fields(player):
@@ -1381,6 +1393,12 @@ class Ideal(Page):
 
 class Predicted(Page):
     form_model = 'player'
+
+    @staticmethod
+    def get_timeout_seconds(player):
+        if player.round_number == 2:
+            return player.session.config['page_timeouts']['predicted_round_2']
+        return player.session.config['page_timeouts']['predicted_round_6']
 
     @staticmethod
     def get_form_fields(player):
@@ -1501,11 +1519,11 @@ class Predicted(Page):
 
 
 class Interval(Page):
+    form_model = 'player'
+    get_timeout_seconds = page_timeout('interval')
     @staticmethod
     def is_displayed(player):
         return player.round_number == 1  # only shown in the trial
-
-    form_model = 'player'
 
     @staticmethod
     def get_form_fields(player):
@@ -1537,6 +1555,7 @@ class Interval(Page):
 
 
 class Performance(Page):  # display performance from the previous round
+    get_timeout_seconds = page_timeout('performance')
 
     @staticmethod
     def is_displayed(player):
@@ -1550,6 +1569,12 @@ class Performance(Page):  # display performance from the previous round
 
 
 class Belief(Page):
+    get_timeout_seconds = page_timeout('belief')
+
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number > 2
+
     @staticmethod
     def is_displayed(player):
         return player.round_number > 2
@@ -1628,7 +1653,9 @@ class Signal(Page):
         # This page always ends when the countdown hits zero
         pass
 
-class Work(Page):  # in period 5, we tell the participants the number of tasks they have to do here
+class Work(Page):
+    get_timeout_seconds = page_timeout('work_instructions')
+
     @staticmethod
     def is_displayed(player):
         return player.round_number > 1
@@ -1747,10 +1774,12 @@ class Task(Page):
         )
 
 class EndOfWork(Page):
-    pass
+    get_timeout_seconds = page_timeout('end_of_work')
 
 
 class Survey1(Page):
+    get_timeout_seconds = page_timeout('survey1')
+
     @staticmethod
     def is_displayed(player):
         return player.round_number == 2
@@ -1778,6 +1807,7 @@ class Survey1(Page):
 
 
 class Survey2(Page):
+    get_timeout_seconds = page_timeout('survey2')
     form_model = 'player'
     form_fields = ['digitspan_max_level']
 
@@ -1792,6 +1822,8 @@ class Survey2(Page):
 
 
 class Survey3(Page):
+    get_timeout_seconds = page_timeout('survey3')
+
     @staticmethod
     def is_displayed(player):
         return player.round_number == 4
@@ -1848,6 +1880,8 @@ class Survey3(Page):
 
 
 class Survey4(Page):
+    get_timeout_seconds = page_timeout('survey4')
+
     @staticmethod
     def is_displayed(player):
         return player.round_number == 5
@@ -1875,6 +1909,8 @@ class Survey4(Page):
 
 
 class Survey5(Page):
+    get_timeout_seconds = page_timeout('survey5')
+
     @staticmethod
     def is_displayed(player):
         return player.round_number == 6
@@ -1938,6 +1974,8 @@ class Survey5(Page):
 
 
 class Payment(Page):
+    get_timeout_seconds = page_timeout('payment')
+
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == C.NUM_ROUNDS
@@ -2024,6 +2062,8 @@ class Payment(Page):
         player.participant.vars['comments'] = player.comments
 
 class FinalPage(Page):
+    get_timeout_seconds = page_timeout('final_page')
+
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == C.NUM_ROUNDS
