@@ -1005,11 +1005,18 @@ class Player(BasePlayer):
 
 
 def get_break_videos():
-    path = Path(__file__).parent.parent / '_static' / 'videos.json'
+    path = Path(__file__).parent.parent / '_static' / 'videos-short.json'
     with open(path) as file:
         data = json.loads(file.read())
-    data_list = [dict(size=v['size'], id=re.search(r'video/(\d+)', v['url']).group(1)) for k, v in data.items()]
-
+    data_list = []
+    for v in data.values():
+        url = v['url']
+        if 'vimeo.com' in url:
+            video_id = re.search(r'video/(\d+)', url).group(1)
+            data_list.append(dict(type='vimeo', id=video_id, size=v.get('size', '')))
+        elif 'instagram.com/reel/' in url:
+            reel_id = re.search(r'/reel/([^/?]+)', url).group(1)
+            data_list.append(dict(type='instagram', id=reel_id, size=v.get('size', '')))
     random.shuffle(data_list)
     return {str(i): v for i, v in enumerate(data_list, 1)}
 

@@ -629,7 +629,7 @@ function shuffleArray(arr) {
 }
 
 function buildVideoQueue() {
-    videoQueue = Object.values(breakVideos).map(v => v.id);
+    videoQueue = Object.values(breakVideos);  // keep full objects (type + id)
     shuffleArray(videoQueue);
 }
 
@@ -647,23 +647,35 @@ function playNextVideo() {
     if (videoQueue.length === 0) {
         buildVideoQueue();
     }
-    const videoId = videoQueue.shift();
+    const video = videoQueue.shift();
     const container = document.getElementById("vimeo-container");
-    container.innerHTML = '<div id="vimeo-player"></div>';
 
     if (vimeoPlayer) {
         vimeoPlayer.destroy().catch(() => {});
         vimeoPlayer = null;
     }
 
-    vimeoPlayer = new Vimeo.Player('vimeo-player', {
-        id: parseInt(videoId),
-        width: 640,
-        autoplay: true
-    });
-
-    vimeoPlayer.on('ended', playNextVideo);
-    vimeoPlayer.on('error', playNextVideo);
+    if (video.type === 'instagram') {
+        container.innerHTML = `
+            <div style="text-align:center;">
+                <iframe src="https://www.instagram.com/reel/${video.id}/embed/?autoplay=1&mute=0"
+                    width="400" height="710" frameborder="0" scrolling="no"
+                    allowtransparency="true" allow="autoplay; encrypted-media"></iframe>
+                <br>
+                <button onclick="playNextVideo()" style="margin-top:12px; padding:10px 24px; font-size:16px; cursor:pointer; border-radius:6px;">
+                    Next video &#9654;
+                </button>
+            </div>`;
+    } else {
+        container.innerHTML = '<div id="vimeo-player"></div>';
+        vimeoPlayer = new Vimeo.Player('vimeo-player', {
+            id: parseInt(video.id),
+            width: 640,
+            autoplay: true
+        });
+        vimeoPlayer.on('ended', playNextVideo);
+        vimeoPlayer.on('error', playNextVideo);
+    }
 }
 
 </script>
