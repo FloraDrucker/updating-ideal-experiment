@@ -130,10 +130,6 @@ class Player(BasePlayer):
         blank=False,
         label="How many tasks would you ideally want to do for what you currently think the task payoff is?"
     )
-    beliefideal_c = models.IntegerField(
-        blank=False,
-        label="How many tasks would you ideally want to do for the number you currently think was chosen?"
-    )
 
     # Predicted values
     predicted50 = models.IntegerField(
@@ -1366,17 +1362,18 @@ class PartStart(Page):
 class BeliefIdeal(Page):
     form_model = 'player'
     get_timeout_seconds = page_timeout('ideal_round_2')
-    timeout_submission = {'beliefideal_t': None, 'beliefideal_c': None}
+    timeout_submission = {'beliefideal_t': None}
 
     @staticmethod
     def get_form_fields(player):
-        if player.participant.vars['treatment']:
-            return ['beliefideal_t']
-        return ['beliefideal_c']
+        return ['beliefideal_t']
 
     @staticmethod
     def is_displayed(player):
-        return player.round_number == 2
+        return (
+            player.round_number == 2
+            and player.participant.vars['treatment']
+        )
 
     @staticmethod
     def vars_for_template(player):
@@ -1399,12 +1396,7 @@ class BeliefIdeal(Page):
 
         ppvars = player.participant.vars
         ppvars['belief_ideal_payoff'] = ppvars['belief'][0]
-        if ppvars['treatment']:
-            ppvars['belief_ideal_tasks'] = player.beliefideal_t
-            player.beliefideal_c = 999
-        else:
-            ppvars['belief_ideal_tasks'] = player.beliefideal_c
-            player.beliefideal_t = 999
+        ppvars['belief_ideal_tasks'] = player.beliefideal_t
 
 
 class Ideal(Page):
