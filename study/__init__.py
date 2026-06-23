@@ -616,6 +616,7 @@ class Player(BasePlayer):
         label='What is the average of the following five numbers? 123, 88, 147, 102, 95. Please do not use a calculator.'
     )
 
+    # ballsremembered1 correct answer is 2
     ballsremembered1 = models.IntegerField(
         choices=[
             [-1, 'I cannot remember how many times I have seen a ball with this number on it.'],
@@ -632,9 +633,10 @@ class Player(BasePlayer):
             [10, '10'],
         ],
         blank=False,
-        label='How many times have you seen a ball with the number 128 on it over the course of the experiment?'
+        label='How many times have you seen a ball with the number 135 on it over the course of the experiment?'
     )
 
+    # ballsremembered2 correct answer is 0
     ballsremembered2 = models.IntegerField(
         choices=[
             [-1, 'I cannot remember how many times I have seen a ball with this number on it.'],
@@ -654,6 +656,7 @@ class Player(BasePlayer):
         label='How many times have you seen a ball with the number 102 on it over the course of the experiment?'
     )
 
+    # ballsremembered3 correct answer is 1
     ballsremembered3 = models.IntegerField(
         choices=[
             [-1, 'I cannot remember how many times I have seen a ball with this number on it.'],
@@ -670,7 +673,7 @@ class Player(BasePlayer):
             [10, '10'],
         ],
         blank=False,
-        label='How many times have you seen a ball with the number 136 on it over the course of the experiment?'
+        label='How many times have you seen a ball with the number 109 on it over the course of the experiment?'
     )
 
     screenshot = models.BooleanField(
@@ -995,6 +998,28 @@ class Player(BasePlayer):
         blank=False
     )
 
+    task_like = models.IntegerField(
+        label="How did you like working on the task?",
+        choices=[
+            [1, '1 - I did not enjoy it at all'],
+            [2, '2'],
+            [3, '3'],
+            [4, '4'],
+            [5, '5'],
+            [6, '6'],
+            [7, '7 - I enjoyed it very much'],
+        ],
+        widget=widgets.RadioSelectHorizontal,
+        blank=False
+    )
+
+    task_more = models.BooleanField(
+        choices=[[True, 'Yes'], [False, 'No']],
+        widget=widgets.RadioSelect,
+        label="Would you like to work on five more tasks without getting paid for this?",
+        blank=False
+    )
+
     #Wechsler Level
     digitspan_max_level = models.IntegerField(
         initial=0,
@@ -1093,7 +1118,10 @@ def creating_session(subsession: Subsession):
         ppvars['ballsremembered2'] = None
         ppvars['ballsremembered3'] = None
         ppvars['screenshot'] = None
+        ppvars['task_like'] = None
+        ppvars['task_more'] = None
         ppvars['ai_integral'] = None
+
 
         # Wechsler
         ppvars['digitspan_max_level'] = None
@@ -1269,9 +1297,46 @@ def get_timeout_seconds(player):
     config = player.session.config
     return config['work_length_seconds']
 
+def page_timeout(timeout_key):
+    def get_timeout_seconds(player):
+        return player.session.config['page_timeouts'][timeout_key]
+
+    return staticmethod(get_timeout_seconds)
+
+
+def exclude_on_incomplete_timeout(
+    player,
+    timeout_happened,
+    required_fields,
+    page_name,
+    additionally_missing=None,
+):
+    """Exclude when a timed form is submitted with required answers missing."""
+    if not timeout_happened:
+        return False
+
+    missing_fields = [
+        field_name
+        for field_name in required_fields
+        if player.field_maybe_none(field_name) is None
+    ]
+    if additionally_missing:
+        missing_fields.extend(additionally_missing)
+
+    if not missing_fields:
+        return False
+
+    ppvars = player.participant.vars
+    ppvars['excluded'] = True
+    ppvars['exclusion_reason'] = 'incomplete_timeout'
+    ppvars['exclusion_page'] = page_name
+    ppvars['missing_fields_at_timeout'] = list(dict.fromkeys(missing_fields))
+    return True
+
 
 # PAGES
 class PartStart(Page):
+    get_timeout_seconds = page_timeout('part_start')
     @staticmethod
     def vars_for_template(player):
         config = player.session.config
@@ -1290,6 +1355,20 @@ class PartStart(Page):
 
 class Ideal(Page):
     form_model = 'player'
+    timeout_submission = {
+        field_name: None
+        for field_name in [
+            'ideal50', 'ideal60', 'ideal70', 'ideal80', 'ideal90',
+            'ideal100', 'ideal110', 'ideal120', 'ideal130', 'ideal140',
+            'ideal150', 'lastideal_t', 'lastideal_c',
+        ]
+    }
+
+    @staticmethod
+    def get_timeout_seconds(player):
+        if player.round_number == 2:
+            return player.session.config['page_timeouts']['ideal_round_2']
+        return player.session.config['page_timeouts']['ideal_round_6']
 
     @staticmethod
     def get_form_fields(player):
@@ -1325,6 +1404,12 @@ class Ideal(Page):
 
     @staticmethod
     def before_next_page(player, timeout_happened):
+        required_fields = Ideal.get_form_fields(player)
+        if exclude_on_incomplete_timeout(
+            player, timeout_happened, required_fields, 'Ideal'
+        ):
+            return
+
         if player.round_number == 2:
             player.participant.vars['ideal'][1] = player.ideal50
             player.participant.vars['ideal'][2] = player.ideal60
@@ -1352,6 +1437,21 @@ class Ideal(Page):
 
 class Predicted(Page):
     form_model = 'player'
+    timeout_submission = {
+        field_name: None
+        for field_name in [
+            'predicted50', 'predicted60', 'predicted70', 'predicted80',
+            'predicted90', 'predicted100', 'predicted110', 'predicted120',
+            'predicted130', 'predicted140', 'predicted150',
+            'lastpredicted_t', 'lastpredicted_c',
+        ]
+    }
+
+    @staticmethod
+    def get_timeout_seconds(player):
+        if player.round_number == 2:
+            return player.session.config['page_timeouts']['predicted_round_2']
+        return player.session.config['page_timeouts']['predicted_round_6']
 
     @staticmethod
     def get_form_fields(player):
@@ -1434,6 +1534,12 @@ class Predicted(Page):
 
     @staticmethod
     def before_next_page(player, timeout_happened):
+        required_fields = Predicted.get_form_fields(player)
+        if exclude_on_incomplete_timeout(
+            player, timeout_happened, required_fields, 'Predicted'
+        ):
+            return
+
         if player.round_number == 2:
             player.participant.vars['predicted'][1] = player.predicted50
             player.participant.vars['predicted'][2] = player.predicted60
@@ -1472,11 +1578,12 @@ class Predicted(Page):
 
 
 class Interval(Page):
+    form_model = 'player'
+    get_timeout_seconds = page_timeout('interval')
+    timeout_submission = {'belief_t': None, 'belief_c': None}
     @staticmethod
     def is_displayed(player):
         return player.round_number == 1  # only shown in the trial
-
-    form_model = 'player'
 
     @staticmethod
     def get_form_fields(player):
@@ -1498,6 +1605,12 @@ class Interval(Page):
 
     @staticmethod
     def before_next_page(player, timeout_happened):
+        required_fields = Interval.get_form_fields(player)
+        if exclude_on_incomplete_timeout(
+            player, timeout_happened, required_fields, 'Interval'
+        ):
+            return
+
         ppvars = player.participant.vars
         if ppvars['treatment']:
             ppvars['belief'][0] = player.belief_t
@@ -1508,6 +1621,7 @@ class Interval(Page):
 
 
 class Performance(Page):  # display performance from the previous round
+    get_timeout_seconds = page_timeout('performance')
 
     @staticmethod
     def is_displayed(player):
@@ -1521,6 +1635,13 @@ class Performance(Page):  # display performance from the previous round
 
 
 class Belief(Page):
+    get_timeout_seconds = page_timeout('belief')
+    timeout_submission = {'belief_t': None, 'belief_c': None}
+
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number > 2
+
     @staticmethod
     def is_displayed(player):
         return player.round_number > 2
@@ -1549,6 +1670,12 @@ class Belief(Page):
 
     @staticmethod
     def before_next_page(player, timeout_happened):
+        required_fields = Belief.get_form_fields(player)
+        if exclude_on_incomplete_timeout(
+            player, timeout_happened, required_fields, 'Belief'
+        ):
+            return
+
         if player.round_number > 2:
             if player.participant.vars['treatment']:
                 player.participant.vars['belief'][player.round_number-1] = player.belief_t
@@ -1599,7 +1726,9 @@ class Signal(Page):
         # This page always ends when the countdown hits zero
         pass
 
-class Work(Page):  # in period 5, we tell the participants the number of tasks they have to do here
+class Work(Page):
+    get_timeout_seconds = page_timeout('work_instructions')
+
     @staticmethod
     def is_displayed(player):
         return player.round_number > 1
@@ -1713,10 +1842,18 @@ class Task(Page):
         )
 
 class EndOfWork(Page):
-    pass
+    get_timeout_seconds = page_timeout('end_of_work')
+
+
+class Excluded(Page):
+    @staticmethod
+    def is_displayed(player):
+        return player.participant.vars.get('excluded', False)
 
 
 class Survey1(Page):
+    get_timeout_seconds = page_timeout('survey1')
+
     @staticmethod
     def is_displayed(player):
         return player.round_number == 2
@@ -1726,9 +1863,15 @@ class Survey1(Page):
         'gender', 'age', 'employment', 'education', 'socialclass', 'children', 'mathgrade',
         'big5_openness1', 'big5_openness2', 'big5_openness3', 'big5_openness4'
     ]
+    timeout_submission = dict.fromkeys(form_fields, None)
 
     @staticmethod
     def before_next_page(player, timeout_happened):
+        if exclude_on_incomplete_timeout(
+            player, timeout_happened, Survey1.form_fields, 'Survey1'
+        ):
+            return
+
         ppvars = player.participant.vars
         ppvars['gender'] = player.gender
         ppvars['age'] = player.age
@@ -1744,8 +1887,10 @@ class Survey1(Page):
 
 
 class Survey2(Page):
+    get_timeout_seconds = page_timeout('survey2')
     form_model = 'player'
     form_fields = ['digitspan_max_level']
+    timeout_submission = {'digitspan_max_level': None}
 
     @staticmethod
     def is_displayed(player):
@@ -1753,11 +1898,25 @@ class Survey2(Page):
 
     @staticmethod
     def before_next_page(player, timeout_happened):
+        incomplete_test = []
+        if player.field_maybe_none('digitspan_max_level') in (None, 0):
+            incomplete_test.append('digitspan_max_level')
+        if exclude_on_incomplete_timeout(
+            player,
+            timeout_happened,
+            Survey2.form_fields,
+            'Survey2',
+            incomplete_test,
+        ):
+            return
+
         ppvars = player.participant.vars
         ppvars['digitspan_max_level'] = player.digitspan_max_level
 
 
 class Survey3(Page):
+    get_timeout_seconds = page_timeout('survey3')
+
     @staticmethod
     def is_displayed(player):
         return player.round_number == 4
@@ -1772,6 +1931,7 @@ class Survey3(Page):
         'big5_conscientious1', 'big5_conscientious2', 'big5_conscientious3',
         'big5_extraversion1', 'big5_extraversion2', 'big5_extraversion3'
     ]
+    timeout_submission = dict.fromkeys(form_fields, None)
 
     @staticmethod
     def vars_for_template(player):
@@ -1784,6 +1944,11 @@ class Survey3(Page):
 
     @staticmethod
     def before_next_page(player, timeout_happened):
+        if exclude_on_incomplete_timeout(
+            player, timeout_happened, Survey3.form_fields, 'Survey3'
+        ):
+            return
+
         player.participant.vars['risk_choices'][0] = player.risk_0
         player.participant.vars['risk_choices'][1] = player.risk_50
         player.participant.vars['risk_choices'][2] = player.risk_100
@@ -1814,6 +1979,8 @@ class Survey3(Page):
 
 
 class Survey4(Page):
+    get_timeout_seconds = page_timeout('survey4')
+
     @staticmethod
     def is_displayed(player):
         return player.round_number == 5
@@ -1824,9 +1991,15 @@ class Survey4(Page):
         'big5_agreeable1', 'big5_agreeable2', 'big5_agreeable3',
         'big5_neuroticism1', 'big5_neuroticism2', 'big5_neuroticism3'
     ]
+    timeout_submission = dict.fromkeys(form_fields, None)
 
     @staticmethod
     def before_next_page(player, timeout_happened):
+        if exclude_on_incomplete_timeout(
+            player, timeout_happened, Survey4.form_fields, 'Survey4'
+        ):
+            return
+
         ppvars = player.participant.vars
         ppvars['GPS_patience'] = player.GPS_patience
         ppvars['GPS_altruism1'] = player.GPS_altruism1
@@ -1841,6 +2014,8 @@ class Survey4(Page):
 
 
 class Survey5(Page):
+    get_timeout_seconds = page_timeout('survey5')
+
     @staticmethod
     def is_displayed(player):
         return player.round_number == 6
@@ -1851,11 +2026,17 @@ class Survey5(Page):
         'BSCS_dobadthings', 'BSCS_refusebad', 'BSCS_morediscipline', 'BSCS_irondiscipline',
         'BSCS_pleasure', 'BSCS_concentrating', 'BSCS_work', 'BSCS_stop',
         'BSCS_alternatives', 'averagetask', 'ballsremembered1', 'ballsremembered2',
-        'ballsremembered3','screenshot', 'ai_integral'
+        'ballsremembered3','screenshot','task_like','task_more','ai_integral',
     ]
+    timeout_submission = dict.fromkeys(form_fields, None)
 
     @staticmethod
     def before_next_page(player, timeout_happened):
+        if exclude_on_incomplete_timeout(
+            player, timeout_happened, Survey5.form_fields, 'Survey5'
+        ):
+            return
+
         ppvars = player.participant.vars
         ppvars['BSCS_temptation'] = player.BSCS_temptation
         ppvars['BSCS_badhabits'] = player.BSCS_badhabits
@@ -1875,6 +2056,8 @@ class Survey5(Page):
         ppvars['ballsremembered2'] = player.ballsremembered2
         ppvars['ballsremembered3'] = player.ballsremembered3
         ppvars['screenshot'] = player.screenshot
+        ppvars['task_like'] = player.task_like
+        ppvars['task_more'] = player.task_more
         ppvars['ai_integral'] = player.ai_integral
 
 
@@ -1902,6 +2085,8 @@ class Survey5(Page):
 
 
 class Payment(Page):
+    get_timeout_seconds = page_timeout('payment')
+
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == C.NUM_ROUNDS
@@ -1986,6 +2171,8 @@ class Payment(Page):
         player.participant.vars['comments'] = player.comments
 
 class FinalPage(Page):
+    get_timeout_seconds = page_timeout('final_page')
+
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == C.NUM_ROUNDS
@@ -2001,20 +2188,29 @@ class FinalPage(Page):
 
 page_sequence = [
     Interval,
+    Excluded,
     PartStart,
     Performance,
     Belief,
+    Excluded,
     Ideal,
+    Excluded,
     Predicted,
+    Excluded,
     Signal,
     Work,
     Task,
     EndOfWork,
     Survey1,
+    Excluded,
     Survey2,
+    Excluded,
     Survey3,
+    Excluded,
     Survey4,
+    Excluded,
     Survey5,
+    Excluded,
     Payment,
     FinalPage
 ]

@@ -139,17 +139,49 @@ def creating_session(subsession: Subsession):
         p.participant.vars['wrong_questions_attempt1'] = ""
         p.participant.vars['wrong_questions_attempt2'] = ""
 
+def page_timeout(timeout_key):
+    def get_timeout_seconds(player):
+        return player.session.config['page_timeouts'][timeout_key]
+
+    return staticmethod(get_timeout_seconds)
+
+
+def exclude_on_incomplete_timeout(
+    player, timeout_happened, required_fields, page_name
+):
+    """Exclude when a timed form is submitted with required answers missing."""
+    if not timeout_happened:
+        return False
+
+    missing_fields = [
+        field_name
+        for field_name in required_fields
+        if player.field_maybe_none(field_name) is None
+    ]
+    if not missing_fields:
+        return False
+
+    player.excluded = True
+    ppvars = player.participant.vars
+    ppvars['excluded'] = True
+    ppvars['exclusion_reason'] = 'incomplete_timeout'
+    ppvars['exclusion_page'] = page_name
+    ppvars['missing_fields_at_timeout'] = missing_fields
+    return True
+
 
 # PAGES
 class Welcome(Page):
-    pass
+    get_timeout_seconds = page_timeout('welcome')
 
 
 class EncryptionTask(Page):
-    pass
+    get_timeout_seconds = page_timeout('encryption_task')
 
 
 class Instructions(Page):
+    get_timeout_seconds = page_timeout('instructions')
+
     @staticmethod
     def vars_for_template(player: Player):
         participation_fee = player.session.config['participation_fee']
@@ -165,7 +197,20 @@ class Instructions(Page):
 
 
 class ComprehensionCheck(Page):
+    get_timeout_seconds = page_timeout('comprehension_check')
+
     form_model = 'player'
+    # oTree normally converts missing timeout answers to '', 0, or False.
+    # Keeping them as None lets before_next_page distinguish them from real answers.
+    timeout_submission = {
+        'q1': None,
+        'q2': None,
+        'q3': None,
+        'q4t': None,
+        'q4c': None,
+        'q5t': None,
+        'q5c': None,
+    }
 
     @staticmethod
     def get_form_fields(player):
@@ -198,6 +243,15 @@ class ComprehensionCheck(Page):
 
     @staticmethod
     def before_next_page(player, timeout_happened):
+        required_fields = ComprehensionCheck.get_form_fields(player)
+        if exclude_on_incomplete_timeout(
+            player,
+            timeout_happened,
+            required_fields,
+            'ComprehensionCheck',
+        ):
+            return
+
         # Increment attempt number
         player.attempt_number += 1
 
@@ -248,6 +302,7 @@ class ComprehensionCheck(Page):
 
 
 class ShowCorrectAnswers(Page):
+    get_timeout_seconds = page_timeout('show_correct_answer')
     @staticmethod
     def is_displayed(player):
         # Show correct answers only if they failed twice but are not excluded
@@ -266,15 +321,30 @@ class ShowCorrectAnswers(Page):
 class Excluded(Page):
     @staticmethod
     def is_displayed(player):
-        return player.excluded
+        return player.participant.vars.get('excluded', False)
+
+    @staticmethod
+    def vars_for_template(player):
+        return dict(
+            incomplete_timeout=(
+                player.participant.vars.get('exclusion_reason')
+                == 'incomplete_timeout'
+            )
+        )
 
 
 class Consent(Page):
+    get_timeout_seconds = page_timeout('consent')
     form_model = 'player'
     form_fields = ['consent']
+    timeout_submission = {'consent': None}
 
     @staticmethod
     def before_next_page(player, timeout_happened):
+        if exclude_on_incomplete_timeout(
+            player, timeout_happened, Consent.form_fields, 'Consent'
+        ):
+            return
         player.participant.vars['consent'] = player.consent
 
 
@@ -293,5 +363,6 @@ page_sequence = [
     ShowCorrectAnswers,
     Excluded,
     Consent,
+    Excluded,
     NoConsent,
 ]
