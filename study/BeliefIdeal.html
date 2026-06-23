@@ -1,0 +1,33 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+    Ideal number of tasks at your current belief
+{% endblock %}
+
+{% block content %}
+
+<style>
+    input[type=number] {
+        width: 60px;
+        text-align: center;
+    }
+</style>
+
+<p>
+    You previously stated that you currently think the
+    {{ if treatment }}task payoff is{{ else }}chosen number is{{ endif }}
+    <b>{{ current_belief }}{{ if treatment }} points per task{{ endif }}</b>.
+</p>
+
+<p>
+    Before considering other potential levels, please state how many tasks you
+    would ideally want to do within {{ work_length_minutes }} minutes at this
+    current belief.
+</p>
+
+{% formfields %}
+
+{% next_button %}
+
+{% endblock %}
