@@ -40,6 +40,7 @@ class C(BaseConstants):
         RISK_CHOICES[i] = f"{j} points or 50 % chance of 1000 points, 50 % chance of 0 points"
         RISK_OPTIONS[i] = {0: f"{j} points", 1: "50 % chance of 1000 points, 50 % chance of 0 points"}
     PERCENT_IDEAL_PART5 = 2
+    BONUS_TASKS = 5
 
 class Subsession(BaseSubsession):
     dictionary = models.StringField()
@@ -1016,9 +1017,12 @@ class Player(BasePlayer):
     task_more = models.BooleanField(
         choices=[[True, 'Yes'], [False, 'No']],
         widget=widgets.RadioSelect,
-        label="Would you like to work on five more tasks without getting paid for this?",
+        label="Would you like to work on five more tasks without getting paid for this? If you choose to work on five more tasks, you will proceed to the tasks on the next page.",
         blank=False
     )
+
+    bonus_performance = models.IntegerField(initial=0, blank=False)
+    bonus_mistakes = models.IntegerField(initial=0, blank=False)
 
     #Wechsler Level
     digitspan_max_level = models.IntegerField(
@@ -1296,6 +1300,86 @@ def live_update_performance(player: Player, data):
 def get_timeout_seconds(player):
     config = player.session.config
     return config['work_length_seconds']
+
+
+def live_update_bonus_performance(player: Player, data):
+    pid = player.id_in_group
+
+    # ------------------------------------------------------------
+    # INIT
+    # ------------------------------------------------------------
+    if data.get('init'):
+        client_perf = data.get('client_performance', 0)
+        client_mistakes = data.get('client_mistakes', 0)
+
+        if client_perf > player.bonus_performance:
+            player.bonus_performance = client_perf
+        if client_mistakes > player.bonus_mistakes:
+            player.bonus_mistakes = client_mistakes
+
+        # Reuse current_dict/current_word; generate fresh ones if empty
+        if not player.field_maybe_none('current_dict') or not player.field_maybe_none('current_word'):
+            d = build_random_dict()
+            w = build_random_word(C.TASK_LENGTH)
+            player.current_dict = json.dumps(d)
+            player.current_word = json.dumps(w)
+        else:
+            d = json.loads(player.current_dict)
+            w = json.loads(player.current_word)
+
+        return {
+            pid: dict(
+                init=True,
+                performance=player.bonus_performance,
+                mistakes=player.bonus_mistakes,
+                encryption_dict=d,
+                word_list=w,
+                shuffle=False,
+                completed=(player.bonus_performance >= C.BONUS_TASKS),
+            )
+        }
+
+    # ------------------------------------------------------------
+    # PERFORMANCE update → refresh dict/word
+    # ------------------------------------------------------------
+    if 'performance' in data:
+        player.bonus_performance = data['performance']
+
+        d = build_random_dict()
+        w = build_random_word(C.TASK_LENGTH)
+        player.current_dict = json.dumps(d)
+        player.current_word = json.dumps(w)
+
+        return {
+            pid: dict(
+                performance=player.bonus_performance,
+                mistakes=player.bonus_mistakes,
+                encryption_dict=d,
+                word_list=w,
+                shuffle=True,
+                completed=(player.bonus_performance >= C.BONUS_TASKS),
+            )
+        }
+
+    # ------------------------------------------------------------
+    # MISTAKES only
+    # ------------------------------------------------------------
+    if 'mistakes' in data:
+        player.bonus_mistakes = data['mistakes']
+
+    d = json.loads(player.current_dict) if player.current_dict else {}
+    w = json.loads(player.current_word) if player.current_word else []
+
+    return {
+        pid: dict(
+            performance=player.bonus_performance,
+            mistakes=player.bonus_mistakes,
+            encryption_dict=d,
+            word_list=w,
+            shuffle=False,
+            completed=(player.bonus_performance >= C.BONUS_TASKS),
+        )
+    }
 
 def page_timeout(timeout_key):
     def get_timeout_seconds(player):
@@ -2084,6 +2168,33 @@ class Survey5(Page):
             player.risk_payment = random.choice([0, C.RISK_LARGE])
 
 
+class BonusTask(Page):
+    live_method = live_update_bonus_performance
+    form_model = 'player'
+    form_fields = ['bonus_performance', 'bonus_mistakes']
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return (
+            player.round_number == C.NUM_ROUNDS
+            and player.field_maybe_none('task_more') is True
+        )
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            letters_per_word=C.TASK_LENGTH,
+            legend_list=list(range(26)),
+            task_list=list(range(C.TASK_LENGTH)),
+        )
+
+    @staticmethod
+    def js_vars(player: Player):
+        return dict(
+            bonus_tasks=C.BONUS_TASKS,
+        )
+
+
 class Payment(Page):
     get_timeout_seconds = page_timeout('payment')
 
@@ -2211,6 +2322,7 @@ page_sequence = [
     Excluded,
     Survey5,
     Excluded,
+    BonusTask,
     Payment,
     FinalPage
 ]

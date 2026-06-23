@@ -1,0 +1,368 @@
+{% extends "global/Page.html" %}
+{% load staticfiles otree %}
+
+{% block styles %}
+<style type="text/css">
+
+.task-container, .task-subcontainer, table, #attention-check {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.otree-timer,
+.otree-timer.alert {
+    display: none !important;
+}
+
+.otree-content.container,
+.otree-body.container {
+    max-width: 90vw;
+    width: 90vw;
+}
+
+.otree-content {
+    width: 90vw;
+    max-width: 90vw;
+    background-color: rgb(255 255 255);
+}
+
+.page-header {
+    margin: 0;
+}
+
+.otree-body {
+    margin-left: 5vw;
+}
+
+.progress-box {
+    display: inline-block;
+    background: #f0fdf4;
+    border: 2px solid #86efac;
+    border-radius: 6px;
+    padding: 15px 20px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #14532d;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+#submit-solution {
+    padding: 15px 25px;
+    font-size: 20px;
+    border-radius: 8px;
+    background: #e5e7eb;
+    border: 1px solid #9ca3af;
+    color: #111827;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.task-container {
+    display: grid;
+    width: min(95%, 1200px);
+    margin: 2rem auto;
+    border: 1px solid rgb(226, 238, 221);
+    padding: 10px;
+    align-items: center;
+    justify-items: center;
+}
+
+.task-subcontainer {
+    display: grid;
+    width: auto;
+    margin: auto;
+    align-items: center;
+    justify-items: center;
+    grid-template-columns: auto repeat({{letters_per_word}}, auto);
+    grid-template-rows: 1fr 1fr;
+    grid-column-gap: 1vw;
+    grid-row-gap: 0.5vw;
+}
+
+.task-letter {
+    font-size: 2vw;
+    text-align: center;
+    background-color: rgb(196, 221, 187);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-code {
+    font-size: 1.8vw;
+    width: 3em;
+}
+
+.legend-letter {
+    font-size: 1.5vw;
+    background-color: #cccccc;
+}
+
+.legend-code {
+    font-size: 1.5vw;
+}
+
+table, td, th {
+    border: 1px solid black;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th {
+    font-size: 2vw;
+    height: 2ex;
+    text-align: center;
+    background-color: rgb(200, 200, 200);
+}
+
+td {
+    font-size: 1.5vw;
+    height: 3.5ex;
+    text-align: center;
+}
+
+.button-container {
+    display: flex;
+    gap: 1vw;
+    align-items: center;
+}
+
+.feedback-error {
+    border: 1px solid rgb(255, 217, 204);
+    background-color: rgb(255, 179, 153);
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.feedback-success {
+    border: 2px solid #93c5fd;
+    background-color: #bfdbfe;
+    color: #172554;
+    text-align: center;
+    padding: 12px 16px;
+    font-size: 18px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+#next-button {
+    display: none;
+}
+
+</style>
+{% endblock %}
+
+{% block title %}
+    Bonus Task
+{% endblock %}
+
+{% block content %}
+
+<p>Thank you for choosing to work on five more tasks! These tasks are unpaid.</p>
+
+<div class="progress-box">
+    Tasks completed: <span id="perf-display">{{ player.bonus_performance }}</span> / 5
+</div>
+
+<input type="hidden" name="bonus_performance" id="bonus_performance" value="{{ player.bonus_performance }}">
+<input type="hidden" name="bonus_mistakes"    id="bonus_mistakes"    value="{{ player.bonus_mistakes }}">
+
+<div id="task-area">
+
+    <div class="task-container">
+        <div class="task-subcontainer" id="task-subcontainer">
+            <div style="font-size: 1.8vw">Word: &nbsp;&nbsp;&nbsp;&nbsp;</div>
+            {% for l in task_list %}
+                <div class="task-letter" id="task_letter_{{l}}"></div>
+            {% endfor %}
+            <div style="font-size: 1.8vw">Code: &nbsp;&nbsp;&nbsp;&nbsp;</div>
+            {% for l in task_list %}
+                <input class="task-code" id="task_code_{{l}}" type="number" onkeypress="return event.keyCode!=13">
+            {% endfor %}
+        </div>
+    </div>
+
+    <br>
+
+    <div class="button-container">
+        <input type="button" id="submit-solution" onclick="myFunction()" value="Submit">
+        <button type="submit" id="next-button"></button>
+    </div>
+
+    <br>
+
+    <div id="feedback" style="display:none;"></div>
+
+    <br><br>
+
+    <table>
+        <tr>{% for l in legend_list %}<td id="llid_{{l}}"></td>{% endfor %}</tr>
+        <tr>{% for l in legend_list %}<td id="lcid_{{l}}"></td>{% endfor %}</tr>
+    </table>
+
+</div>
+
+<div id="completion-message" style="display:none; margin-top:20px;">
+    <div class="feedback-success">
+        You have completed all 5 bonus tasks! Thank you. You will be forwarded automatically in a moment.
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+/* =========================================================
+   Disable copy/cut/paste
+   ========================================================= */
+['copy', 'cut', 'paste'].forEach(evt => {
+    document.addEventListener(evt, e => e.preventDefault());
+});
+document.addEventListener('keydown', e => {
+    const key = (e.key || '').toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && (key === 'c' || key === 'v' || key === 'x')) {
+        e.preventDefault();
+    }
+});
+
+const BONUS_TASKS = js_vars.bonus_tasks;
+const letters_per_word = {{ letters_per_word|safe }};
+
+let dict = {};
+let word = [];
+
+/* =========================================================
+   On page load: send init to server
+   ========================================================= */
+document.addEventListener("DOMContentLoaded", () => {
+    const serverPerf     = {{ player.bonus_performance }};
+    const serverMistakes = {{ player.bonus_mistakes }};
+
+    liveSend({
+        init: true,
+        client_performance: serverPerf,
+        client_mistakes:    serverMistakes,
+    });
+});
+
+/* =========================================================
+   Submit answer
+   ========================================================= */
+function myFunction() {
+    const errors = checkSolution(letters_per_word);
+
+    if (errors === 0) {
+        let perf = Number(document.getElementById("bonus_performance").value) + 1;
+        document.getElementById("bonus_performance").value = perf;
+        document.getElementById("perf-display").innerText = perf;
+
+        hideFeedback();
+
+        liveSend({ performance: perf });
+
+        if (perf >= BONUS_TASKS) {
+            showCompletion();
+        }
+
+    } else {
+        let mistakes = Number(document.getElementById("bonus_mistakes").value) + 1;
+        document.getElementById("bonus_mistakes").value = mistakes;
+        liveSend({ mistakes: mistakes });
+
+        const fb = document.getElementById("feedback");
+        fb.className = "feedback-error";
+        fb.innerText  = errors === 1 ? "There is 1 mistake." : "There are " + errors + " mistakes.";
+        fb.style.display = "block";
+    }
+}
+
+function hideFeedback() {
+    const fb = document.getElementById("feedback");
+    fb.style.display = "none";
+}
+
+/* =========================================================
+   Show completion, then auto-submit
+   ========================================================= */
+function showCompletion() {
+    // Disable all inputs
+    for (let i = 0; i < letters_per_word; i++) {
+        const el = document.getElementById("task_code_" + i);
+        if (el) el.disabled = true;
+    }
+    document.getElementById("submit-solution").disabled = true;
+    document.getElementById("feedback").style.display  = "none";
+
+    document.getElementById("completion-message").style.display = "block";
+
+    // Auto-proceed after 2 seconds
+    setTimeout(() => {
+        document.getElementById("next-button").click();
+    }, 2000);
+}
+
+/* =========================================================
+   Check solution
+   ========================================================= */
+function checkSolution(n) {
+    let errors = 0;
+    for (let i = 0; i < n; i++) {
+        const entered = Number(document.getElementById("task_code_" + i).value);
+        if (dict[word[i]] !== entered) errors++;
+    }
+    return errors;
+}
+
+/* =========================================================
+   Live receive
+   ========================================================= */
+function liveRecv(data) {
+    if (typeof data.performance === 'number') {
+        document.getElementById("bonus_performance").value = data.performance;
+        document.getElementById("perf-display").innerText  = data.performance;
+    }
+    if (typeof data.mistakes === 'number') {
+        document.getElementById("bonus_mistakes").value = data.mistakes;
+    }
+
+    if (data.shuffle === true || data.init === true) {
+        dict = data.encryption_dict;
+        word = data.word_list;
+
+        const server_letters = Object.keys(dict);
+        for (let i = 0; i < 26; i++) {
+            document.getElementById("llid_" + i).innerText = server_letters[i];
+            document.getElementById("lcid_" + i).innerText = dict[server_letters[i]];
+        }
+
+        for (let i = 0; i < letters_per_word; i++) {
+            document.getElementById("task_letter_" + i).innerText = word[i];
+            document.getElementById("task_code_" + i).value = '';
+        }
+        document.getElementById("task_code_0").focus();
+    }
+
+    if (data.completed) {
+        showCompletion();
+    }
+}
+
+// Enter key submits
+document.getElementById("submit-solution")
+    .addEventListener("keyup", e => { if (e.keyCode === 13) myFunction(); });
+
+document.title = "Bonus Task";
+
+</script>
+{% endblock %}
