@@ -2171,8 +2171,6 @@ class Payment(Page):
         player.participant.vars['comments'] = player.comments
 
 class FinalPage(Page):
-    get_timeout_seconds = page_timeout('final_page')
-
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == C.NUM_ROUNDS

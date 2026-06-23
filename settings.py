@@ -34,7 +34,6 @@ SESSION_CONFIGS = [
             ideal_round_6=120,
             predicted_round_6=120,
             payment=300,
-            final_page=300,
         ),
         use_browser_bots=False,
         set_treatment=False,
