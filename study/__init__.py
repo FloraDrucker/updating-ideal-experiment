@@ -130,6 +130,10 @@ class Player(BasePlayer):
         blank=False,
         label="How many tasks would you ideally want to do for what you currently think the task payoff is?"
     )
+    beliefpredicted_t = models.IntegerField(
+        blank=False,
+        label="How many tasks do you predict you would actually do for what you currently think the task payoff is?"
+    )
 
     # Predicted values
     predicted50 = models.IntegerField(
@@ -1084,6 +1088,8 @@ def creating_session(subsession: Subsession):
         ppvars['ideal'] = {i+1: None for i in range(12)}
         ppvars['belief_ideal_payoff'] = None
         ppvars['belief_ideal_tasks'] = None
+        ppvars['belief_predicted_payoff'] = None
+        ppvars['belief_predicted_tasks'] = None
         ppvars['predicted'] = {i+1: None for i in range(12)}
         ppvars['do_ideal'] = False
         ppvars['ideal_to_do'] = None
@@ -1491,6 +1497,52 @@ class Ideal(Page):
             pass
 
 
+class BeliefPredicted(Page):
+    form_model = 'player'
+    get_timeout_seconds = page_timeout('predicted_round_2')
+    timeout_submission = {'beliefpredicted_t': None}
+
+    @staticmethod
+    def get_form_fields(player):
+        return ['beliefpredicted_t']
+
+    @staticmethod
+    def is_displayed(player):
+        return (
+            player.round_number == 2
+            and player.participant.vars['treatment']
+        )
+
+    @staticmethod
+    def vars_for_template(player):
+        return {
+            'current_belief': player.participant.vars['belief'][0],
+            'belief_ideal_tasks': player.participant.vars['belief_ideal_tasks'],
+        }
+
+    @staticmethod
+    def error_message(player, values):
+        predicted_tasks = values.get('beliefpredicted_t')
+        ideal_tasks = player.participant.vars['belief_ideal_tasks']
+        if predicted_tasks is not None and predicted_tasks > ideal_tasks:
+            return (
+                f"Your predicted number of tasks ({predicted_tasks}) "
+                f"cannot exceed your ideal number ({ideal_tasks})."
+            )
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        required_fields = BeliefPredicted.get_form_fields(player)
+        if exclude_on_incomplete_timeout(
+            player, timeout_happened, required_fields, 'BeliefPredicted'
+        ):
+            return
+
+        ppvars = player.participant.vars
+        ppvars['belief_predicted_payoff'] = ppvars['belief'][0]
+        ppvars['belief_predicted_tasks'] = player.beliefpredicted_t
+
+
 class Predicted(Page):
     form_model = 'player'
     timeout_submission = {
@@ -1531,9 +1583,23 @@ class Predicted(Page):
     def vars_for_template(player):
         treatment = player.participant.vars['treatment']
         payoff = base_constants.TRUE_PAYOFF
+        current_belief = player.participant.vars.get(
+            'belief_predicted_payoff'
+        )
+        anchor_before_field = None
+        if player.round_number == 2 and current_belief is not None:
+            for standard_payoff in range(50, 151, 10):
+                if current_belief <= standard_payoff:
+                    anchor_before_field = f'predicted{standard_payoff}'
+                    break
         return {
             'treatment': treatment,
             'payoff': payoff,
+            'anchor_payoff': current_belief,
+            'anchor_tasks': player.participant.vars.get(
+                'belief_predicted_tasks'
+            ),
+            'anchor_before_field': anchor_before_field,
         }
 
     @staticmethod
@@ -2250,6 +2316,8 @@ page_sequence = [
     BeliefIdeal,
     Excluded,
     Ideal,
+    Excluded,
+    BeliefPredicted,
     Excluded,
     Predicted,
     Excluded,
