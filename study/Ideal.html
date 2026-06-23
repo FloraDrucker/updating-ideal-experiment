@@ -31,7 +31,7 @@
 {{ if treatment }}
     <p>
         Your answer based on your current belief is shown in the appropriate
-        place below as an anchor.
+        place below.
     </p>
 {{ endif }}
 
@@ -48,7 +48,7 @@
     {% for field in form %}
         {{ if treatment and field.name == anchor_before_field }}
             <div class="belief-anchor">
-                <b>Your current-belief anchor:</b>
+                <b>Your current-belief:</b>
                 at {{ anchor_payoff }} points per task,
                 you stated an ideal of <b>{{ anchor_tasks }} tasks</b>.
             </div>

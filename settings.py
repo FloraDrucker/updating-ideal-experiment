@@ -23,6 +23,7 @@ SESSION_CONFIGS = [
             end_of_work=30,
             performance=30,
             belief=60,
+            belief_ideal=120,
             ideal_round_2=300,
             predicted_round_2=240,
             work_instructions=60,

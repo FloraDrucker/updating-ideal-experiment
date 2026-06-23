@@ -1367,12 +1367,15 @@ class PartStart(Page):
 
 class BeliefIdeal(Page):
     form_model = 'player'
-    get_timeout_seconds = page_timeout('ideal_round_2')
-    timeout_submission = {'beliefideal_t': None}
+    get_timeout_seconds = page_timeout('belief_ideal')
+    timeout_submission = {
+        'beliefideal_t': None,
+        'beliefpredicted_t': None,
+    }
 
     @staticmethod
     def get_form_fields(player):
-        return ['beliefideal_t']
+        return ['beliefideal_t', 'beliefpredicted_t']
 
     @staticmethod
     def is_displayed(player):
@@ -1393,6 +1396,20 @@ class BeliefIdeal(Page):
         }
 
     @staticmethod
+    def error_message(player, values):
+        ideal_tasks = values.get('beliefideal_t')
+        predicted_tasks = values.get('beliefpredicted_t')
+        if (
+            ideal_tasks is not None
+            and predicted_tasks is not None
+            and predicted_tasks > ideal_tasks
+        ):
+            return (
+                f"Your predicted number of tasks ({predicted_tasks}) "
+                f"cannot exceed your ideal number ({ideal_tasks})."
+            )
+
+    @staticmethod
     def before_next_page(player, timeout_happened):
         required_fields = BeliefIdeal.get_form_fields(player)
         if exclude_on_incomplete_timeout(
@@ -1403,6 +1420,8 @@ class BeliefIdeal(Page):
         ppvars = player.participant.vars
         ppvars['belief_ideal_payoff'] = ppvars['belief'][0]
         ppvars['belief_ideal_tasks'] = player.beliefideal_t
+        ppvars['belief_predicted_payoff'] = ppvars['belief'][0]
+        ppvars['belief_predicted_tasks'] = player.beliefpredicted_t
 
 
 class Ideal(Page):
@@ -1495,52 +1514,6 @@ class Ideal(Page):
                 player.lastideal_t = 999
         else:
             pass
-
-
-class BeliefPredicted(Page):
-    form_model = 'player'
-    get_timeout_seconds = page_timeout('predicted_round_2')
-    timeout_submission = {'beliefpredicted_t': None}
-
-    @staticmethod
-    def get_form_fields(player):
-        return ['beliefpredicted_t']
-
-    @staticmethod
-    def is_displayed(player):
-        return (
-            player.round_number == 2
-            and player.participant.vars['treatment']
-        )
-
-    @staticmethod
-    def vars_for_template(player):
-        return {
-            'current_belief': player.participant.vars['belief'][0],
-            'belief_ideal_tasks': player.participant.vars['belief_ideal_tasks'],
-        }
-
-    @staticmethod
-    def error_message(player, values):
-        predicted_tasks = values.get('beliefpredicted_t')
-        ideal_tasks = player.participant.vars['belief_ideal_tasks']
-        if predicted_tasks is not None and predicted_tasks > ideal_tasks:
-            return (
-                f"Your predicted number of tasks ({predicted_tasks}) "
-                f"cannot exceed your ideal number ({ideal_tasks})."
-            )
-
-    @staticmethod
-    def before_next_page(player, timeout_happened):
-        required_fields = BeliefPredicted.get_form_fields(player)
-        if exclude_on_incomplete_timeout(
-            player, timeout_happened, required_fields, 'BeliefPredicted'
-        ):
-            return
-
-        ppvars = player.participant.vars
-        ppvars['belief_predicted_payoff'] = ppvars['belief'][0]
-        ppvars['belief_predicted_tasks'] = player.beliefpredicted_t
 
 
 class Predicted(Page):
@@ -2316,8 +2289,6 @@ page_sequence = [
     BeliefIdeal,
     Excluded,
     Ideal,
-    Excluded,
-    BeliefPredicted,
     Excluded,
     Predicted,
     Excluded,
