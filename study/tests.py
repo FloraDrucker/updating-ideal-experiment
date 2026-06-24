@@ -77,6 +77,10 @@ def ideal_answers_for_round(bot):
     return {}
 
 
+def belief_ideal_answers(bot):
+    return dict(beliefideal_t=10, beliefpredicted_t=8)
+
+
 def predicted_answers_for_round(bot):
     # Round 2: all 11 fields
     if bot.round_number == 2:
@@ -206,15 +210,22 @@ class PlayerBot(Bot):
             else:
                 yield Belief, dict(belief_c=110)
 
-        # 5) Ideal (round 2 and 6)
+        # 5) Current-belief ideal anchor (round 2)
+        if (
+            self.round_number == 2
+            and self.player.participant.vars['treatment']
+        ):
+            yield BeliefIdeal, belief_ideal_answers(self)
+
+        # 6) Ideal (round 2 and 6)
         if self.round_number in [2, 6]:
             yield Ideal, ideal_answers_for_round(self)
 
-        # 6) Predicted (round 2 and 6)
+        # 7) Predicted (round 2 and 6)
         if self.round_number in [2, 6]:
             yield Predicted, predicted_answers_for_round(self)
 
-        # 7) Signal (rounds 3-5)
+        # 8) Signal (rounds 3-5)
         if 2 < self.round_number < 6:
             yield Signal
 

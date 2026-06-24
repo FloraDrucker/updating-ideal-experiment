@@ -12,15 +12,27 @@
         width: 60px;
         text-align: center;
     }
+
+    .belief-anchor {
+        margin: 1rem 0;
+        padding: 0.8rem 1rem;
+        border-left: 5px solid #0d6efd;
+        background: #eef5ff;
+    }
 </style>
 
 {{ if player.round_number == 2 }}
 
 <p>
-    Before you start working, we ask you to <b>state how many tasks you would ideally want to do</b> within the
-    {{ work_length_minutes }} minutes <b>for different potential levels of the task payoff,</b> given your experience with the trial task and the alternative options you have. Please take into account (i) how much you (dis)like working on the task in the trial round and (ii) what you know about the payoff per task. There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance that in part five, you will have to do as many tasks as you stated as ideal for the true payoff per task{{ if not treatment }} ({{ payoff }} points){{ endif }}</b>. In this case, if you complete the ideal number of tasks you stated in less than 8 minutes, you will stop working earlier but forgo additional earnings if this part gets selected for payment. You will need to work until you have reached your stated ideal (even if it takes longer than 8 minutes) but you will only be paid for those tasks that you completed correctly within the 8 minutes if this part gets selected for payment. {{ if treatment }}Should the true payoff per task be different from the payoffs for which you stated your ideal work amounts, we will extrapolate the ideal amount of work at the true payoff level from your answers.{{ endif }}
-    
+    Before you start working, we ask you to <b>state how many tasks you would ideally want to do</b> within the {{ work_length_minutes }} minutes <b>for different potential levels of the task payoff,</b> given your experience with the trial task and the alternative options you have. Please take into account (i) how much you (dis)like working on the task in the trial round and (ii) what you know about the payoff per task. There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance that in part five, you will have to do as many tasks as you stated as ideal for the true payoff per task{{ if not treatment }} ({{ payoff }} points){{ endif }}</b>. In this case, if you complete the ideal number of tasks you stated earlier than in 8 minutes, you will stop working earlier but forgo additional earnings if this part gets selected for payment. You will need to work until you have reached your stated ideal (even if it takes longer than 8 minutes) but you will only be paid for those tasks that you completed correctly within the 8 minutes if this part gets selected for payment. {{ if treatment }}Should the true payoff per task be different from the payoffs for which you stated your ideal work amounts, we will extrapolate the ideal amount of work at the true payoff level from your answers.{{ endif }}
 </p>
+
+{{ if treatment }}
+    <p>
+        Your answer based on your current belief is shown in the appropriate
+        place below.
+    </p>
+{{ endif }}
 
 {{ elif player.round_number == 6 }}
 
@@ -30,7 +42,24 @@
 
 {{ endif }}
 
-{% formfields %}
+{{ if player.round_number == 2 }}
+
+    {% for field in form %}
+        {{ if treatment and field.name == anchor_before_field }}
+            <div class="belief-anchor">
+                <b>Your current-belief:</b>
+                at {{ anchor_payoff }} points per task,
+                you stated an ideal of <b>{{ anchor_tasks }} tasks</b>.
+            </div>
+        {{ endif }}
+        {% formfield field %}
+    {% endfor %}
+
+{{ else }}
+
+    {% formfields %}
+
+{{ endif }}
 
 {% next_button %}
 

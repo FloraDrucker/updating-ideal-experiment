@@ -1,0 +1,32 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+    Ideal and predicted number of tasks at your current belief
+{% endblock %}
+
+{% block content %}
+
+<style>
+    input[type=number] {
+        width: 60px;
+        text-align: center;
+    }
+</style>
+
+<p>
+    You previously stated that you currently think the task payoff is
+    <b>{{ current_belief }} points per task</b>.
+</p>
+
+<p>
+   Please state how many tasks you
+    would <b>ideally want to do</b> within {{ work_length_minutes }} minutes and how
+    many tasks you <b>predict you would actually do</b> at this current belief.
+</p>
+
+{% formfields %}
+
+{% next_button %}
+
+{% endblock %}

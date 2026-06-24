@@ -12,6 +12,13 @@
         width: 60px;
         text-align: center;
     }
+
+    .belief-anchor {
+        margin: 1rem 0;
+        padding: 0.8rem 1rem;
+        border-left: 5px solid #0d6efd;
+        background: #eef5ff;
+    }
 </style>
 
 {{ if player.round_number == 2 }}
@@ -19,6 +26,13 @@
 <p>
     Now we ask you to <b> predict how many tasks you would actually do</b> for the different potential levels of task payoff shown below, given your experience with the trial task and the alternative options you have.
 </p>
+
+{{ if treatment }}
+    <p>
+        Your prediction based on your current belief is shown in the
+        appropriate place below as an anchor.
+    </p>
+{{ endif }}
 
 {{ elif player.round_number == 6 }}
 
@@ -28,7 +42,24 @@
 
 {{ endif }}
 
-{% formfields %}
+{{ if player.round_number == 2 }}
+
+    {% for field in form %}
+        {{ if treatment and field.name == anchor_before_field }}
+            <div class="belief-anchor">
+                <b>Your current-belief anchor:</b>
+                at {{ anchor_payoff }} points per task, you predicted that you
+                would do <b>{{ anchor_tasks }} tasks</b>.
+            </div>
+        {{ endif }}
+        {% formfield field %}
+    {% endfor %}
+
+{{ else }}
+
+    {% formfields %}
+
+{{ endif }}
 
 {% next_button %}
 
