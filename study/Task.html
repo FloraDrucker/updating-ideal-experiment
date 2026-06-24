@@ -325,6 +325,13 @@ const STORAGE_KEY_PERF = 'task_perf_round_{{ player.round_number }}';
 const STORAGE_KEY_MISTAKES = 'task_mistakes_round_{{ player.round_number }}';
 const STORAGE_KEY_WORK = 'task_work_seconds_round_{{ player.round_number }}';
 const STORAGE_KEY_STOPPED = 'task_stopped_round_{{ player.round_number }}';
+const STORAGE_KEY_TASK_COMPLETED = 'task_completed_round_{{ player.round_number }}';
+const STORAGE_KEY_IN_TIME_RECORDED = 'task_in_time_recorded_round_{{ player.round_number }}';
+
+// State for do_ideal time tracking (persisted across page refreshes)
+let inTimeRecorded = sessionStorage.getItem(STORAGE_KEY_IN_TIME_RECORDED) === '1';
+let taskCompleted = sessionStorage.getItem(STORAGE_KEY_TASK_COMPLETED) === '1';
+let taskSecondsLeft = Infinity;
 
 // Re-freeze UI if Back button restores this page from bfcache
 window.addEventListener('pageshow', function(event) {
@@ -468,12 +475,28 @@ function myFunction() {
             const msg = document.getElementById("error-form");
             msg.classList.remove("otree-form-errors");
             msg.classList.add("success-message");
-            msg.innerText = "You have completed all required tasks. Non-work time has begun.";
             msg.style.display = "block";
 
-            js_vars.stopped_work = true;
-            sessionStorage.setItem(STORAGE_KEY_STOPPED, '1');
-            startBreakVideos();
+            if (js_vars.do_ideal === 1) {
+                taskCompleted = true;
+                setStoredValue(STORAGE_KEY_TASK_COMPLETED, '1');
+                if (taskSecondsLeft > 0) {
+                    // Finished within time — show videos; tick() submits when timer expires
+                    msg.innerText = "You have completed all required tasks. Leisure time has begun.";
+                    js_vars.stopped_work = true;
+                    sessionStorage.setItem(STORAGE_KEY_STOPPED, '1');
+                    startBreakVideos();
+                } else {
+                    // Finished after time expired — submit immediately
+                    msg.innerText = "You have completed all required tasks.";
+                    document.getElementById("next-button").click();
+                }
+            } else {
+                msg.innerText = "You have completed all required tasks. Non-work time has begun.";
+                js_vars.stopped_work = true;
+                sessionStorage.setItem(STORAGE_KEY_STOPPED, '1');
+                startBreakVideos();
+            }
 
             return;
         }
@@ -701,12 +724,26 @@ function playNextVideo() {
 
     function tick() {
         const left = seconds_left();
+        taskSecondsLeft = left;
         const el = document.getElementById("task-timer");
 
         if (!el) return;
 
         if (left <= 0) {
-            document.getElementById("next-button").click();
+            if (js_vars.do_ideal === 1 && !taskCompleted) {
+                // Time's up but tasks not done: record in-time performance once,
+                // then let the participant keep working.
+                if (!inTimeRecorded) {
+                    inTimeRecorded = true;
+                    sessionStorage.setItem(STORAGE_KEY_IN_TIME_RECORDED, '1');
+                    const currentPerf = Number(document.getElementById("performance").value || 0);
+                    liveSend({ record_in_time: true, performance: currentPerf });
+                }
+                el.innerText = "Time is up — please complete your remaining tasks.";
+            } else {
+                // Normal timeout OR do_ideal participant finished all tasks
+                document.getElementById("next-button").click();
+            }
         } else {
             el.innerText = "Remaining working time: " + formatTime(left);
         }

@@ -1041,6 +1041,9 @@ class Player(BasePlayer):
     bonus_performance = models.IntegerField(initial=0, blank=False)
     bonus_mistakes = models.IntegerField(initial=0, blank=False)
 
+    # Tasks completed within the 8-minute window for do_ideal participants
+    performance_in_time = models.IntegerField(null=True, blank=True, default=None)
+
     #Wechsler Level
     digitspan_max_level = models.IntegerField(
         initial=0,
@@ -1109,6 +1112,7 @@ def creating_session(subsession: Subsession):
         ppvars['ideal_index'] = None
         ppvars['work_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
         ppvars['nonwork_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
+        ppvars['performance_in_time_5'] = None  # tasks within time for do_ideal
 
         # Risk preferences
         ppvars['risk_choices'] = {i: None for i in range(21)}
@@ -1272,6 +1276,16 @@ def live_update_performance(player: Player, data):
         }
 
     # ------------------------------------------------------------
+    # RECORD IN-TIME PERFORMANCE (do_ideal participants at the 8-min mark)
+    # Only recorded once; server ignores subsequent sends after page refresh.
+    # ------------------------------------------------------------
+    if data.get('record_in_time'):
+        if player.field_maybe_none('performance_in_time') is None:
+            player.performance_in_time = data.get('performance', player.performance)
+            player.participant.vars['performance_in_time_5'] = player.performance_in_time
+        return {pid: dict(ok=True)}
+
+    # ------------------------------------------------------------
     # PERFORMANCE update ⇒ increment AND refresh dict/word
     # ------------------------------------------------------------
     if 'performance' in data:
@@ -1319,6 +1333,10 @@ def live_update_performance(player: Player, data):
     }
 
 def get_timeout_seconds(player):
+    # do_ideal participants must finish their tasks even past 8 min;
+    # the JS submits the page when they complete ideal_to_do tasks.
+    if player.do_ideal:
+        return None
     config = player.session.config
     return config['work_length_seconds']
 
@@ -1971,7 +1989,11 @@ class Task(Page):
     form_model = 'player'
     form_fields = ['performance', 'mistakes', 'work_seconds']
 
-    get_timeout_seconds = get_timeout_seconds  # keep server cutoff
+    @staticmethod
+    def get_timeout_seconds(player):
+        if player.do_ideal:
+            return None  # JS submits when tasks are complete
+        return player.session.config['work_length_seconds']
 
     @staticmethod
     def vars_for_template(player: Player):
@@ -2020,6 +2042,12 @@ class Task(Page):
 
         # Nonwork seconds always the remainder
         player.nonwork_seconds = total - player.work_seconds
+
+        # For do_ideal: ensure performance_in_time is stored in participant vars.
+        # If it was never set (finished within time limit), fall back to performance.
+        if player.do_ideal:
+            pit = player.field_maybe_none('performance_in_time')
+            player.participant.vars['performance_in_time_5'] = pit if pit is not None else player.performance
 
         # Cap performance
         if player.performance > player.ideal_to_do:
@@ -2333,20 +2361,17 @@ class Payment(Page):
         config = player.session.config
         chosen_part = C.PARTS[player.task_chosen_part]
         performance_in_part = player.participant.vars['actual'][player.task_chosen_part]
-        not_done_ideal = False
-        if player.task_chosen_part == 5 and player.participant.vars['do_ideal'] and performance_in_part < player.participant.vars['ideal_to_do']:
-            not_done_ideal = True
-            performance_to_pay = 0
+        if player.task_chosen_part == 5 and player.participant.vars['do_ideal']:
+            # Payment is based on tasks completed within the 8-minute window
+            perf_in_time = player.participant.vars.get('performance_in_time_5')
+            performance_to_pay = perf_in_time if perf_in_time is not None else performance_in_part
         else:
             performance_to_pay = performance_in_part
 
         payoff_for_work = base_constants.TRUE_PAYOFF*performance_to_pay
         payoff_in_usd = cu(config['real_world_currency_per_point']*payoff_for_work)
         leisure_minutes = round((player.participant.vars['nonwork_seconds'][player.task_chosen_part])/60, 2)
-        if not_done_ideal:
-            leisure_to_pay = 0
-        else:
-            leisure_to_pay = leisure_minutes
+        leisure_to_pay = leisure_minutes
         leisure_payoff = round(leisure_to_pay * base_constants.FLAT_LEISURE_FEE, 2)
         leisure_payoff_usd = cu(round(config['real_world_currency_per_point']*leisure_payoff, 2))
         belief_chosen_part = C.PARTS[player.belief_chosen_part]
@@ -2378,9 +2403,9 @@ class Payment(Page):
             'ideal_to_do': player.participant.vars['ideal_to_do'],
             'task_chosen_part': chosen_part,
             'performance_in_chosen_part': performance_in_part,
+            'performance_to_pay': performance_to_pay,
             'percent_ideal': base_constants.PERCENT_IDEAL,
             'do_ideal': ppvars['do_ideal'],
-            'not_done_ideal': not_done_ideal,
             'true_payoff': base_constants.TRUE_PAYOFF,
             'payoff_for_work': payoff_for_work,
             'payoff_for_work_usd': payoff_in_usd,
