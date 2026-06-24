@@ -91,7 +91,7 @@
     <b>In every part, you will work on the encryption task for eight minutes.</b> In parts two to four, the work will come after receiving further information about the {{ guess_about }}. Your payment for the encryption task will be <b>{{ if player.treatment }}the fixed payoff {{ else }} {{C.TRUE_PAYOFF }} points {{ endif }}times the number of tasks you completed correctly.</b>
 </p>
     <p>
-    In the trial part, you have to work for the full eight minutes to become familiar with the task. However, in all other parts, <b>you can stop working on the encryption task</b> by clicking on the "Stop working" button at any point during the eight minutes. For the remainder of the eight minutes, you can do any non-work activity you wish to do (e.g., using your smartphone). You will receive a flat fee of <b>{{ C.FLAT_LEISURE_FEE }} points for every minute in the non-work activity</b> as long as you show you are still active in the assignment by completing <b>attention checks.</b> To do this, you need to <b>click a button that pops up roughly once every 60 seconds</b> and remains on the screen for 5 seconds. If you fail to click the button before it disappears, you will receive a warning message. If you fail more than one attention check, you will not get paid for the non-work activity in that part. Please note that <b>once you decide to stop working, you will NOT be able to return to the encryption task in this part.</b>
+    In the trial part, you have to work for the full eight minutes to become familiar with the task. However, in all other parts, <b>you can stop working on the encryption task</b> by clicking on the "Stop working" button at any point during the eight minutes. For the remainder of the eight minutes, we offer you to watch entertaining videos. You will receive a flat fee of <b>{{ C.FLAT_LEISURE_FEE }} points for every minute spent on watching the videos. </b> Please note that <b>once you decide to stop working, you will NOT be able to return to the encryption task in that part.</b>
 </p>
 
     <p> At the beginning of parts one to five, we will remind you about your performance in the previous part. </p>
@@ -116,7 +116,7 @@
 <ol>
     <li>A fixed <b>completion fee of {{ participation_fee }}</b> if you complete the whole study.</li>
     <li>Payoff from your <b>performance in a part randomly chosen by the computer</b> (including the trial): number of <b>tasks completed times {{ if player.treatment }}the true payoff</b> per task{{ else }} {{C.TRUE_PAYOFF }} points</b>{{ endif }}. </li>
-    <li> <b>{{ C.FLAT_LEISURE_FEE }} points per minute spent on the non-work activity</b> in the same randomly chosen part. Note that you only receive payment for the non-work activity if you fail no more than one attention check. </li>
+    <li> <b>{{ C.FLAT_LEISURE_FEE }} points per minute spent on watching videos</b> in the same randomly chosen part. </li>
     <li><b>Bonus payment based on the accuracy of your guess</b> about the {{ guess_about }} in another part randomly chosen by the computer (from the trial part and parts two to five).</li>
     <li>In one of the questionnaires between two parts, you will make a <b>lottery decision</b>. At the end, you will also get paid based on this decision.</li>
 </ol>
