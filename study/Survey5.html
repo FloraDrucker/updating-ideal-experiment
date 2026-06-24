@@ -27,7 +27,7 @@
 {% for field in form %}
     {% if 'BSCS_' not in field.name and field.name != 'ai_integral' %}
         {{ field.label }}<br>
-        {{ field }}<br>
+        {{ field }}<br><br>
     {% endif %}
 {% endfor %}
 

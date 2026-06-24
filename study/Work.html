@@ -8,7 +8,7 @@
 {% block content %}
 
 <p>
-    The {{ work_length_minutes }} minutes of work will start on the next page. {{ if player.round_number == 2 }} In this part and all consecutive parts, <b>you can also choose to stop working at any time</b> and watch videos for the rest of the time {{ work_length_minutes }}. If one of these parts is selected at the end of the study for payment, you will be paid based on your <b>performance in the task</b> (earning {{ if treatment }}the true payoff{{ else }}{{ true_benefit }} points{{ endif }} per task) and <b>minutes spent on watching videos</b> (earning the flat fee of {{ flat_fee }} points per minute).
+    The {{ work_length_minutes }} minutes of work will start on the next page. {{ if player.round_number == 2 }} In this part and all consecutive parts, <b>you can also choose to stop working at any time</b> and watch videos for the rest of the time. If one of these parts is selected at the end of the study for payment, you will be paid based on your <b>performance in the task</b> (earning {{ if treatment }}the true payoff{{ else }}{{ true_benefit }} points{{ endif }} per task) and <b>minutes spent on watching videos</b> (earning the flat fee of {{ flat_fee }} points per minute).
 </p>
 
 {{ elif player.round_number == 6 and player.do_ideal == False }}
