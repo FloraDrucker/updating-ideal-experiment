@@ -1093,102 +1093,118 @@ def creating_session(subsession: Subsession):
     dictionary = dict([(d[0][i], d[1][i]) for i in range(26)])
     subsession.dictionary = json.dumps(dictionary)
 
-    # define participant variables
-    for p in subsession.get_players():
-        ppvars = p.participant.vars
+    # Participant variables are initialised only once at session creation (round 1).
+    # Subsequent rounds re-use the same participant object, so there is no need
+    # to re-initialise and risk overwriting already-assigned values.
+    if subsession.round_number == 1:
+        import itertools
+        # Exactly 2 % → ideal from part 1 (index 8), 2 % → ideal from part 5 (index 12).
+        # A shuffled 50-entry cycle guarantees exact proportions regardless of session size.
+        assignment = [8, 12] + [None] * 48   # 1/50 = 2 % for each condition
+        random.shuffle(assignment)
+        conditions = itertools.cycle(assignment)
 
-        # Task
-        ppvars['actual'] = {i: None for i in range(C.NUM_ROUNDS)}
-        ppvars['mistakes'] = {i: None for i in range(C.NUM_ROUNDS)}
-        ppvars['belief'] = {i: None for i in [0,2,3,4,5]}
-        ppvars['ideal'] = {i+1: None for i in range(12)}
-        ppvars['belief_ideal_payoff'] = None
-        ppvars['belief_ideal_tasks'] = None
-        ppvars['belief_predicted_payoff'] = None
-        ppvars['belief_predicted_tasks'] = None
-        ppvars['predicted'] = {i+1: None for i in range(12)}
-        ppvars['do_ideal'] = False
-        ppvars['ideal_to_do'] = None
-        ppvars['ideal_index'] = None
-        ppvars['work_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
-        ppvars['nonwork_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
-        ppvars['performance_in_time_5'] = None  # tasks within time for do_ideal
+        for p in subsession.get_players():
+            ppvars = p.participant.vars
 
-        # Risk preferences
-        ppvars['risk_choices'] = {i: None for i in range(21)}
+            # Task
+            ppvars['actual'] = {i: None for i in range(C.NUM_ROUNDS)}
+            ppvars['mistakes'] = {i: None for i in range(C.NUM_ROUNDS)}
+            ppvars['belief'] = {i: None for i in [0,2,3,4,5]}
+            ppvars['ideal'] = {i+1: None for i in range(12)}
+            ppvars['belief_ideal_payoff'] = None
+            ppvars['belief_ideal_tasks'] = None
+            ppvars['belief_predicted_payoff'] = None
+            ppvars['belief_predicted_tasks'] = None
+            ppvars['predicted'] = {i+1: None for i in range(12)}
+            ppvars['do_ideal'] = False
+            ppvars['ideal_to_do'] = None
+            ppvars['ideal_index'] = None
+            ppvars['work_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
+            ppvars['nonwork_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
+            ppvars['performance_in_time_5'] = None  # tasks within time for do_ideal
 
-        # Demographics
-        ppvars['gender'] = None
-        ppvars['age'] = None
-        ppvars['employment'] = None
-        ppvars['education'] = None
-        ppvars['socialclass'] = None
-        ppvars['children'] = None
-        ppvars['mathgrade'] = None
+            # Risk preferences
+            ppvars['risk_choices'] = {i: None for i in range(21)}
 
-        # BSCS
-        ppvars['BSCS_temptation'] = None
-        ppvars['BSCS_badhabits'] = None
-        ppvars['BSCS_lazy'] = None
-        ppvars['BSCS_inappropriate'] = None
-        ppvars['BSCS_dobadthings'] = None
-        ppvars['BSCS_refusebad'] = None
-        ppvars['BSCS_morediscipline'] = None
-        ppvars['BSCS_irondiscipline'] = None
-        ppvars['BSCS_pleasure'] = None
-        ppvars['BSCS_concentrating'] = None
-        ppvars['BSCS_work'] = None
-        ppvars['BSCS_stop'] = None
-        ppvars['BSCS_alternatives'] = None
+            # Demographics
+            ppvars['gender'] = None
+            ppvars['age'] = None
+            ppvars['employment'] = None
+            ppvars['education'] = None
+            ppvars['socialclass'] = None
+            ppvars['children'] = None
+            ppvars['mathgrade'] = None
 
-        # Memory and averaging skills
-        ppvars['averagetask'] = None
-        ppvars['ballsremembered1'] = None
-        ppvars['ballsremembered2'] = None
-        ppvars['ballsremembered3'] = None
-        ppvars['screenshot'] = None
-        ppvars['task_like'] = None
-        ppvars['task_more'] = None
-        ppvars['ai_integral'] = None
+            # BSCS
+            ppvars['BSCS_temptation'] = None
+            ppvars['BSCS_badhabits'] = None
+            ppvars['BSCS_lazy'] = None
+            ppvars['BSCS_inappropriate'] = None
+            ppvars['BSCS_dobadthings'] = None
+            ppvars['BSCS_refusebad'] = None
+            ppvars['BSCS_morediscipline'] = None
+            ppvars['BSCS_irondiscipline'] = None
+            ppvars['BSCS_pleasure'] = None
+            ppvars['BSCS_concentrating'] = None
+            ppvars['BSCS_work'] = None
+            ppvars['BSCS_stop'] = None
+            ppvars['BSCS_alternatives'] = None
 
+            # Memory and averaging skills
+            ppvars['averagetask'] = None
+            ppvars['ballsremembered1'] = None
+            ppvars['ballsremembered2'] = None
+            ppvars['ballsremembered3'] = None
+            ppvars['screenshot'] = None
+            ppvars['task_like'] = None
+            ppvars['task_more'] = None
+            ppvars['ai_integral'] = None
 
-        # Wechsler
-        ppvars['digitspan_max_level'] = None
+            # Wechsler
+            ppvars['digitspan_max_level'] = None
 
-        # GPS
-        ppvars['GPS_patience'] = None
-        ppvars['GPS_altruism1'] = None
-        ppvars['GPS_altruism2'] = None
-        ppvars['GPS_timediscounting'] = None
+            # GPS
+            ppvars['GPS_patience'] = None
+            ppvars['GPS_altruism1'] = None
+            ppvars['GPS_altruism2'] = None
+            ppvars['GPS_timediscounting'] = None
 
-        # Big five
-        ppvars['big5_openness1'] = None
-        ppvars['big5_openness2'] = None
-        ppvars['big5_openness3'] = None
-        ppvars['big5_openness4'] = None
-        ppvars['big5_conscientious1'] = None
-        ppvars['big5_conscientious2'] = None
-        ppvars['big5_conscientious3'] = None
-        ppvars['big5_extraversion1'] = None
-        ppvars['big5_extraversion2'] = None
-        ppvars['big5_extraversion3'] = None
-        ppvars['big5_agreeable1'] = None
-        ppvars['big5_agreeable2'] = None
-        ppvars['big5_agreeable3'] = None
-        ppvars['big5_neuroticism1'] = None
-        ppvars['big5_neuroticism2'] = None
-        ppvars['big5_neuroticism3'] = None
+            # Big five
+            ppvars['big5_openness1'] = None
+            ppvars['big5_openness2'] = None
+            ppvars['big5_openness3'] = None
+            ppvars['big5_openness4'] = None
+            ppvars['big5_conscientious1'] = None
+            ppvars['big5_conscientious2'] = None
+            ppvars['big5_conscientious3'] = None
+            ppvars['big5_extraversion1'] = None
+            ppvars['big5_extraversion2'] = None
+            ppvars['big5_extraversion3'] = None
+            ppvars['big5_agreeable1'] = None
+            ppvars['big5_agreeable2'] = None
+            ppvars['big5_agreeable3'] = None
+            ppvars['big5_neuroticism1'] = None
+            ppvars['big5_neuroticism2'] = None
+            ppvars['big5_neuroticism3'] = None
 
-        # Variables for payment
-        ppvars['task_chosen_part'] = None
-        ppvars['prob'] = None
-        ppvars['belief_chosen_part'] = None
-        ppvars['payment_for_belief'] = None
-        ppvars['risk_chosen'] = None
-        ppvars['risk_payment'] = None
-        ppvars['choice_in_risk_chosen'] = None
-        ppvars['total_payment'] = None
-        ppvars['comments'] = None
+            # Variables for payment
+            ppvars['task_chosen_part'] = None
+            ppvars['prob'] = None
+            ppvars['belief_chosen_part'] = None
+            ppvars['payment_for_belief'] = None
+            ppvars['risk_chosen'] = None
+            ppvars['risk_payment'] = None
+            ppvars['choice_in_risk_chosen'] = None
+            ppvars['total_payment'] = None
+            ppvars['comments'] = None
+
+            # Pre-assign do_ideal and ideal_index at session creation
+            idx = next(conditions)
+            if idx is not None:
+                ppvars['do_ideal'] = True
+                ppvars['ideal_index'] = idx
+            # else: do_ideal remains False, ideal_index remains None
 
 
 def build_random_dict():
@@ -1779,18 +1795,14 @@ class Predicted(Page):
                 player.participant.vars['predicted'][12] = player.lastpredicted_c
                 player.lastpredicted_t = 999
 
-            # randomly select whether participant has to do ideal number of tasks
-            prob_ideal = round((base_constants.PERCENT_IDEAL + C.PERCENT_IDEAL_PART5) / 100, 2)
-            player.do_ideal = bool(np.random.choice([True, False],
-                                                    p=[prob_ideal, 1 - prob_ideal]))
-            player.participant.vars['do_ideal'] = player.do_ideal
-
-            # do either the ideal stated in the first round or in the last round:
+            # do_ideal and ideal_index were pre-assigned at session creation;
+            # copy them to player-level fields and resolve ideal_to_do now that
+            # the elicited ideal values are known.
+            player.do_ideal = player.participant.vars['do_ideal']
             if player.do_ideal:
-                player.ideal_index = int(np.random.choice([8, 12]))
+                player.ideal_index = player.participant.vars['ideal_index']
                 player.ideal_to_do = player.participant.vars['ideal'][player.ideal_index]
                 player.participant.vars['ideal_to_do'] = player.ideal_to_do
-                player.participant.vars['ideal_index'] = player.ideal_index
                 print('Ideal to do:', player.ideal_to_do, 'index:', player.ideal_index)
         else:
             pass
