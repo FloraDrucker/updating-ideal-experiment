@@ -136,6 +136,15 @@ class Player(BasePlayer):
         label="How many tasks do you predict you would actually do for what you currently think the task payoff is?"
     )
 
+    beliefideal_c = models.IntegerField(
+        blank=False,
+        label="How many tasks would you ideally want to do for 120 points per task?"
+    )
+    beliefpredicted_c = models.IntegerField(
+        blank=False,
+        label="How many tasks do you predict you would actually do for 120 points per task?"
+    )
+
     # Predicted values
     predicted50 = models.IntegerField(
         blank=False,
@@ -1455,24 +1464,27 @@ class BeliefIdeal(Page):
     timeout_submission = {
         'beliefideal_t': None,
         'beliefpredicted_t': None,
+        'beliefideal_c': None,
+        'beliefpredicted_c': None,
     }
 
     @staticmethod
     def get_form_fields(player):
-        return ['beliefideal_t', 'beliefpredicted_t']
+        if player.participant.vars['treatment']:
+            return ['beliefideal_t', 'beliefpredicted_t']
+        else:
+            return ['beliefideal_c', 'beliefpredicted_c']
 
     @staticmethod
     def is_displayed(player):
-        return (
-            player.round_number == 2
-            and player.participant.vars['treatment']
-        )
+        return player.round_number == 2
 
     @staticmethod
     def vars_for_template(player):
         treatment = player.participant.vars['treatment']
+        current_belief = player.participant.vars['belief'][0] if treatment else 120
         return {
-            'current_belief': player.participant.vars['belief'][0],
+            'current_belief': current_belief,
             'treatment': treatment,
             'work_length_minutes': round(
                 player.session.config['work_length_seconds'] / 60
@@ -1481,8 +1493,12 @@ class BeliefIdeal(Page):
 
     @staticmethod
     def error_message(player, values):
-        ideal_tasks = values.get('beliefideal_t')
-        predicted_tasks = values.get('beliefpredicted_t')
+        if player.participant.vars['treatment']:
+            ideal_tasks = values.get('beliefideal_t')
+            predicted_tasks = values.get('beliefpredicted_t')
+        else:
+            ideal_tasks = values.get('beliefideal_c')
+            predicted_tasks = values.get('beliefpredicted_c')
         if (
             ideal_tasks is not None
             and predicted_tasks is not None
@@ -1502,10 +1518,16 @@ class BeliefIdeal(Page):
             return
 
         ppvars = player.participant.vars
-        ppvars['belief_ideal_payoff'] = ppvars['belief'][0]
-        ppvars['belief_ideal_tasks'] = player.beliefideal_t
-        ppvars['belief_predicted_payoff'] = ppvars['belief'][0]
-        ppvars['belief_predicted_tasks'] = player.beliefpredicted_t
+        if ppvars['treatment']:
+            ppvars['belief_ideal_payoff'] = ppvars['belief'][0]
+            ppvars['belief_ideal_tasks'] = player.beliefideal_t
+            ppvars['belief_predicted_payoff'] = ppvars['belief'][0]
+            ppvars['belief_predicted_tasks'] = player.beliefpredicted_t
+        else:
+            ppvars['belief_ideal_payoff'] = 120
+            ppvars['belief_ideal_tasks'] = player.beliefideal_c
+            ppvars['belief_predicted_payoff'] = 120
+            ppvars['belief_predicted_tasks'] = player.beliefpredicted_c
 
 
 class Ideal(Page):

@@ -32,6 +32,10 @@
         Your prediction based on your current belief is shown in the
         appropriate place below as an anchor.
     </p>
+{{ else }}
+    <p>
+        Your earlier prediction at {{ anchor_payoff }} points per task is shown in the appropriate place below as an anchor.
+    </p>
 {{ endif }}
 
 {{ elif player.round_number == 6 }}
@@ -45,10 +49,9 @@
 {{ if player.round_number == 2 }}
 
     {% for field in form %}
-        {{ if treatment and field.name == anchor_before_field }}
+        {{ if field.name == anchor_before_field }}
             <div class="belief-anchor">
-                <b>Your current-belief anchor:</b>
-                at {{ anchor_payoff }} points per task, you predicted that you
+                At {{ anchor_payoff }} points per task, you predicted that you
                 would do <b>{{ anchor_tasks }} tasks</b>.
             </div>
         {{ endif }}
