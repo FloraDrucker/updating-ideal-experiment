@@ -21,13 +21,13 @@
 /* Our custom timer */
 .pretty-timer {
     display: inline-block;
-    background: #fff7c2;
-    border: 2px solid #f5d768;
+    background: #d4edda;
+    border: 2px solid #28a745;
     border-radius: 6px;
     padding: 15px 20px;
     font-size: 16px;
     font-weight: 600;
-    color: #6a4d00;
+    color: #155724;
     margin-bottom: 12px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
@@ -708,7 +708,7 @@ function playNextVideo() {
         if (left <= 0) {
             document.getElementById("next-button").click();
         } else {
-            el.innerText = "Time remaining: " + formatTime(left);
+            el.innerText = "Remaining working time: " + formatTime(left);
         }
     }
 

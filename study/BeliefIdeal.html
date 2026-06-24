@@ -21,7 +21,7 @@
 </p>
 
 <p>
-   How many tasks would you <b>ideally want to do</b> within {{ work_length_minutes }} minutes if the task payoff was <b>{{ current_belief }} points per task?</b> There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance</b> that you will have to do this amount of tasks in part five if the true payoff per task is indeed {{ current_belief}} points. Please also state how many tasks you <b>predict you would actually do</b> if the payoff was {{ current_belief }} points per task.
+   How many tasks would you <b>ideally want to do</b> within {{ work_length_minutes }} minutes if the task payoff was <b>{{ current_belief }} points per task?</b> Please take into account your experience with the task in the trial round. There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance that you will have to do this amount of tasks in part five</b> if the true payoff per task is indeed {{ current_belief}} points. Please also state how many tasks you <b>predict you would actually do</b> if the payoff was {{ current_belief }} points per task.
 </p>
 {{ else }}
 <p>
@@ -29,7 +29,7 @@
 </p>
 
 <p>
-   How many tasks would you <b>ideally want to do</b> within {{ work_length_minutes }} minutes for a task payoff of <b>{{ current_belief }} points per task?</b> There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance</b> that you will have to do this amount of tasks in part five. Please also state how many tasks you <b>predict you would actually do</b> for a payoff of {{ current_belief }} points per task.
+   How many tasks would you <b>ideally want to do</b> within {{ work_length_minutes }} minutes for <b>{{ current_belief }} points per task?</b> Please take into account your experience with the task in the trial round. There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance</b> that you will have to do this amount of tasks in part five. Please also state how many tasks you <b>predict you would actually do</b> for a payoff of {{ current_belief }} points per task.
 </p>
 {{ endif }}
 

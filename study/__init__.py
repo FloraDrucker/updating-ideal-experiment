@@ -2098,6 +2098,12 @@ class Survey2(Page):
         return player.round_number == 3
 
     @staticmethod
+    def js_vars(player):
+        return dict(
+            survey2_timeout=player.session.config['page_timeouts']['survey2']
+        )
+
+    @staticmethod
     def before_next_page(player, timeout_happened):
         incomplete_test = []
         if player.field_maybe_none('digitspan_max_level') in (None, 0):
