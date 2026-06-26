@@ -1206,6 +1206,8 @@ def creating_session(subsession: Subsession):
                 ppvars['ideal_index'] = idx
             # else: do_ideal remains False, ideal_index remains None
 
+            print(f"Participant {p.id_in_subsession}assigned do_ideal={ppvars['do_ideal']}, ideal_index={ppvars['ideal_index']}")
+
 
 def build_random_dict():
     import string, random
