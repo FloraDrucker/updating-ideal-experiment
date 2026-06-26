@@ -2,7 +2,7 @@
 {% load otree %}
 
 {% block title %}
-    Ideal and predicted number of tasks at your current belief
+    Ideal and predicted number of tasks at {{ if treatment }}your current belief{{ else }}the task payoff{{ endif }}
 {% endblock %}
 
 {% block content %}
@@ -14,16 +14,24 @@
     }
 </style>
 
+{{ if treatment }}
 <p>
     You previously stated that you currently think the task payoff is
     <b>{{ current_belief }} points per task</b>.
 </p>
 
 <p>
-   Please state how many tasks you
-    would <b>ideally want to do</b> within {{ work_length_minutes }} minutes and how
-    many tasks you <b>predict you would actually do</b> at this current belief.
+   How many tasks would you <b>ideally want to do</b> within {{ work_length_minutes }} minutes if the task payoff was <b>{{ current_belief }} points per task?</b> Please take into account your experience with the task in the trial round. There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance that you will have to do this amount of tasks in part five</b> if the true payoff per task is indeed {{ current_belief}} points. Please also state how many tasks you <b>predict you would actually do</b> if the payoff was {{ current_belief }} points per task.
 </p>
+{{ else }}
+<p>
+    The task payoff is <b>{{ current_belief }} points per task</b>.
+</p>
+
+<p>
+   How many tasks would you <b>ideally want to do</b> within {{ work_length_minutes }} minutes for <b>{{ current_belief }} points per task?</b> Please take into account your experience with the task in the trial round. There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance</b> that you will have to do this amount of tasks in part five. Please also state how many tasks you <b>predict you would actually do</b> for a payoff of {{ current_belief }} points per task.
+</p>
+{{ endif }}
 
 {% formfields %}
 

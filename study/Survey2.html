@@ -8,6 +8,12 @@ Survey Two.
 {% block content %}
 
 <style>
+    /* Hide the built-in oTree timer on this page; we use a custom timer. */
+    .otree-timer,
+    .otree-timer.alert {
+        display: none !important;
+    }
+
     /* Prevent selecting the shown sequence (helps reduce manual copying). */
     #display-box {
         -webkit-user-select: none;
@@ -15,7 +21,23 @@ Survey Two.
         -ms-user-select: none;
         user-select: none;
     }
+
+    .pretty-timer {
+        display: inline-block;
+        background: #fff7c2;
+        border: 2px solid #f5d768;
+        border-radius: 6px;
+        padding: 10px 16px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #6a4d00;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
 </style>
+
+<!-- PAGE TIMER -->
+<div id="survey2-timer" class="pretty-timer"></div>
 
 <!-- INSTRUCTIONS -->
 <div id="instructions" style="font-size:1.2em; line-height:1.4; margin-bottom:2em;">
@@ -115,7 +137,25 @@ Survey Two.
           inputBlk = document.getElementById('input-block'),
           resp     = document.getElementById('response'),
           nextBtn  = document.getElementById('next-page-btn'),
-          maxField = document.getElementById('digitspan_max_level');
+          maxField = document.getElementById('digitspan_max_level'),
+          timerEl  = document.getElementById('survey2-timer');
+
+    // Page-level countdown — visible during instructions and end-message only
+    const PAGE_TIMEOUT = js_vars.survey2_timeout;
+    const pageLoadTime = Date.now();
+    function getRemainingSeconds() {
+        return Math.max(0, Math.round(PAGE_TIMEOUT - (Date.now() - pageLoadTime) / 1000));
+    }
+    function formatPageTime(secs) {
+        const m = Math.floor(secs / 60).toString().padStart(2, '0');
+        const s = (secs % 60).toString().padStart(2, '0');
+        return m + ':' + s;
+    }
+    function updateTimerDisplay() {
+        timerEl.textContent = 'Remaining time: ' + formatPageTime(getRemainingSeconds());
+    }
+    updateTimerDisplay();
+    setInterval(updateTimerDisplay, 1000);
 
     function saveState() {
         sessionStorage.setItem('ds_state', JSON.stringify({ level, stage, correctCount, phase }));
@@ -151,6 +191,7 @@ Survey Two.
 
         document.getElementById('end-message').style.display = 'block';
         nextBtn.style.display = 'inline-block';
+        timerEl.style.display = 'inline-block';
 
         sessionStorage.setItem('digitspan_finished', '1');
         clearState();
@@ -177,6 +218,7 @@ Survey Two.
         phase = s.phase ?? 'show';
 
         instr.style.display = 'none';
+        timerEl.style.display = 'none';
         disp.style.display = 'block';
 
         if (phase === 'input') {
@@ -192,6 +234,7 @@ Survey Two.
 
     startBtn.addEventListener('click', () => {
         instr.style.display = 'none';
+        timerEl.style.display = 'none';
         disp.style.display = 'block';
         level = 0; stage = 0; correctCount = 0; phase = 'show';
         saveState();

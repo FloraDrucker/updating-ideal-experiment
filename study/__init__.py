@@ -136,6 +136,15 @@ class Player(BasePlayer):
         label="How many tasks do you predict you would actually do for what you currently think the task payoff is?"
     )
 
+    beliefideal_c = models.IntegerField(
+        blank=False,
+        label="How many tasks would you ideally want to do for 120 points per task?"
+    )
+    beliefpredicted_c = models.IntegerField(
+        blank=False,
+        label="How many tasks do you predict you would actually do for 120 points per task?"
+    )
+
     # Predicted values
     predicted50 = models.IntegerField(
         blank=False,
@@ -1032,6 +1041,9 @@ class Player(BasePlayer):
     bonus_performance = models.IntegerField(initial=0, blank=False)
     bonus_mistakes = models.IntegerField(initial=0, blank=False)
 
+    # Tasks completed within the 8-minute window for do_ideal participants
+    performance_in_time = models.IntegerField(null=True, blank=True, default=None)
+
     #Wechsler Level
     digitspan_max_level = models.IntegerField(
         initial=0,
@@ -1081,101 +1093,120 @@ def creating_session(subsession: Subsession):
     dictionary = dict([(d[0][i], d[1][i]) for i in range(26)])
     subsession.dictionary = json.dumps(dictionary)
 
-    # define participant variables
-    for p in subsession.get_players():
-        ppvars = p.participant.vars
+    # Participant variables are initialised only once at session creation (round 1).
+    # Subsequent rounds re-use the same participant object, so there is no need
+    # to re-initialise and risk overwriting already-assigned values.
+    if subsession.round_number == 1:
+        import itertools
+        # Exactly 2 % → ideal from part 1 (index 8), 2 % → ideal from part 5 (index 12).
+        # A shuffled 50-entry cycle guarantees exact proportions regardless of session size.
+        assignment = [8, 12] + [None] * 48   # 1/50 = 2 % for each condition
+        random.shuffle(assignment)
+        conditions = itertools.cycle(assignment)
 
-        # Task
-        ppvars['actual'] = {i: None for i in range(C.NUM_ROUNDS)}
-        ppvars['mistakes'] = {i: None for i in range(C.NUM_ROUNDS)}
-        ppvars['belief'] = {i: None for i in [0,2,3,4,5]}
-        ppvars['ideal'] = {i+1: None for i in range(12)}
-        ppvars['belief_ideal_payoff'] = None
-        ppvars['belief_ideal_tasks'] = None
-        ppvars['belief_predicted_payoff'] = None
-        ppvars['belief_predicted_tasks'] = None
-        ppvars['predicted'] = {i+1: None for i in range(12)}
-        ppvars['do_ideal'] = False
-        ppvars['ideal_to_do'] = None
-        ppvars['ideal_index'] = None
-        ppvars['work_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
-        ppvars['nonwork_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
+        for p in subsession.get_players():
+            ppvars = p.participant.vars
 
-        # Risk preferences
-        ppvars['risk_choices'] = {i: None for i in range(21)}
+            # Task
+            ppvars['actual'] = {i: None for i in range(C.NUM_ROUNDS)}
+            ppvars['mistakes'] = {i: None for i in range(C.NUM_ROUNDS)}
+            ppvars['belief'] = {i: None for i in [0,2,3,4,5]}
+            ppvars['ideal'] = {i+1: None for i in range(12)}
+            ppvars['belief_ideal_payoff'] = None
+            ppvars['belief_ideal_tasks'] = None
+            ppvars['belief_predicted_payoff'] = None
+            ppvars['belief_predicted_tasks'] = None
+            ppvars['predicted'] = {i+1: None for i in range(12)}
+            ppvars['do_ideal'] = False
+            ppvars['ideal_to_do'] = None
+            ppvars['ideal_index'] = None
+            ppvars['work_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
+            ppvars['nonwork_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
+            ppvars['performance_in_time_5'] = None  # tasks within time for do_ideal
 
-        # Demographics
-        ppvars['gender'] = None
-        ppvars['age'] = None
-        ppvars['employment'] = None
-        ppvars['education'] = None
-        ppvars['socialclass'] = None
-        ppvars['children'] = None
-        ppvars['mathgrade'] = None
+            # Risk preferences
+            ppvars['risk_choices'] = {i: None for i in range(21)}
 
-        # BSCS
-        ppvars['BSCS_temptation'] = None
-        ppvars['BSCS_badhabits'] = None
-        ppvars['BSCS_lazy'] = None
-        ppvars['BSCS_inappropriate'] = None
-        ppvars['BSCS_dobadthings'] = None
-        ppvars['BSCS_refusebad'] = None
-        ppvars['BSCS_morediscipline'] = None
-        ppvars['BSCS_irondiscipline'] = None
-        ppvars['BSCS_pleasure'] = None
-        ppvars['BSCS_concentrating'] = None
-        ppvars['BSCS_work'] = None
-        ppvars['BSCS_stop'] = None
-        ppvars['BSCS_alternatives'] = None
+            # Demographics
+            ppvars['gender'] = None
+            ppvars['age'] = None
+            ppvars['employment'] = None
+            ppvars['education'] = None
+            ppvars['socialclass'] = None
+            ppvars['children'] = None
+            ppvars['mathgrade'] = None
 
-        # Memory and averaging skills
-        ppvars['averagetask'] = None
-        ppvars['ballsremembered1'] = None
-        ppvars['ballsremembered2'] = None
-        ppvars['ballsremembered3'] = None
-        ppvars['screenshot'] = None
-        ppvars['task_like'] = None
-        ppvars['task_more'] = None
-        ppvars['ai_integral'] = None
+            # BSCS
+            ppvars['BSCS_temptation'] = None
+            ppvars['BSCS_badhabits'] = None
+            ppvars['BSCS_lazy'] = None
+            ppvars['BSCS_inappropriate'] = None
+            ppvars['BSCS_dobadthings'] = None
+            ppvars['BSCS_refusebad'] = None
+            ppvars['BSCS_morediscipline'] = None
+            ppvars['BSCS_irondiscipline'] = None
+            ppvars['BSCS_pleasure'] = None
+            ppvars['BSCS_concentrating'] = None
+            ppvars['BSCS_work'] = None
+            ppvars['BSCS_stop'] = None
+            ppvars['BSCS_alternatives'] = None
 
+            # Memory and averaging skills
+            ppvars['averagetask'] = None
+            ppvars['ballsremembered1'] = None
+            ppvars['ballsremembered2'] = None
+            ppvars['ballsremembered3'] = None
+            ppvars['screenshot'] = None
+            ppvars['task_like'] = None
+            ppvars['task_more'] = None
+            ppvars['ai_integral'] = None
 
-        # Wechsler
-        ppvars['digitspan_max_level'] = None
+            # Wechsler
+            ppvars['digitspan_max_level'] = None
 
-        # GPS
-        ppvars['GPS_patience'] = None
-        ppvars['GPS_altruism1'] = None
-        ppvars['GPS_altruism2'] = None
-        ppvars['GPS_timediscounting'] = None
+            # GPS
+            ppvars['GPS_patience'] = None
+            ppvars['GPS_altruism1'] = None
+            ppvars['GPS_altruism2'] = None
+            ppvars['GPS_timediscounting'] = None
 
-        # Big five
-        ppvars['big5_openness1'] = None
-        ppvars['big5_openness2'] = None
-        ppvars['big5_openness3'] = None
-        ppvars['big5_openness4'] = None
-        ppvars['big5_conscientious1'] = None
-        ppvars['big5_conscientious2'] = None
-        ppvars['big5_conscientious3'] = None
-        ppvars['big5_extraversion1'] = None
-        ppvars['big5_extraversion2'] = None
-        ppvars['big5_extraversion3'] = None
-        ppvars['big5_agreeable1'] = None
-        ppvars['big5_agreeable2'] = None
-        ppvars['big5_agreeable3'] = None
-        ppvars['big5_neuroticism1'] = None
-        ppvars['big5_neuroticism2'] = None
-        ppvars['big5_neuroticism3'] = None
+            # Big five
+            ppvars['big5_openness1'] = None
+            ppvars['big5_openness2'] = None
+            ppvars['big5_openness3'] = None
+            ppvars['big5_openness4'] = None
+            ppvars['big5_conscientious1'] = None
+            ppvars['big5_conscientious2'] = None
+            ppvars['big5_conscientious3'] = None
+            ppvars['big5_extraversion1'] = None
+            ppvars['big5_extraversion2'] = None
+            ppvars['big5_extraversion3'] = None
+            ppvars['big5_agreeable1'] = None
+            ppvars['big5_agreeable2'] = None
+            ppvars['big5_agreeable3'] = None
+            ppvars['big5_neuroticism1'] = None
+            ppvars['big5_neuroticism2'] = None
+            ppvars['big5_neuroticism3'] = None
 
-        # Variables for payment
-        ppvars['task_chosen_part'] = None
-        ppvars['prob'] = None
-        ppvars['belief_chosen_part'] = None
-        ppvars['payment_for_belief'] = None
-        ppvars['risk_chosen'] = None
-        ppvars['risk_payment'] = None
-        ppvars['choice_in_risk_chosen'] = None
-        ppvars['total_payment'] = None
-        ppvars['comments'] = None
+            # Variables for payment
+            ppvars['task_chosen_part'] = None
+            ppvars['prob'] = None
+            ppvars['belief_chosen_part'] = None
+            ppvars['payment_for_belief'] = None
+            ppvars['risk_chosen'] = None
+            ppvars['risk_payment'] = None
+            ppvars['choice_in_risk_chosen'] = None
+            ppvars['total_payment'] = None
+            ppvars['comments'] = None
+
+            # Pre-assign do_ideal and ideal_index at session creation
+            idx = next(conditions)
+            if idx is not None:
+                ppvars['do_ideal'] = True
+                ppvars['ideal_index'] = idx
+            # else: do_ideal remains False, ideal_index remains None
+
+            print(f"Participant {p.id_in_subsession}assigned do_ideal={ppvars['do_ideal']}, ideal_index={ppvars['ideal_index']}")
 
 
 def build_random_dict():
@@ -1263,6 +1294,16 @@ def live_update_performance(player: Player, data):
         }
 
     # ------------------------------------------------------------
+    # RECORD IN-TIME PERFORMANCE (do_ideal participants at the 8-min mark)
+    # Only recorded once; server ignores subsequent sends after page refresh.
+    # ------------------------------------------------------------
+    if data.get('record_in_time'):
+        if player.field_maybe_none('performance_in_time') is None:
+            player.performance_in_time = data.get('performance', player.performance)
+            player.participant.vars['performance_in_time_5'] = player.performance_in_time
+        return {pid: dict(ok=True)}
+
+    # ------------------------------------------------------------
     # PERFORMANCE update ⇒ increment AND refresh dict/word
     # ------------------------------------------------------------
     if 'performance' in data:
@@ -1310,6 +1351,10 @@ def live_update_performance(player: Player, data):
     }
 
 def get_timeout_seconds(player):
+    # do_ideal participants must finish their tasks even past 8 min;
+    # the JS submits the page when they complete ideal_to_do tasks.
+    if player.do_ideal:
+        return None
     config = player.session.config
     return config['work_length_seconds']
 
@@ -1455,24 +1500,27 @@ class BeliefIdeal(Page):
     timeout_submission = {
         'beliefideal_t': None,
         'beliefpredicted_t': None,
+        'beliefideal_c': None,
+        'beliefpredicted_c': None,
     }
 
     @staticmethod
     def get_form_fields(player):
-        return ['beliefideal_t', 'beliefpredicted_t']
+        if player.participant.vars['treatment']:
+            return ['beliefideal_t', 'beliefpredicted_t']
+        else:
+            return ['beliefideal_c', 'beliefpredicted_c']
 
     @staticmethod
     def is_displayed(player):
-        return (
-            player.round_number == 2
-            and player.participant.vars['treatment']
-        )
+        return player.round_number == 2
 
     @staticmethod
     def vars_for_template(player):
         treatment = player.participant.vars['treatment']
+        current_belief = player.participant.vars['belief'][0] if treatment else 120
         return {
-            'current_belief': player.participant.vars['belief'][0],
+            'current_belief': current_belief,
             'treatment': treatment,
             'work_length_minutes': round(
                 player.session.config['work_length_seconds'] / 60
@@ -1481,8 +1529,12 @@ class BeliefIdeal(Page):
 
     @staticmethod
     def error_message(player, values):
-        ideal_tasks = values.get('beliefideal_t')
-        predicted_tasks = values.get('beliefpredicted_t')
+        if player.participant.vars['treatment']:
+            ideal_tasks = values.get('beliefideal_t')
+            predicted_tasks = values.get('beliefpredicted_t')
+        else:
+            ideal_tasks = values.get('beliefideal_c')
+            predicted_tasks = values.get('beliefpredicted_c')
         if (
             ideal_tasks is not None
             and predicted_tasks is not None
@@ -1502,10 +1554,16 @@ class BeliefIdeal(Page):
             return
 
         ppvars = player.participant.vars
-        ppvars['belief_ideal_payoff'] = ppvars['belief'][0]
-        ppvars['belief_ideal_tasks'] = player.beliefideal_t
-        ppvars['belief_predicted_payoff'] = ppvars['belief'][0]
-        ppvars['belief_predicted_tasks'] = player.beliefpredicted_t
+        if ppvars['treatment']:
+            ppvars['belief_ideal_payoff'] = ppvars['belief'][0]
+            ppvars['belief_ideal_tasks'] = player.beliefideal_t
+            ppvars['belief_predicted_payoff'] = ppvars['belief'][0]
+            ppvars['belief_predicted_tasks'] = player.beliefpredicted_t
+        else:
+            ppvars['belief_ideal_payoff'] = 120
+            ppvars['belief_ideal_tasks'] = player.beliefideal_c
+            ppvars['belief_predicted_payoff'] = 120
+            ppvars['belief_predicted_tasks'] = player.beliefpredicted_c
 
 
 class Ideal(Page):
@@ -1739,18 +1797,14 @@ class Predicted(Page):
                 player.participant.vars['predicted'][12] = player.lastpredicted_c
                 player.lastpredicted_t = 999
 
-            # randomly select whether participant has to do ideal number of tasks
-            prob_ideal = round((base_constants.PERCENT_IDEAL + C.PERCENT_IDEAL_PART5) / 100, 2)
-            player.do_ideal = bool(np.random.choice([True, False],
-                                                    p=[prob_ideal, 1 - prob_ideal]))
-            player.participant.vars['do_ideal'] = player.do_ideal
-
-            # do either the ideal stated in the first round or in the last round:
+            # do_ideal and ideal_index were pre-assigned at session creation;
+            # copy them to player-level fields and resolve ideal_to_do now that
+            # the elicited ideal values are known.
+            player.do_ideal = player.participant.vars['do_ideal']
             if player.do_ideal:
-                player.ideal_index = int(np.random.choice([8, 12]))
+                player.ideal_index = player.participant.vars['ideal_index']
                 player.ideal_to_do = player.participant.vars['ideal'][player.ideal_index]
                 player.participant.vars['ideal_to_do'] = player.ideal_to_do
-                player.participant.vars['ideal_index'] = player.ideal_index
                 print('Ideal to do:', player.ideal_to_do, 'index:', player.ideal_index)
         else:
             pass
@@ -1949,7 +2003,11 @@ class Task(Page):
     form_model = 'player'
     form_fields = ['performance', 'mistakes', 'work_seconds']
 
-    get_timeout_seconds = get_timeout_seconds  # keep server cutoff
+    @staticmethod
+    def get_timeout_seconds(player):
+        if player.do_ideal:
+            return None  # JS submits when tasks are complete
+        return player.session.config['work_length_seconds']
 
     @staticmethod
     def vars_for_template(player: Player):
@@ -1998,6 +2056,12 @@ class Task(Page):
 
         # Nonwork seconds always the remainder
         player.nonwork_seconds = total - player.work_seconds
+
+        # For do_ideal: ensure performance_in_time is stored in participant vars.
+        # If it was never set (finished within time limit), fall back to performance.
+        if player.do_ideal:
+            pit = player.field_maybe_none('performance_in_time')
+            player.participant.vars['performance_in_time_5'] = pit if pit is not None else player.performance
 
         # Cap performance
         if player.performance > player.ideal_to_do:
@@ -2074,6 +2138,12 @@ class Survey2(Page):
     @staticmethod
     def is_displayed(player):
         return player.round_number == 3
+
+    @staticmethod
+    def js_vars(player):
+        return dict(
+            survey2_timeout=player.session.config['page_timeouts']['survey2']
+        )
 
     @staticmethod
     def before_next_page(player, timeout_happened):
@@ -2305,20 +2375,17 @@ class Payment(Page):
         config = player.session.config
         chosen_part = C.PARTS[player.task_chosen_part]
         performance_in_part = player.participant.vars['actual'][player.task_chosen_part]
-        not_done_ideal = False
-        if player.task_chosen_part == 5 and player.participant.vars['do_ideal'] and performance_in_part < player.participant.vars['ideal_to_do']:
-            not_done_ideal = True
-            performance_to_pay = 0
+        if player.task_chosen_part == 5 and player.participant.vars['do_ideal']:
+            # Payment is based on tasks completed within the 8-minute window
+            perf_in_time = player.participant.vars.get('performance_in_time_5')
+            performance_to_pay = perf_in_time if perf_in_time is not None else performance_in_part
         else:
             performance_to_pay = performance_in_part
 
         payoff_for_work = base_constants.TRUE_PAYOFF*performance_to_pay
         payoff_in_usd = cu(config['real_world_currency_per_point']*payoff_for_work)
         leisure_minutes = round((player.participant.vars['nonwork_seconds'][player.task_chosen_part])/60, 2)
-        if not_done_ideal:
-            leisure_to_pay = 0
-        else:
-            leisure_to_pay = leisure_minutes
+        leisure_to_pay = leisure_minutes
         leisure_payoff = round(leisure_to_pay * base_constants.FLAT_LEISURE_FEE, 2)
         leisure_payoff_usd = cu(round(config['real_world_currency_per_point']*leisure_payoff, 2))
         belief_chosen_part = C.PARTS[player.belief_chosen_part]
@@ -2350,9 +2417,9 @@ class Payment(Page):
             'ideal_to_do': player.participant.vars['ideal_to_do'],
             'task_chosen_part': chosen_part,
             'performance_in_chosen_part': performance_in_part,
+            'performance_to_pay': performance_to_pay,
             'percent_ideal': base_constants.PERCENT_IDEAL,
             'do_ideal': ppvars['do_ideal'],
-            'not_done_ideal': not_done_ideal,
             'true_payoff': base_constants.TRUE_PAYOFF,
             'payoff_for_work': payoff_for_work,
             'payoff_for_work_usd': payoff_in_usd,
