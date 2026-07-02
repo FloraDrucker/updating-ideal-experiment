@@ -1070,7 +1070,6 @@ def get_break_videos():
             video_id_match = re.search(r'/video/(\d+)', url)
             if video_id_match:
                 data_list.append(dict(type='tiktok', id=video_id_match.group(1), size=v.get('size', '')))
-    random.shuffle(data_list)
     return {str(i): v for i, v in enumerate(data_list, 1)}
 
 def belief_t_error_message(player, value):
