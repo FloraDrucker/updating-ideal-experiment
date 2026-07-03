@@ -7,7 +7,7 @@ SESSION_CONFIGS = [
         app_sequence=['instructions_consent', 'study'],
         num_demo_participants=10,
         participation_fee=11.0,
-        work_length_seconds=10,
+        work_length_seconds=60,
         page_timeouts=dict(
             # instructions_consent app
             welcome=300,
