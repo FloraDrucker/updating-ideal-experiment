@@ -46,6 +46,7 @@ class Player(BasePlayer):
 
     # Consent
     consent = models.BooleanField(label="Do you wish to participate in the study?", blank=False)
+    consent_no_ai = models.BooleanField(label="I agree to not using AI during any part of this study.", blank=False)
 
     # comprehension check answers
     q1 = models.StringField(
@@ -132,6 +133,7 @@ def creating_session(subsession: Subsession):
             p.treatment = config['treatment']
         p.participant.vars['treatment'] = p.treatment
         p.participant.vars['consent'] = False
+        p.participant.vars['consent_no_ai'] = False
         p.participant.vars['total_wrong'] = None
         p.participant.vars['success_attempt'] = None
         p.participant.vars['attempt_number'] = 0
@@ -336,8 +338,8 @@ class Excluded(Page):
 class Consent(Page):
     get_timeout_seconds = page_timeout('consent')
     form_model = 'player'
-    form_fields = ['consent']
-    timeout_submission = {'consent': None}
+    form_fields = ['consent', 'consent_no_ai']
+    timeout_submission = {'consent': None, 'consent_no_ai': None}
 
     @staticmethod
     def before_next_page(player, timeout_happened):
@@ -346,12 +348,13 @@ class Consent(Page):
         ):
             return
         player.participant.vars['consent'] = player.consent
+        player.participant.vars['consent_no_ai'] = player.consent_no_ai
 
 
 class NoConsent(Page):
     @staticmethod
     def is_displayed(player):
-        return player.consent is not None and player.consent is False
+        return not (player.consent and player.consent_no_ai)
 
 
 page_sequence = [
