@@ -78,7 +78,9 @@ def ideal_answers_for_round(bot):
 
 
 def belief_ideal_answers(bot):
-    return dict(beliefideal_t=10, beliefpredicted_t=8)
+    if bot.player.participant.vars['treatment']:
+        return dict(beliefideal_t=10, beliefpredicted_t=8)
+    return dict(beliefideal_c=10, beliefpredicted_c=8)
 
 
 def predicted_answers_for_round(bot):
@@ -177,6 +179,8 @@ def survey5_answers():
         ballsremembered2=0,
         ballsremembered3=0,
         screenshot=False,
+        task_like=4,
+        task_more=False,
         ai_integral=4,
     )
 
@@ -211,10 +215,7 @@ class PlayerBot(Bot):
                 yield Belief, dict(belief_c=110)
 
         # 5) Current-belief ideal anchor (round 2)
-        if (
-            self.round_number == 2
-            and self.player.participant.vars['treatment']
-        ):
+        if self.round_number == 2:
             yield BeliefIdeal, belief_ideal_answers(self)
 
         # 6) Ideal (round 2 and 6)
