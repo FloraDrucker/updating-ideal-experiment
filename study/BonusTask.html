@@ -60,6 +60,17 @@
     cursor: pointer;
 }
 
+#skip-button {
+    padding: 15px 20px;
+    font-size: 16px;
+    border-radius: 6px;
+    background: #bfdbfe;
+    border: 1px solid #3b82f6;
+    color: #1e3a8a;
+    font-weight: bold;
+    cursor: pointer;
+}
+
 .task-container {
     display: grid;
     width: min(95%, 1200px);
@@ -173,6 +184,10 @@ td {
 <div class="progress-box">
     Tasks completed: <span id="perf-display">{{ player.bonus_performance }}</span> / 5
 </div>
+
+<br>
+
+<input type="button" id="skip-button" onclick="skipTasks()" value="Skip tasks">
 
 <input type="hidden" name="bonus_performance" id="bonus_performance" value="{{ player.bonus_performance }}">
 <input type="hidden" name="bonus_mistakes"    id="bonus_mistakes"    value="{{ player.bonus_mistakes }}">
@@ -356,6 +371,10 @@ function liveRecv(data) {
     if (data.completed) {
         showCompletion();
     }
+}
+
+function skipTasks() {
+    document.getElementById("next-button").click();
 }
 
 // Enter key submits

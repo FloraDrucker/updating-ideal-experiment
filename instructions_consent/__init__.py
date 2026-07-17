@@ -27,8 +27,8 @@ class C(BaseConstants):
         q3=20,
         q4c='State your actual belief about the chosen number, because the closer your guess is to the real value (between 50 points and 150 points), the higher is your probability of winning.',
         q4t='State your actual belief about the true payoff, because the closer your guess is to the real value (between 50 points and 150 points), the higher is your probability of winning.',
-        q5c='It is the average of 60 numbers between 50 and 150.',
-        q5t='It is the average of 60 numbers between 50 points and 150 points.'
+        q5c='It is the average of the numbers displayed on the 60 balls.',
+        q5t='It is the average of the numbers displayed on the 60 balls.'
     )
 
 
@@ -50,7 +50,7 @@ class Player(BasePlayer):
 
     # comprehension check answers
     q1 = models.StringField(
-        label='<b>Question 1</b> <br> At the end of part four, will you have seen all the numbers (“balls”) from the underlying distribution?',
+        label='<b>Question 1</b> <br> Will you have seen all 60 numbers (“balls”) by the end of part four?',
         choices=[
             'Yes, because the same 60 balls are shown repeatedly in every part.',
             'Yes, because each ball is shown only once, and by part four all 60 will have been shown.',
@@ -96,7 +96,7 @@ class Player(BasePlayer):
     q5t = models.StringField(
         label='<b>Question 5</b> <br> How is the fixed payoff per correctly solved task calculated?',
         choices=[
-            'It is the average of 60 numbers between 50 points and 150 points.',
+            'It is the average of the numbers displayed on the 60 balls.',
             'It is the highest number out of the 60 balls shown.',
             'It is a random number chosen between 50 and 150 each round.',
         ],
@@ -106,7 +106,7 @@ class Player(BasePlayer):
     q5c = models.StringField(
         label='<b>Question 5</b> <br> How is the chosen number calculated?',
         choices=[
-            'It is the average of 60 numbers between 50 and 150.',
+            'It is the average of the numbers displayed on the 60 balls.',
             'It is the highest number out of the 60 balls shown.',
             'It is a random number chosen between 50 and 150 each round.',
         ],
@@ -174,7 +174,7 @@ def exclude_on_incomplete_timeout(
 
 # PAGES
 class Welcome(Page):
-    get_timeout_seconds = page_timeout('welcome')
+    pass
 
 
 class EncryptionTask(Page):

@@ -10,13 +10,13 @@ img {
 /* Our custom timer */
 .pretty-timer {
     display: inline-block;
-    background: #fff7c2;                 /* oTree-style light yellow */
-    border: 2px solid #f5d768;           /* slightly darker yellow border */
+    background: #d4edda;
+    border: 2px solid #28a745;
     border-radius: 6px;
-    padding: 6px 14px;
-    font-size: 14px;
+    padding: 15px 20px;
+    font-size: 16px;
     font-weight: 600;
-    color: #6a4d00;                      /* dark warm brown text */
+    color: #155724;
     margin-bottom: 12px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
@@ -91,7 +91,7 @@ img {
             document.querySelector('.otree-btn-next').click();
         } else {
             document.getElementById("timer").innerText =
-                "Time remaining: " + Math.ceil(left) + " seconds";
+                "Time left to see information: " + Math.ceil(left) + " seconds";
         }
     }
 

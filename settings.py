@@ -10,7 +10,6 @@ SESSION_CONFIGS = [
         work_length_seconds=480,
         page_timeouts=dict(
             # instructions_consent app
-            welcome=300,
             encryption_task=300,
             instructions=600,
             comprehension_check=600,
