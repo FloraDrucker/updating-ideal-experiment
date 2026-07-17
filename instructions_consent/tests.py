@@ -30,6 +30,6 @@ class PlayerBot(Bot):
             )
 
         # consent yes
-        yield Consent, dict(consent=True)
+        yield Consent, dict(consent=True, consent_no_ai=True)
 
         # NoConsent page is only shown if consent=False, so bot ends here.
