@@ -651,7 +651,7 @@ class Player(BasePlayer):
             [10, '10'],
         ],
         blank=False,
-        label='How many times have you seen a ball with the number 135 on it over the course of the experiment?'
+        label='How many times have you seen a ball with the number 135 on it over the course of the study?'
     )
 
     # ballsremembered2 correct answer is 0
@@ -671,7 +671,7 @@ class Player(BasePlayer):
             [10, '10'],
         ],
         blank=False,
-        label='How many times have you seen a ball with the number 102 on it over the course of the experiment?'
+        label='How many times have you seen a ball with the number 102 on it over the course of the study?'
     )
 
     # ballsremembered3 correct answer is 1
@@ -691,7 +691,7 @@ class Player(BasePlayer):
             [10, '10'],
         ],
         blank=False,
-        label='How many times have you seen a ball with the number 109 on it over the course of the experiment?'
+        label='How many times have you seen a ball with the number 109 on it over the course of the study?'
     )
 
     screenshot = models.BooleanField(
@@ -1201,6 +1201,10 @@ def creating_session(subsession: Subsession):
             ppvars['choice_in_risk_chosen'] = None
             ppvars['total_payment'] = None
             ppvars['comments'] = None
+
+            # Bonus task
+            ppvars['bonus_performance'] = None
+            ppvars['bonus_mistakes'] = None
 
             # Pre-assign do_ideal and ideal_index at session creation
             idx = next(conditions)
@@ -2364,6 +2368,12 @@ class BonusTask(Page):
             bonus_tasks=C.BONUS_TASKS,
         )
 
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        ppvars = player.participant.vars
+        ppvars['bonus_performance'] = player.bonus_performance
+        ppvars['bonus_mistakes'] = player.bonus_mistakes
+
 
 class Payment(Page):
     get_timeout_seconds = page_timeout('payment')
@@ -2499,7 +2509,7 @@ page_sequence = [
 def custom_export(players):
     # Collect keys for the export table
     fp = players[0]
-    all_participant_vars = [v for v in fp.participant.vars.keys()]
+    all_participant_vars = list(fp.participant.vars.keys())
     all_var_keys = []
     for var in all_participant_vars:
         if isinstance(fp.participant.vars[var], dict):
@@ -2532,11 +2542,11 @@ def custom_export(players):
             ]
 
             for var in all_participant_vars:
-                if isinstance(p.participant.vars[var], dict):
-                    for key in p.participant.vars[var].keys():
-                        row.append(p.participant.vars[var][key])
+                if isinstance(fp.participant.vars[var], dict):
+                    val = p.participant.vars.get(var, {})
+                    for key in fp.participant.vars[var].keys():
+                        row.append(val.get(key, '') if isinstance(val, dict) else '')
                 else:
-                    val = p.participant.vars.get(var, '')
-                    row.append(val)
+                    row.append(p.participant.vars.get(var, ''))
 
             yield row
