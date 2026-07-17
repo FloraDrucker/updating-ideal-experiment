@@ -174,7 +174,7 @@ def exclude_on_incomplete_timeout(
 
 # PAGES
 class Welcome(Page):
-    get_timeout_seconds = page_timeout('welcome')
+    pass
 
 
 class EncryptionTask(Page):
