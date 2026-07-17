@@ -1611,6 +1611,7 @@ class Ideal(Page):
         work_length_minutes = round(config['work_length_seconds']/60)
         percent_normal = 100 - C.PERCENT_IDEAL_PART5
         current_belief = player.participant.vars.get('belief_ideal_payoff')
+        flat_leisure_fee = base_constants.FLAT_LEISURE_FEE
         anchor_before_field = None
         if player.round_number == 2 and current_belief is not None:
             for standard_payoff in range(50, 151, 10):
@@ -1626,6 +1627,7 @@ class Ideal(Page):
             'anchor_payoff': current_belief,
             'anchor_tasks': player.participant.vars.get('belief_ideal_tasks'),
             'anchor_before_field': anchor_before_field,
+            'flat_leisure_fee': flat_leisure_fee,
         }
 
     @staticmethod

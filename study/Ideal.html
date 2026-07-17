@@ -28,7 +28,7 @@
     
 </p>
 <p>
-    There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance that in part five, you will have to do as many tasks as you stated as ideal for the true payoff per task{{ if not treatment }} ({{ payoff }} points){{ endif }}</b>. In this case, if you complete the ideal number of tasks you stated earlier than in {{ work_length_minutes }} minutes, you will stop working earlier and for the rest of the time, you will be shown videos. <b>You will have to work until you have reached your stated ideal</b> (even if it takes longer than {{ work_length_minutes }} minutes), but <b>you will only be paid for those tasks that you completed correctly within the {{ work_length_minutes }} minutes,</b> if this part gets selected for payment.
+    There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance that in part five, you will have to do as many tasks as you stated as ideal for the true payoff per task{{ if not treatment }} ({{ payoff }} points){{ endif }}</b>. In this case, if you complete the ideal number of tasks you stated earlier than in {{ work_length_minutes }} minutes, you will stop working earlier and for the rest of the time, you will be shown videos and will be paid at {{ flat_leisure_fee }} points per minute. <b>You will have to work until you have reached your stated ideal</b> (even if it takes longer than {{ work_length_minutes }} minutes), but <b>you will only be paid for those tasks that you completed correctly within the {{ work_length_minutes }} minutes,</b> if this part gets selected for payment.
 </p>
 <p>
      {{ if treatment }}Should the true payoff per task be different from the payoffs for which you stated your ideal work amounts, we will extrapolate the ideal amount of work at the true payoff level from your answers.{{ endif }}
