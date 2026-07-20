@@ -33,8 +33,11 @@
     }
     #ideal-table th.col-label {
         width: 10em;
-        white-space: nowrap;
         font-size: 0.85rem;
+        word-break: break-word;
+    }
+    #ideal-table thead th.col-label {
+        white-space: nowrap;
     }
     .anchor-col {
         background-color: #cfe2ff !important;
@@ -98,14 +101,14 @@
 <p class="mt-3">
     <strong>Please start by filling in the column highlighted in blue
     ({{ anchor_payoff }} points per task
-    {{ if treatment }}&mdash; closest to your current belief of {{ current_belief }} points{{ endif }}).
-    The remaining columns will unlock once you have entered a value there.</strong>
+    {{ if treatment }} - closest to your current belief of {{ current_belief }} points{{ endif }}).</strong>
+    The remaining columns will unlock once you have entered a value there.
 </p>
 
 <table class="table table-bordered table-sm text-center align-middle ideal-tbl" id="ideal-table">
     <thead>
         <tr>
-            <th class="col-label text-start">Points per task &rarr;</th>
+            <th class="col-label text-start">Points per task</th>
             {% for level, is_anchor in payoff_levels_info %}
             <th {% if is_anchor %}class="anchor-col"{% endif %}>{{ level }}</th>
             {% endfor %}
@@ -113,7 +116,7 @@
     </thead>
     <tbody>
         <tr>
-            <th class="col-label text-start">Ideal # of tasks:</th>
+            <th class="col-label text-start">Ideal number of tasks:</th>
             {% for field in form %}
             <td {% if field.name == anchor_field_name %}class="anchor-col"{% endif %}>
                 {% formfield field %}
