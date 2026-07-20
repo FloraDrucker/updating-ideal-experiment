@@ -2,34 +2,120 @@
 {% load otree %}
 
 {% block title %}
-    {{ if player.round_number == 2 }}Questions {{ else }} Question {{ endif }}about predicted number of tasks
+    {{ if player.round_number == 2 }}Questions{{ else }}Question{{ endif }} about predicted number of tasks
 {% endblock %}
 
 {% block content %}
 
 <style>
-    input[type=number] {
-        width: 60px;
-        text-align: center;
+    /* ── Round-2 horizontal table ── */
+    .pred-tbl label,
+    .pred-tbl .col-form-label {
+        display: none !important;
     }
-
-    .belief-anchor {
-        margin: 1rem 0;
-        padding: 0.8rem 1rem;
-        border-left: 5px solid #0d6efd;
-        background: #eef5ff;
+    .pred-tbl .mb-3,
+    .pred-tbl .form-group {
+        margin-bottom: 0 !important;
+    }
+    .pred-tbl .invalid-feedback {
+        display: block;
+        font-size: 0.75rem;
+    }
+    .pred-tbl input[type=number] {
+        width: 100%;
+        min-width: 42px;
+        text-align: center;
+        padding: 0.2rem 0.1rem;
+    }
+    #pred-table {
+        table-layout: fixed;
+        width: 100%;
+    }
+    #pred-table th.col-label {
+        width: 10em;
+        font-size: 0.85rem;
+        word-break: break-word;
+    }
+    #pred-table thead th.col-label {
+        white-space: nowrap;
+    }
+    .anchor-col {
+        background-color: #cfe2ff !important;
+    }
+    .ideal-ref-row td {
+        color: #555;
+        font-size: 0.9rem;
     }
 </style>
 
 {{ if player.round_number == 2 }}
 
 <p>
-    Now we ask you to <b> predict how many tasks you would actually do</b> for the different potential levels of task payoff shown below, given your experience with the trial task and the alternative options you have.
+    Now we ask you to <b>predict how many tasks you would actually do</b> for
+    the different potential levels of task payoff shown below, given your
+    experience with the trial task and the alternative options you have.
 </p>
 
-    <p>
-        <b>Your earlier prediction is shown in the appropriate place below.</b>
-    </p>
+<p class="mt-3">
+    <strong>Please start by filling in the column highlighted in blue
+    ({{ anchor_payoff }} points per task
+    {{ if treatment }} - closest to your current belief of {{ current_belief }} points{{ endif }}).</strong>
+    The remaining columns will unlock once you have entered a value there.
+</p>
+
+<table class="table table-bordered table-sm text-center align-middle pred-tbl" id="pred-table">
+    <thead>
+        <tr>
+            <th class="col-label text-start">Points per task</th>
+            {% for level, ideal_val, is_anchor in payoff_ideal_pairs %}
+            <th {% if is_anchor %}class="anchor-col"{% endif %}>{{ level }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="ideal-ref-row">
+            <th class="col-label text-start text-muted">Your ideal (for reference):</th>
+            {% for level, ideal_val, is_anchor in payoff_ideal_pairs %}
+            <td {% if is_anchor %}class="anchor-col"{% endif %}>{{ ideal_val }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th class="col-label text-start">Predicted number of tasks:</th>
+            {% for field in form %}
+            <td {% if field.name == anchor_field_name %}class="anchor-col"{% endif %}>
+                {% formfield field %}
+            </td>
+            {% endfor %}
+        </tr>
+    </tbody>
+</table>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var anchorName = '{{ anchor_field_name }}';
+    var anchorInput = document.getElementById('id_' + anchorName);
+    var allInputs = document.querySelectorAll('#pred-table input[type="number"]');
+    var otherInputs = Array.prototype.filter.call(allInputs, function (inp) {
+        return inp.name !== anchorName;
+    });
+
+    function updateState() {
+        var filled = anchorInput.value.trim() !== '';
+        otherInputs.forEach(function (inp) {
+            inp.disabled = !filled;
+            inp.closest('td').style.opacity = filled ? '' : '0.45';
+            inp.closest('td').style.cursor = filled ? '' : 'not-allowed';
+        });
+    }
+
+    updateState();
+    anchorInput.addEventListener('input', updateState);
+
+    document.querySelector('form').addEventListener('submit', function () {
+        otherInputs.forEach(function (inp) { inp.disabled = false; });
+    });
+});
+</script>
 
 {{ elif player.round_number == 6 }}
 
@@ -37,23 +123,7 @@
     Now please {{ if treatment }}think again of what you think the task payoff is, and {{ endif }}answer the following question.
 </p>
 
-{{ endif }}
-
-{{ if player.round_number == 2 }}
-
-    {% for field in form %}
-        {{ if field.name == anchor_before_field }}
-            <div class="belief-anchor">
-                At {{ anchor_payoff }} points per task, you predicted that you
-                would do <b>{{ anchor_tasks }} tasks</b>.
-            </div>
-        {{ endif }}
-        {% formfield field %}
-    {% endfor %}
-
-{{ else }}
-
-    {% formfields %}
+{% formfields %}
 
 {{ endif }}
 

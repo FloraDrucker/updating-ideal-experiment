@@ -77,12 +77,6 @@ def ideal_answers_for_round(bot):
     return {}
 
 
-def belief_ideal_answers(bot):
-    if bot.player.participant.vars['treatment']:
-        return dict(beliefideal_t=10, beliefpredicted_t=8)
-    return dict(beliefideal_c=10, beliefpredicted_c=8)
-
-
 def predicted_answers_for_round(bot):
     # Round 2: all 11 fields
     if bot.round_number == 2:
@@ -214,24 +208,19 @@ class PlayerBot(Bot):
             else:
                 yield Belief, dict(belief_c=110)
 
-        # 5) Current-belief ideal anchor (round 2)
-        if self.round_number == 2:
-            yield BeliefIdeal, belief_ideal_answers(self)
-
-        # 6) Ideal (round 2 and 6)
+        # 5) Ideal (round 2 and 6)
         if self.round_number in [2, 6]:
             yield Ideal, ideal_answers_for_round(self)
 
-        # 7) Predicted (round 2 and 6)
+        # 6) Predicted (round 2 and 6)
         if self.round_number in [2, 6]:
             yield Predicted, predicted_answers_for_round(self)
 
-        # 8) Signal (rounds 3-5)
+        # 7) Signal (rounds 3-5)
         if 2 < self.round_number < 6:
             yield Signal
 
-        # 8) Work (displayed only if round_number > 1 in your code,
-        # but it's safe to also gate it here)
+        # 8) Work (displayed only if round_number > 1)
         if self.round_number > 1:
             yield Work
 
