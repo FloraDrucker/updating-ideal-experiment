@@ -202,12 +202,12 @@ class Player(BasePlayer):
 
     belief_t = models.IntegerField(
         blank=False,
-        label="What do you think is the task payoff in points?"
+        label="What do you currently think is the task payoff in points?"
     )
 
     belief_c = models.IntegerField(
         blank=False,
-        label="What do you think is the chosen number?"
+        label="What do you currently think is the chosen number?"
     )
 
     risk_0 = models.IntegerField(
