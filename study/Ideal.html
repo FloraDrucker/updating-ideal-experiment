@@ -2,76 +2,171 @@
 {% load otree %}
 
 {% block title %}
-     {{ if player.round_number == 2 }}Questions {{ else }} Question {{ endif }}about ideal number of tasks
+     {{ if player.round_number == 2 }}Questions{{ else }}Question{{ endif }} about ideal number of tasks
 {% endblock %}
 
 {% block content %}
 
 <style>
-    input[type=number] {
-        width: 60px;
-        text-align: center;
+    /* ── Round-2 horizontal table ── */
+    .ideal-tbl label,
+    .ideal-tbl .col-form-label {
+        display: none !important;
     }
-
-    .belief-anchor {
-        margin: 1rem 0;
-        padding: 0.8rem 1rem;
-        border-left: 5px solid #0d6efd;
-        background: #eef5ff;
+    .ideal-tbl .mb-3,
+    .ideal-tbl .form-group {
+        margin-bottom: 0 !important;
+    }
+    .ideal-tbl .invalid-feedback {
+        display: block;
+        font-size: 0.75rem;
+    }
+    .ideal-tbl input[type=number] {
+        width: 100%;
+        min-width: 42px;
+        text-align: center;
+        padding: 0.2rem 0.1rem;
+    }
+    #ideal-table {
+        table-layout: fixed;
+        width: 100%;
+    }
+    #ideal-table th.col-label {
+        width: 10em;
+        font-size: 0.85rem;
+        word-break: break-word;
+    }
+    #ideal-table thead th.col-label {
+        white-space: nowrap;
+    }
+    .anchor-col {
+        background-color: #cfe2ff !important;
     }
 </style>
 
 {{ if player.round_number == 2 }}
 
+{{ if treatment }}
 <p>
-    Now we ask you to <b>state how many tasks you would ideally want to do</b> within the {{ work_length_minutes }} minutes <b>for different potential levels of the task payoff.</b> Please consider again your experience with the task in the trial round. 
-    
+    You previously stated that you currently think the task payoff is
+    <b>{{ current_belief }} points per task</b>.
 </p>
 <p>
-    There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance that in part five, you will have to do as many tasks as you stated as ideal for the true payoff per task{{ if not treatment }} ({{ payoff }} points){{ endif }}</b>. In this case, if you complete the ideal number of tasks you stated earlier than in {{ work_length_minutes }} minutes, you will stop working earlier and for the rest of the time, you will be shown videos and will be paid at {{ flat_leisure_fee }} points per minute. <b>You will have to work until you have reached your stated ideal</b> (even if it takes longer than {{ work_length_minutes }} minutes), but <b>you will only be paid for those tasks that you completed correctly within the {{ work_length_minutes }} minutes,</b> if this part gets selected for payment.
+    Please <b>state how many tasks you would ideally want to do</b> within
+    {{ work_length_minutes }} minutes for each of the potential task payoff
+    levels shown in the table below. Please consider your experience with the
+    task in the trial round.
 </p>
 <p>
-     {{ if treatment }}Should the true payoff per task be different from the payoffs for which you stated your ideal work amounts, we will extrapolate the ideal amount of work at the true payoff level from your answers.{{ endif }}
+    There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance that in part five, you
+    will have to do as many tasks as you stated as ideal for the true payoff
+    per task</b>. In this case, if you complete the ideal number of tasks you
+    stated earlier than in {{ work_length_minutes }} minutes, you will stop
+    working earlier and for the rest of the time, you will be shown videos and
+    will be paid at {{ flat_leisure_fee }} points per minute.
+    <b>You will have to work until you have reached your stated ideal</b> (even
+    if it takes longer than {{ work_length_minutes }} minutes), but <b>you will
+    only be paid for those tasks that you completed correctly within the
+    {{ work_length_minutes }} minutes,</b> if this part gets selected for payment.
+</p>
+<p>
+    Should the true payoff per task be different from the payoffs for which you
+    stated your ideal work amounts, we will extrapolate the ideal amount of work
+    at the true payoff level from your answers.
+</p>
+{{ else }}
+<p>
+    The task payoff is <b>{{ payoff }} points per task</b>.
+</p>
+<p>
+    Please <b>state how many tasks you would ideally want to do</b> within
+    {{ work_length_minutes }} minutes for each of the potential task payoff
+    levels shown in the table below. Please consider your experience with the
+    task in the trial round.
+</p>
+<p>
+    There is a <b>{{ C.PERCENT_IDEAL_PART5 }}% chance that in part five, you
+    will have to do as many tasks as you stated as ideal for the true payoff
+    per task ({{ payoff }} points)</b>. In this case, if you complete the ideal
+    number of tasks you stated earlier than in {{ work_length_minutes }} minutes,
+    you will stop working earlier and for the rest of the time, you will be shown
+    videos and will be paid at {{ flat_leisure_fee }} points per minute.
+    <b>You will have to work until you have reached your stated ideal</b> (even
+    if it takes longer than {{ work_length_minutes }} minutes), but <b>you will
+    only be paid for those tasks that you completed correctly within the
+    {{ work_length_minutes }} minutes,</b> if this part gets selected for payment.
+</p>
+{{ endif }}
+
+<p class="mt-3">
+    <strong>Please start by filling in the column highlighted in blue
+    ({{ anchor_payoff }} points per task
+    {{ if treatment }} - closest to your current belief of {{ current_belief }} points{{ endif }}).</strong>
+    The remaining columns will unlock once you have entered a value there.
 </p>
 
-<br>
+<table class="table table-bordered table-sm text-center align-middle ideal-tbl" id="ideal-table">
+    <thead>
+        <tr>
+            <th class="col-label text-start">Points per task</th>
+            {% for level, is_anchor in payoff_levels_info %}
+            <th {% if is_anchor %}class="anchor-col"{% endif %}>{{ level }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th class="col-label text-start">Ideal number of tasks:</th>
+            {% for field in form %}
+            <td {% if field.name == anchor_field_name %}class="anchor-col"{% endif %}>
+                {% formfield field %}
+            </td>
+            {% endfor %}
+        </tr>
+    </tbody>
+</table>
 
-    <p>
-        <b>Your earlier answer is shown in the appropriate place below.</b>
-    </p>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var anchorName = '{{ anchor_field_name }}';
+    var anchorInput = document.getElementById('id_' + anchorName);
+    var allInputs = document.querySelectorAll('#ideal-table input[type="number"]');
+    var otherInputs = Array.prototype.filter.call(allInputs, function (inp) {
+        return inp.name !== anchorName;
+    });
+
+    function updateState() {
+        var filled = anchorInput.value.trim() !== '';
+        otherInputs.forEach(function (inp) {
+            inp.disabled = !filled;
+            inp.closest('td').style.opacity = filled ? '' : '0.45';
+            inp.closest('td').style.cursor = filled ? '' : 'not-allowed';
+        });
+    }
+
+    updateState();
+    anchorInput.addEventListener('input', updateState);
+
+    document.querySelector('form').addEventListener('submit', function () {
+        otherInputs.forEach(function (inp) { inp.disabled = false; });
+    });
+});
+</script>
 
 {{ elif player.round_number == 6 }}
 
 <p>
-    {{ if treatment }}Please <b>think of what you think the task payoff is,</b>{{ else }}Please <b>think of the task payoff of {{ payoff }} points</b> again,{{ endif }} and answer the following question. There is a <b>{{ C.PERCENT_IDEAL_PART5 }} percent chance</b> that you will have to do as many tasks in this part as <b>you state as ideal now</b>, and a {{ C.PERCENT_IDEAL_PART5 }} percent chance of having to do as many as you stated as ideal in the first part{{ if treatment }} for the true task payoff{{ endif }}. 
+    {{ if treatment }}Please <b>think of what you think the task payoff is,</b>{{ else }}Please <b>think of the task payoff of {{ payoff }} points</b> again,{{ endif }} and answer the following question. There is a <b>{{ C.PERCENT_IDEAL_PART5 }} percent chance</b> that you will have to do as many tasks in this part as <b>you state as ideal now</b>, and a {{ C.PERCENT_IDEAL_PART5 }} percent chance of having to do as many as you stated as ideal in the first part{{ if treatment }} for the true task payoff{{ endif }}.
 </p>
 
-<p> 
+<p>
     Remember that if you complete the ideal number of tasks you stated earlier than in {{ work_length_minutes }} minutes, you will stop working earlier and for the rest of the time, you will be shown videos and will be paid at {{ flat_leisure_fee }} points per minute. <b>You will have to work until you have reached your stated ideal</b> (even if it takes longer than {{ work_length_minutes }} minutes), but <b>you will only be paid for those tasks that you completed correctly within the {{ work_length_minutes }} minutes,</b> if this part gets selected for payment.
 </p>
 
-{{ endif }}
-
-{{ if player.round_number == 2 }}
-
-    {% for field in form %}
-        {{ if field.name == anchor_before_field }}
-            <div class="belief-anchor">
-                <b>Your earlier answer:</b>
-                at {{ anchor_payoff }} points per task,
-                you stated an ideal of <b>{{ anchor_tasks }} tasks</b>.
-            </div>
-        {{ endif }}
-        {% formfield field %}
-    {% endfor %}
-
-{{ else }}
-
-    {% formfields %}
+{% formfields %}
 
 {{ endif }}
 
 {% next_button %}
-
 
 {% endblock %}

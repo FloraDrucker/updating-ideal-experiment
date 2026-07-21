@@ -127,24 +127,6 @@ class Player(BasePlayer):
         blank=False,
         label="How many tasks do you ideally want to do in this round?"
     )
-    beliefideal_t = models.IntegerField(
-        blank=False,
-        label="How many tasks would you ideally want to do for what you currently think the task payoff is?"
-    )
-    beliefpredicted_t = models.IntegerField(
-        blank=False,
-        label="How many tasks do you predict you would actually do for what you currently think the task payoff is?"
-    )
-
-    beliefideal_c = models.IntegerField(
-        blank=False,
-        label="How many tasks would you ideally want to do for 120 points per task?"
-    )
-    beliefpredicted_c = models.IntegerField(
-        blank=False,
-        label="How many tasks do you predict you would actually do for 120 points per task?"
-    )
-
     # Predicted values
     predicted50 = models.IntegerField(
         blank=False,
@@ -202,12 +184,12 @@ class Player(BasePlayer):
 
     belief_t = models.IntegerField(
         blank=False,
-        label="What do you think is the task payoff in points?"
+        label="What do you currently think is the task payoff in points?"
     )
 
     belief_c = models.IntegerField(
         blank=False,
-        label="What do you think is the chosen number?"
+        label="What do you currently think is the chosen number?"
     )
 
     risk_0 = models.IntegerField(
@@ -1452,6 +1434,23 @@ def page_timeout(timeout_key):
     return staticmethod(get_timeout_seconds)
 
 
+def get_anchor_payoff(player):
+    """Return the standard payoff level (50, 60, …, 150) to use as the anchor
+    that participants must fill in first on the merged Ideal / Predicted table.
+
+    Treatment: nearest standard level, rounding half-up on the last digit
+               (e.g. belief 83 → 80, belief 85 → 90, belief 87 → 90).
+    Control:   always 120 (the known true payoff).
+    """
+    if player.participant.vars['treatment']:
+        raw_belief = player.participant.vars['belief'][0]
+        remainder = raw_belief % 10
+        anchor = raw_belief - remainder + (10 if remainder >= 5 else 0)
+        return max(50, min(150, anchor))
+    else:
+        return 120
+
+
 def exclude_on_incomplete_timeout(
     player,
     timeout_happened,
@@ -1501,78 +1500,6 @@ class PartStart(Page):
         }
 
 
-class BeliefIdeal(Page):
-    form_model = 'player'
-    get_timeout_seconds = page_timeout('belief_ideal')
-    timeout_submission = {
-        'beliefideal_t': None,
-        'beliefpredicted_t': None,
-        'beliefideal_c': None,
-        'beliefpredicted_c': None,
-    }
-
-    @staticmethod
-    def get_form_fields(player):
-        if player.participant.vars['treatment']:
-            return ['beliefideal_t', 'beliefpredicted_t']
-        else:
-            return ['beliefideal_c', 'beliefpredicted_c']
-
-    @staticmethod
-    def is_displayed(player):
-        return player.round_number == 2
-
-    @staticmethod
-    def vars_for_template(player):
-        treatment = player.participant.vars['treatment']
-        current_belief = player.participant.vars['belief'][0] if treatment else 120
-        return {
-            'current_belief': current_belief,
-            'treatment': treatment,
-            'work_length_minutes': round(
-                player.session.config['work_length_seconds'] / 60
-            ),
-        }
-
-    @staticmethod
-    def error_message(player, values):
-        if player.participant.vars['treatment']:
-            ideal_tasks = values.get('beliefideal_t')
-            predicted_tasks = values.get('beliefpredicted_t')
-        else:
-            ideal_tasks = values.get('beliefideal_c')
-            predicted_tasks = values.get('beliefpredicted_c')
-        if (
-            ideal_tasks is not None
-            and predicted_tasks is not None
-            and predicted_tasks > ideal_tasks
-        ):
-            return (
-                f"Your predicted number of tasks ({predicted_tasks}) "
-                f"cannot exceed your ideal number ({ideal_tasks})."
-            )
-
-    @staticmethod
-    def before_next_page(player, timeout_happened):
-        required_fields = BeliefIdeal.get_form_fields(player)
-        if exclude_on_incomplete_timeout(
-            player, timeout_happened, required_fields, 'BeliefIdeal'
-        ):
-            return
-
-        ppvars = player.participant.vars
-        if ppvars['treatment']:
-            ppvars['belief_ideal_payoff'] = ppvars['belief'][0]
-            ppvars['belief_ideal_tasks'] = player.beliefideal_t
-            ppvars['belief_predicted_payoff'] = ppvars['belief'][0]
-            ppvars['belief_predicted_tasks'] = player.beliefpredicted_t
-        else:
-            ppvars['belief_ideal_payoff'] = 120
-            ppvars['belief_ideal_tasks'] = player.beliefideal_c
-            ppvars['belief_predicted_payoff'] = 120
-            ppvars['belief_predicted_tasks'] = player.beliefpredicted_c
-
-
 class Ideal(Page):
     form_model = 'player'
     timeout_submission = {
@@ -1614,24 +1541,34 @@ class Ideal(Page):
         config = player.session.config
         work_length_minutes = round(config['work_length_seconds']/60)
         percent_normal = 100 - C.PERCENT_IDEAL_PART5
-        current_belief = player.participant.vars.get('belief_ideal_payoff')
         flat_leisure_fee = base_constants.FLAT_LEISURE_FEE
-        anchor_before_field = None
-        if player.round_number == 2 and current_belief is not None:
-            for standard_payoff in range(50, 151, 10):
-                if current_belief <= standard_payoff:
-                    anchor_before_field = f'ideal{standard_payoff}'
-                    break
+
+        # Round-2 table metadata
+        anchor_payoff = None
+        anchor_field_name = None
+        payoff_levels_info = []
+        current_belief = None
+        if player.round_number == 2:
+            anchor_payoff = get_anchor_payoff(player)
+            anchor_field_name = f'ideal{anchor_payoff}'
+            payoff_levels_info = [
+                (p, p == anchor_payoff) for p in range(50, 151, 10)
+            ]
+            if treatment:
+                current_belief = player.participant.vars['belief'][0]
+
         return {
             'percent_ideal': base_constants.PERCENT_IDEAL,
             'treatment': treatment,
             'payoff': payoff,
             'work_length_minutes': work_length_minutes,
             'percent_normal': percent_normal,
-            'anchor_payoff': current_belief,
-            'anchor_tasks': player.participant.vars.get('belief_ideal_tasks'),
-            'anchor_before_field': anchor_before_field,
             'flat_leisure_fee': flat_leisure_fee,
+            # Round-2 table
+            'anchor_payoff': anchor_payoff,
+            'anchor_field_name': anchor_field_name,
+            'payoff_levels_info': payoff_levels_info,
+            'current_belief': current_belief,
         }
 
     @staticmethod
@@ -1654,6 +1591,12 @@ class Ideal(Page):
             player.participant.vars['ideal'][9] = player.ideal130
             player.participant.vars['ideal'][10] = player.ideal140
             player.participant.vars['ideal'][11] = player.ideal150
+            # Store anchor payoff/tasks so the Predicted page can read them.
+            # belief_ideal_payoff is now the standard anchor level (not the raw belief).
+            anchor_payoff = get_anchor_payoff(player)
+            player.participant.vars['belief_ideal_payoff'] = anchor_payoff
+            player.participant.vars['belief_ideal_tasks'] = getattr(player, f'ideal{anchor_payoff}')
+            player.participant.vars['belief_predicted_payoff'] = anchor_payoff
         elif player.round_number == 6:
             if player.participant.vars['treatment']:
                 player.participant.vars['ideal'][12] = player.lastideal_t
@@ -1707,23 +1650,33 @@ class Predicted(Page):
     def vars_for_template(player):
         treatment = player.participant.vars['treatment']
         payoff = base_constants.TRUE_PAYOFF
-        current_belief = player.participant.vars.get(
-            'belief_predicted_payoff'
+
+        # Round-2 table metadata
+        anchor_payoff = None
+        anchor_field_name = None
+        payoff_ideal_pairs = []
+        if player.round_number == 2:
+            anchor_payoff = get_anchor_payoff(player)
+            anchor_field_name = f'predicted{anchor_payoff}'
+            payoff_ideal_pairs = [
+                (p, player.field_maybe_none(f'ideal{p}'), p == anchor_payoff)
+                for p in range(50, 151, 10)
+            ]
+
+        current_belief = (
+            player.participant.vars['belief'][0]
+            if player.round_number == 2 and treatment
+            else None
         )
-        anchor_before_field = None
-        if player.round_number == 2 and current_belief is not None:
-            for standard_payoff in range(50, 151, 10):
-                if current_belief <= standard_payoff:
-                    anchor_before_field = f'predicted{standard_payoff}'
-                    break
+
         return {
             'treatment': treatment,
             'payoff': payoff,
-            'anchor_payoff': current_belief,
-            'anchor_tasks': player.participant.vars.get(
-                'belief_predicted_tasks'
-            ),
-            'anchor_before_field': anchor_before_field,
+            # Round-2 table
+            'anchor_payoff': anchor_payoff,
+            'anchor_field_name': anchor_field_name,
+            'payoff_ideal_pairs': payoff_ideal_pairs,
+            'current_belief': current_belief,
         }
 
     @staticmethod
@@ -1798,6 +1751,9 @@ class Predicted(Page):
             player.participant.vars['predicted'][9] = player.predicted130
             player.participant.vars['predicted'][10] = player.predicted140
             player.participant.vars['predicted'][11] = player.predicted150
+            # Store anchor predicted tasks for data export
+            anchor_payoff = get_anchor_payoff(player)
+            player.participant.vars['belief_predicted_tasks'] = getattr(player, f'predicted{anchor_payoff}')
         elif player.round_number == 6:
             if player.participant.vars['treatment']:
                 player.participant.vars['predicted'][12] = player.lastpredicted_t
@@ -2478,8 +2434,6 @@ page_sequence = [
     PartStart,
     Performance,
     Belief,
-    Excluded,
-    BeliefIdeal,
     Excluded,
     Ideal,
     Excluded,
