@@ -482,6 +482,13 @@ function myFunction() {
                 taskCompleted = true;
                 setStoredValue(STORAGE_KEY_TASK_COMPLETED, '1');
                 if (taskSecondsLeft > 0) {
+                    // Record actual work seconds at the moment of task completion
+                    const now = Math.floor(Date.now() / 1000);
+                    const workSecs = Math.floor(now - {{ task_start_time|json }});
+                    document.getElementById("work_seconds").value = workSecs;
+                    setStoredValue(STORAGE_KEY_WORK, workSecs);
+                    liveSend({ stop_work: true, work_seconds: workSecs });
+
                     // Finished within time — show videos; tick() submits when timer expires
                     msg.innerText = "You have completed all required tasks. Leisure time has begun.";
                     js_vars.stopped_work = true;
