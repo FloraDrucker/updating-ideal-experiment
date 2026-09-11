@@ -50,7 +50,7 @@ class Player(BasePlayer):
 
     # comprehension check answers
     q1 = models.StringField(
-        label='<b>Question 1</b> <br> Will you have seen all 60 numbers (“balls”) by the end of part four?',
+        label='<b>Question 1</b> <br> Will you have seen all 60 numbers (balls) by the end of part four?',
         choices=[
             'Yes, because the same 60 balls are shown repeatedly in every part.',
             'Yes, because each ball is shown only once, and by part four all 60 will have been shown.',
@@ -98,7 +98,7 @@ class Player(BasePlayer):
         choices=[
             'It is the average of the numbers displayed on the 60 balls.',
             'It is the highest number out of the 60 balls shown.',
-            'It is a random number chosen between 50 and 150 each round.',
+            'It is a number between 50 and 150 randomly chosen in each part.',
         ],
         widget=widgets.RadioSelect,
     )
@@ -108,7 +108,7 @@ class Player(BasePlayer):
         choices=[
             'It is the average of the numbers displayed on the 60 balls.',
             'It is the highest number out of the 60 balls shown.',
-            'It is a random number chosen between 50 and 150 each round.',
+            'It is a number between 50 and 150 randomly chosen in each part.',
         ],
         widget=widgets.RadioSelect,
     )

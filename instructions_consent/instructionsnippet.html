@@ -11,7 +11,7 @@
 <h5> 1. Guessing the {{ guess_about }} </h5>
 
 <p>
-    Before the trial, and in all parts from two to five, you will have to <b>state how large you think the {{ guess_about }} is</b> based on your current information. You can earn a <b>bonus payment of {{C.BELIEF_BONUS}} points if your guess</b> in the randomly chosen part <b>is close to the true {{ guess_about }}.</b> The more precise your guess – i.e., the closer it is to the true {{ guess_about }} -, the more likely it is that you win {{C.BELIEF_BONUS}} points. Given this payment rule, <b>you should state your best guess</b> to ensure the largest chance of receiving the {{C.BELIEF_BONUS}} points. If you are interested in the exact mathematical formula stating the precise payment rule, please click on the button “Show mathematical formula”.
+    Before the trial, and in all parts from two to five, you will have to <b>state how large you think the {{ guess_about }} is based on your current information.</b> You can earn a <b>bonus payment of {{C.BELIEF_BONUS}} points if your guess</b> in the randomly chosen part <b>is close to the true {{ guess_about }}.</b> The more precise your guess – i.e., the closer it is to the true {{ guess_about }} –, the more likely it is that you win {{C.BELIEF_BONUS}} points. Given this payment rule, <b>you should state your best guess</b> to ensure the largest chance of receiving the {{C.BELIEF_BONUS}} points. If you are interested in the exact mathematical formula stating the precise payment rule, please click on the button “Show mathematical formula”.
 </p>
 
 <br>
@@ -51,8 +51,13 @@
 <h5> 2. Further information about the {{ guess_about }} </h5>
 
 <p>
-    During the course of the study, you will get more and more information that will allow you to obtain more precise knowledge of the {{ guess_about }}. This will work in the following way: The {{ guess_about }} is <b> the average of 60 numbers</b> that lie <b>between {{ C.BENEFIT_RANGE_MIN }} {{ if player.treatment }}points{{ endif }} and {{ C.BENEFIT_RANGE_MAX }}{{ if player.treatment }} points{{ endif }}.</b> The same number can occur several times. <b>At the beginning of parts two to four,</b> we will briefly <b>display 20 of these 60 numbers (represented by balls)</b> on the screen. <b>Each of the 60 balls will be displayed only once, so you will have seen all the balls after part four.</b>
+    <b>The {{ guess_about }} is  the average of 60 numbers that lie between {{ C.BENEFIT_RANGE_MIN }} {{ if player.treatment }}points{{ endif }} and {{ C.BENEFIT_RANGE_MAX }}{{ if player.treatment }} points{{ endif }}.</b> The same number can occur multiple times. During the course of the study, you will get more and more information about the {{ guess_about }}, in the following way: <b>At the beginning of parts two, three and four, we will briefly display 20 of these 60 numbers – represented by balls – on the screen.</b> Each of the 60 balls will be displayed only once, so you will have seen all the balls after part four. See the example of a ball below.
 </p>
+
+<div style="text-align: center;">
+    <img src="{{ static 'ball.png' }}" alt="Ball" style="width: 90px; height: 90px;">
+    <p>Example of a number represented by a ball</p>
+</div>
 
 <script>
     let mathJaxLoaded = false;

@@ -1569,6 +1569,7 @@ class Ideal(Page):
             'anchor_field_name': anchor_field_name,
             'payoff_levels_info': payoff_levels_info,
             'current_belief': current_belief,
+            'trial_performance': player.participant.vars['actual'][0],
         }
 
     @staticmethod
