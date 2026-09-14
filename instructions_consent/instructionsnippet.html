@@ -3,18 +3,18 @@
 <div class="text">
 
 <p>
-    In the trial and in all five consecutive parts, you will work on the task you just saw for at most eight minutes. You will receive <b> a fixed payoff {{ if not player.treatment }} of {{ C.TRUE_PAYOFF }} points {{ endif }} for each correctly solved encryption task</b> in the part that will be randomly chosen for payment. {{ if player.treatment }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: we chose <b> a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }}</b>, and you will have to guess this number. {{ endif }}
+    In the trial and in all five consecutive parts, you will work on the task you just saw for at most eight minutes. You will receive <b> a fixed payoff {{ if not player.treatment }} of {{ C.TRUE_PAYOFF }} points {{ endif }} for each correctly solved encryption task in the part that will be randomly chosen for payment.</b> {{ if player.treatment }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: we chose <b> a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }}</b>, and you will have to guess this number. {{ endif }}
 </p>
 
     <p>Each part of the study will have the following stages:</p>
+
+<br>
 
 <h5> 1. Guessing the {{ guess_about }} </h5>
 
 <p>
     Before the trial, and in all parts from two to five, you will have to <b>state how large you think the {{ guess_about }} is based on your current information.</b> You can earn a <b>bonus payment of {{C.BELIEF_BONUS}} points if your guess</b> in the randomly chosen part <b>is close to the true {{ guess_about }}.</b> The more precise your guess – i.e., the closer it is to the true {{ guess_about }} –, the more likely it is that you win {{C.BELIEF_BONUS}} points. Given this payment rule, <b>you should state your best guess</b> to ensure the largest chance of receiving the {{C.BELIEF_BONUS}} points. If you are interested in the exact mathematical formula stating the precise payment rule, please click on the button “Show mathematical formula”.
 </p>
-
-<br>
 
 <button type="button" onclick="toggleMathFormula()" style="
     background-color: #f0f0f0;
@@ -51,7 +51,7 @@
 <h5> 2. Further information about the {{ guess_about }} </h5>
 
 <p>
-    <b>The {{ guess_about }} is  the average of 60 numbers that lie between {{ C.BENEFIT_RANGE_MIN }} {{ if player.treatment }}points{{ endif }} and {{ C.BENEFIT_RANGE_MAX }}{{ if player.treatment }} points{{ endif }}.</b> The same number can occur multiple times. During the course of the study, you will get more and more information about the {{ guess_about }}, in the following way: <b>At the beginning of parts two, three and four, we will briefly display 20 of these 60 numbers – represented by balls – on the screen.</b> Each of the 60 balls will be displayed only once, so you will have seen all the balls after part four. See the example of a ball below.
+    The {{ guess_about }} is  the average of 60 numbers that lie between {{ C.BENEFIT_RANGE_MIN }} {{ if player.treatment }}points{{ endif }} and {{ C.BENEFIT_RANGE_MAX }}{{ if player.treatment }} points{{ endif }}. The same number can occur multiple times. During the course of the study, you will get more and more information about the {{ guess_about }}, in the following way: <b>At the beginning of parts two, three and four, we will briefly display 20 of these 60 numbers – represented by balls – on the screen.</b> Each of the 60 balls will be displayed only once, so you will have seen all the balls after part four. See the example of a ball below.
 </p>
 
 <div style="text-align: center;">
@@ -93,13 +93,29 @@
 <h5> 3. Working on the encryption task </h5>
 
 <p>
-    <b>In every part, you will work on the encryption task for eight minutes.</b> In parts two to four, the work will come after receiving further information about the {{ guess_about }}. Your payment for the encryption task will be <b>{{ if player.treatment }}the fixed payoff {{ else }} {{C.TRUE_PAYOFF }} points {{ endif }}times the number of tasks you completed correctly.</b>
+    <b>In every part, you will have the opportunity to work on the encryption task for eight minutes.</b> As explained above, in parts two to four, you will receive further information about the {{ guess_about }} before working. Your payment for the encryption task will be {{ if player.treatment }}the fixed payoff {{ else }} {{C.TRUE_PAYOFF }} points {{ endif }}times the number of tasks you completed correctly in the part randomly chosen for payment.
 </p>
     <p>
-    In the trial part, you have to work for the full eight minutes to become familiar with the task. However, in all other parts, <b>you can stop working on the encryption task</b> by clicking on the "Stop working" button at any point during the eight minutes. For the remainder of the eight minutes, we offer you to watch entertaining videos. You will receive a flat fee of <b>{{ C.FLAT_LEISURE_FEE }} points for every minute spent on watching the videos. </b> Please note that <b>once you decide to stop working, you will NOT be able to return to the encryption task in that part.</b>
+    In the trial part, you have to work for the full eight minutes to become familiar with the task. However, in all other parts, <b>you can stop working on the encryption task</b> by clicking on the "Stop working" button at any point during the eight minutes. For the remainder of the eight minutes, we offer you to watch entertaining videos (see screenshots from example videos below). You will receive a flat fee of <b>{{ C.FLAT_LEISURE_FEE }} points for every minute spent on watching the videos. </b> Please note that once you decide to stop working, you will NOT be able to return to the encryption task in that part.
 </p>
 
     <p> At the beginning of parts one to five, we will remind you about your performance in the previous part. </p>
+
+<br>
+
+<div style="text-align: center;">
+    <div style="display: inline-grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1em;">
+        <img src="{% static 'video-1.png' %}" style="width: 100%;">
+        <img src="{% static 'video-2.png' %}" style="width: 100%;">
+        <img src="{% static 'video-3.png' %}" style="width: 100%;">
+        <img src="{% static 'video-4.png' %}" style="width: 100%;">
+        <img src="{% static 'video-5.png' %}" style="width: 100%;">
+        <img src="{% static 'video-6.png' %}" style="width: 100%;">
+        <img src="{% static 'video-7.png' %}" style="width: 100%;">
+        <img src="{% static 'video-8.png' %}" style="width: 100%;">
+    </div>
+    <p>Screenshots from example videos</p>
+</div>
 
     <br>
 

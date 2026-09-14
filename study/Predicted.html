@@ -46,6 +46,9 @@
         color: #555;
         font-size: 0.9rem;
     }
+    .pred-part5 input[type=number] {
+        width: 6em;
+    }
 </style>
 
 {{ if player.round_number == 2 }}
@@ -95,7 +98,9 @@
     Now please {{ if treatment }}think again of what you think the task payoff is, and {{ endif }}answer the following question.
 </p>
 
-{% formfields %}
+<div class="pred-part5">
+    {% formfields %}
+</div>
 
 {{ endif }}
 

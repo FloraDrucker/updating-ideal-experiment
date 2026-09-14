@@ -42,6 +42,9 @@
     .anchor-col {
         background-color: #cfe2ff !important;
     }
+    .ideal-part5 input[type=number] {
+        width: 6em;
+    }
 </style>
 
 {{ if player.round_number == 2 }}
@@ -163,7 +166,9 @@ document.addEventListener('DOMContentLoaded', function () {
     Remember that if you complete the ideal number of tasks you stated earlier than in {{ work_length_minutes }} minutes, you will stop working earlier and for the rest of the time, you will be shown videos and will be paid at {{ flat_leisure_fee }} points per minute. <b>You will have to work until you have reached your stated ideal</b> (even if it takes longer than {{ work_length_minutes }} minutes), but <b>you will only be paid for those tasks that you completed correctly within the {{ work_length_minutes }} minutes,</b> if this part gets selected for payment.
 </p>
 
-{% formfields %}
+<div class="ideal-part5">
+    {% formfields %}
+</div>
 
 {{ endif }}
 
