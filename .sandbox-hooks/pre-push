@@ -1,0 +1,9 @@
+#!/bin/sh
+# This sandbox may push only to the owner's independent private repository.
+case "$2" in
+  https://github.com/ncmnkmp/updating-ideal-experiment-sandbox.git|https://github.com/ncmnkmp/updating-ideal-experiment-sandbox|git@github.com:ncmnkmp/updating-ideal-experiment-sandbox.git)
+    exit 0 ;;
+  *)
+    echo "Push blocked: this sandbox may push only to ncmnkmp/updating-ideal-experiment-sandbox." >&2
+    exit 1 ;;
+esac

@@ -12,3 +12,13 @@ __pycache__/
 *.py[cod]
 .DS_Store
 *.otreezip
+
+# Local sandbox files and participant data must not be published.
+.sandbox-runtime/
+.env
+.env.*
+!.env.example
+*.dta
+*.csv
+*.xlsx
+*.log
