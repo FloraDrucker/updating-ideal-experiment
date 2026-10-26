@@ -62,6 +62,39 @@ if environ.get('SANDBOX_FAST_TEST') == '1':
         )
         SESSION_CONFIGS.append(config)
 
+    # Each form route starts directly at its first requested page.
+    for treatment, group in [(True, 'MAIN'), (False, 'CONTROL')]:
+        for route, title, test_round, pages in [
+            ('prior', 'Initial belief', 1, ['Interval']),
+            ('ideal', 'Part 1 ideal amounts and predictions', 2, ['Ideal', 'Predicted']),
+            ('belief', 'Part 2 belief and signal', 3, ['Belief', 'Signal']),
+            ('final', 'Part 5 belief, ideal and prediction', 6, ['Belief', 'Ideal', 'Predicted']),
+        ]:
+            config = deepcopy(SESSION_CONFIGS[0])
+            config.update(
+                name=f'sandbox_{route}_{group.lower()}',
+                display_name=f'TEST FORMS - {group} - {title}',
+                app_sequence=['study'], num_demo_participants=1,
+                participation_fee=0, sandbox_fast_test=True,
+                sandbox_test_round=test_round, sandbox_ideal_target=None,
+                sandbox_treatment=treatment, sandbox_pages=pages,
+                work_length_seconds=480,
+                prolific_completion_url='', prolific_completion_code='',
+            )
+            SESSION_CONFIGS.append(config)
+    for survey_number in range(1, 6):
+        config = deepcopy(SESSION_CONFIGS[0])
+        config.update(
+            name=f'sandbox_survey_{survey_number}',
+            display_name=f'TEST FORMS - Questionnaire {survey_number}',
+            app_sequence=['study'], num_demo_participants=1,
+            participation_fee=0, sandbox_fast_test=True,
+            sandbox_test_round=survey_number + 1, sandbox_ideal_target=None,
+            sandbox_pages=[f'Survey{survey_number}'], work_length_seconds=480,
+            prolific_completion_url='', prolific_completion_code='',
+        )
+        SESSION_CONFIGS.append(config)
+
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
 # in SESSION_CONFIGS, except those that explicitly override it.
 # the session config can be accessed from methods in your apps as self.session.config,

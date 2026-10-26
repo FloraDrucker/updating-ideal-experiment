@@ -42,6 +42,20 @@ Stop the server with Ctrl+C. To return to the full route, use `-Action Start` in
 
 This temporary branch is local only. It is not pushed to GitHub or transferred to the original experiment.
 
+#### Direct form access
+
+The same Fast menu now includes **TEST FORMS** entries for MAIN and CONTROL separately:
+
+- Initial belief: opens the prior-belief form directly.
+- Part 1 ideal amounts and predictions: opens the original 11-column ideal table, followed by the prediction table.
+- Part 2 belief and signal: opens the updated-belief form, followed by the original signal.
+- Part 5 belief, ideal and prediction: opens those three final-part forms in order.
+- Questionnaire 1 through 5: opens each original filler questionnaire directly.
+
+Choose an entry, then its P1 link. These routes skip work periods, consent, comprehension and the trial. Form sessions retain the 480-second setting so their instructions still refer to 8 minutes; no work is required. Original validation, timeouts and form-saving methods remain active. The result screen lists the belief/ideal/prediction answers submitted in that route. Questionnaire-specific results are available through the local session data view; the result screen does not list all questionnaire answers.
+
+Skipped prerequisites are supplied as explicit synthetic fixtures: prior 100, earlier performance 0, ideal 10, prediction 8 and safe risk choices. These allow pages to render but are not evidence of real choices. No payment or live study is run. Start a fresh P1 session after restarting the server; old test links may no longer exist in the local development database.
+
 ### Fix review
 
 1. Keep `main` as the accepted sandbox setup. Start a branch for one defect, for example `fix/task-double-count`.

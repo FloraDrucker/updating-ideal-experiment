@@ -53,6 +53,25 @@ class FastModeTests(unittest.TestCase):
             self.assertFalse(participant.vars['consent'])
             self.assertEqual(participant.vars['belief'][0], 100)
 
+    def test_form_routes_keep_only_selected_pages_and_treatment(self):
+        pages = [type(name, (), {}) for name in ('Task', 'Belief', 'Ideal', 'Predicted', 'Survey1')]
+        ns = dict(creating_session=lambda s: None, page_sequence=list(pages),
+                  SandboxResult=type('SandboxResult', (), {}))
+        install(ns)
+        for treatment in (True, False):
+            config = dict(sandbox_fast_test=True, sandbox_test_round=6,
+                          sandbox_ideal_target=None, sandbox_treatment=treatment,
+                          sandbox_pages=['Belief', 'Ideal', 'Predicted'])
+            player = fake_player(config)
+            seed_player(player)
+            self.assertIs(player.participant.vars['treatment'], treatment)
+            self.assertEqual(player.participant.vars['risk_choices'][0], 0)
+            player.round_number = 6
+            self.assertEqual([page.__name__ for page in pages if page.is_displayed(player)],
+                             ['Belief', 'Ideal', 'Predicted'])
+            player.round_number = 2
+            self.assertFalse(any(page.is_displayed(player) for page in pages))
+
 
 if __name__ == '__main__':
     unittest.main()

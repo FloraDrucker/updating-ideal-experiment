@@ -7,7 +7,7 @@ def seed_player(player):
     pp = player.participant.vars
     if player.round_number == 1:
         pp.update(
-            sandbox_fast_test=True, treatment=True, consent=False,
+            sandbox_fast_test=True, treatment=config.get('sandbox_treatment', True), consent=False,
             consent_no_ai=False, excluded=False, total_wrong=None,
             success_attempt=None, attempt_number=0,
             wrong_questions_attempt1='', wrong_questions_attempt2='',
@@ -18,6 +18,7 @@ def seed_player(player):
         pp['belief'] = {i: 100 for i in (0, 2, 3, 4, 5)}
         pp['ideal'] = {i: 10 for i in range(1, 13)}
         pp['predicted'] = {i: 8 for i in range(1, 13)}
+        pp['risk_choices'] = {i: 0 for i in range(21)}
         pp['actual'] = {i: 0 for i in range(6)}
         pp['mistakes'] = {i: 0 for i in range(6)}
         pp['work_seconds'] = {i: 0 for i in range(6)}
@@ -48,7 +49,8 @@ def install(namespace):
         def is_displayed(player, page_name=page.__name__, original=original_display):
             config = player.session.config
             if config.get('sandbox_fast_test', False):
-                return page_name == 'Task' and player.round_number == config['sandbox_test_round']
+                pages = config.get('sandbox_pages', ['Task'])
+                return page_name in pages and player.round_number == config['sandbox_test_round']
             return original(player) if original is not None else True
 
         page.is_displayed = staticmethod(is_displayed)
