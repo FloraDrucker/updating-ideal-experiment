@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('Start', 'Bots', 'Check')]
+    [ValidateSet('Start', 'Fast', 'Bots', 'Check')]
     [string]$Action = 'Start'
 )
 $ErrorActionPreference = 'Stop'
@@ -12,7 +12,7 @@ if (!(Test-Path -LiteralPath $otreePath)) {
 # Never inherit a live database, cache or production configuration.
 $environmentNames = @('DATABASE_URL', 'REDIS_URL', 'OTREE_PRODUCTION',
     'OTREE_SECRET_KEY', 'SECRET_KEY', 'OTREE_ADMIN_PASSWORD', 'OTREE_AUTH_LEVEL',
-    'OTREE_IN_MEMORY', 'OTREE_SESSION_CONFIGS')
+    'OTREE_IN_MEMORY', 'OTREE_SESSION_CONFIGS', 'SANDBOX_FAST_TEST')
 $savedEnvironment = @{}
 foreach ($name in $environmentNames) {
     $savedEnvironment[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
@@ -26,13 +26,16 @@ try {
     $env:OTREE_ADMIN_PASSWORD = [Guid]::NewGuid().ToString('N')
     $env:OTREE_AUTH_LEVEL = 'DEMO'
     $runtimeRoot = Join-Path $sandboxRoot '.sandbox-runtime'
-    if ($Action -eq 'Start') {
+    if ($Action -eq 'Fast') {
+        $env:SANDBOX_FAST_TEST = '1'
+        $runPath = Join-Path $runtimeRoot 'fast-interactive'
+    } elseif ($Action -eq 'Start') {
         $runPath = Join-Path $runtimeRoot 'interactive'
     } else {
         $runPath = Join-Path $runtimeRoot ($Action.ToLower() + '-' + [Guid]::NewGuid().ToString('N'))
     }
     New-Item -ItemType Directory -Path $runPath -Force | Out-Null
-    foreach ($item in @('settings.py', '_static', '_templates', 'instructions_consent', 'study')) {
+    foreach ($item in @('settings.py', 'sandbox_fast.py', '_static', '_templates', 'instructions_consent', 'study')) {
         $sourcePath = Join-Path $sandboxRoot $item
         $destinationPath = Join-Path $runPath $item
         # Sync the app copy, including file removals, but preserve its local database.
@@ -51,7 +54,7 @@ try {
     if ($Action -eq 'Bots') {
         & $pythonPath -c 'from otree.main import execute_from_command_line; execute_from_command_line()' test study_on_work
     } elseif ($Action -eq 'Check') {
-        & $pythonPath -m compileall -q settings.py instructions_consent study
+        & $pythonPath -m compileall -q settings.py sandbox_fast.py instructions_consent study
     } else {
         Write-Host 'Open http://localhost:8000/demo . Use synthetic participants only. Ctrl+C stops the server.'
         Write-Host 'The database is local. No payment or recruitment service is configured by this launcher.'

@@ -2461,6 +2461,29 @@ page_sequence = [
 
 
 # Data export
+class SandboxResult(Page):
+    @staticmethod
+    def is_displayed(player):
+        config = player.session.config
+        return config.get('sandbox_fast_test', False) and player.round_number == config['sandbox_test_round']
+
+    @staticmethod
+    def vars_for_template(player):
+        return dict(
+            test_name=player.session.config['display_name'],
+            test_duration=player.session.config['work_length_seconds'],
+            total_saved=player.work_seconds + player.nonwork_seconds,
+            required_ideal=player.ideal_to_do if player.do_ideal else 'Free choice',
+        )
+
+
+# No task/live-message/timer/payment behavior is changed by the shortcut mode.
+from os import environ as _sandbox_environ
+if _sandbox_environ.get('SANDBOX_FAST_TEST') == '1':
+    from sandbox_fast import install as _install_sandbox_fast
+    _install_sandbox_fast(globals())
+
+
 def custom_export(players):
     # Collect keys for the export table
     fp = players[0]

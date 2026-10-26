@@ -1,0 +1,17 @@
+{% extends "global/Page.html" %}
+{% block title %}Local test result{% endblock %}
+{% block content %}
+<p><strong>TEST ONLY. Synthetic data. No real payment.</strong></p>
+<p>{{ test_name }}</p>
+<p>Task duration: {{ test_duration }} seconds. Required tasks: {{ required_ideal }}.</p>
+<dl>
+    <dt>Saved correct tasks</dt><dd>{{ player.performance }}</dd>
+    <dt>Saved work time</dt><dd>{{ player.work_seconds }} seconds</dd>
+    <dt>Saved leisure time</dt><dd>{{ player.nonwork_seconds }} seconds</dd>
+    <dt>Work plus leisure</dt><dd>{{ total_saved }} seconds</dd>
+    <dt>Stop recorded</dt><dd>{{ player.stopped_work }}</dd>
+</dl>
+<p>This shows the original task's saved results. It does not correct them.</p>
+<p><a href="/demo">Return to test selection</a></p>
+<p>Use a fresh private browser window for independent tests. Keep the same tab only when testing browser-state carryover.</p>
+{% endblock %}

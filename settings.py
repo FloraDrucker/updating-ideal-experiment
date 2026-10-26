@@ -43,6 +43,25 @@ SESSION_CONFIGS = [
      ),
 ]
 
+# Local shortcut sessions are available only through sandbox.ps1 -Action Fast.
+if environ.get('SANDBOX_FAST_TEST') == '1':
+    from copy import deepcopy
+    for name, title, duration, test_round, ideal_target in [
+        ('sandbox_work', 'TEST ONLY - Work directly (480 seconds)', 480, 2, None),
+        ('sandbox_work_short', 'TEST ONLY - Work directly (30 seconds)', 30, 2, None),
+        ('sandbox_ideal_zero', 'TEST ONLY - Required ideal ZERO (30 seconds)', 30, 6, 0),
+        ('sandbox_ideal_five', 'TEST ONLY - Required ideal FIVE (30 seconds)', 30, 6, 5),
+    ]:
+        config = deepcopy(SESSION_CONFIGS[0])
+        config.update(
+            name=name, display_name=title, app_sequence=['study'],
+            num_demo_participants=1, participation_fee=0,
+            sandbox_fast_test=True, sandbox_test_round=test_round,
+            sandbox_ideal_target=ideal_target, work_length_seconds=duration,
+            prolific_completion_url='', prolific_completion_code='',
+        )
+        SESSION_CONFIGS.append(config)
+
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
 # in SESSION_CONFIGS, except those that explicitly override it.
 # the session config can be accessed from methods in your apps as self.session.config,

@@ -26,6 +26,24 @@ After model/schema changes, use a fresh interactive test directory rather than r
 
 ## Safe development process
 
+### Temporary direct-access mode
+
+The local branch `sandbox/fast-bug-checks` adds opt-in shortcuts. Run:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\sandbox.ps1 -Action Fast
+```
+
+At http://localhost:8000/demo choose a **TEST ONLY** entry and then its P1 participant link. Consent, comprehension, trial, beliefs, ideals, predictions and surveys are skipped. Synthetic fixtures are supplied instead; they are marked `sandbox_fast_test` and are not research observations. Choices are normal work at 480 seconds, normal work at 30 seconds, required ideal 0 at 30 seconds, and required ideal 5 at 30 seconds. After task submission, a result page shows the saved counts and work/leisure times. The zero-ideal defect can prevent reaching that result page; it has deliberately not been fixed.
+
+The original task template, answer handler, timer and final-save method are unchanged. Tests with a 30-second duration check the same logic with a shorter configured window; exact 480-second claims still require the 480-second test. This mode is for the work/task bugs, not a valid test of consent, questionnaires, belief elicitation, real payments, or complete exports.
+
+Stop the server with Ctrl+C. To return to the full route, use `-Action Start` instead of `-Action Fast`. The two modes use separate local databases. Do not reuse links from the other database. For independent tests, use a fresh private browser window to avoid the known round-only storage carryover. Keep the same tab only when deliberately testing that defect.
+
+This temporary branch is local only. It is not pushed to GitHub or transferred to the original experiment.
+
+### Fix review
+
 1. Keep `main` as the accepted sandbox setup. Start a branch for one defect, for example `fix/task-double-count`.
 2. Reproduce the defect with synthetic inputs. Add a focused regression test.
 3. Apply the smallest correction and run the relevant checks plus the bot suite.
