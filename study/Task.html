@@ -373,8 +373,8 @@ const taskClient = new TaskClient({
         } else if (data.accepted) {
             msg.style.display = 'none';
         }
-        // The separate zero-ideal repair will restore completion on initial load.
-        if (data.completed && data.performance > 0) taskCompleted = true;
+        // Zero targets are complete too; restore this from the server on every load.
+        taskCompleted = Boolean(data.completed);
         if (data.stopped_work || data.completed) {
             disableTaskInputs();
             if (data.completed && data.remaining_seconds <= 0 && taskCompleted) {

@@ -1784,14 +1784,18 @@ class Task(Page):
 
     @staticmethod
     def get_timeout_seconds(player):
+        total = player.session.config['work_length_seconds']
         if player.do_ideal:
-            return None  # JS submits when tasks are complete
-        return player.session.config['work_length_seconds']
+            if player.performance < player.ideal_to_do:
+                return None  # Unfinished binding ideals can still require overtime.
+            if player.task_start_time:
+                return max(0, player.task_start_time + total - time.time())
+        return total
 
     @staticmethod
     def vars_for_template(player: Player):
-        if player.task_start_time == 0:
-            player.task_start_time = time.time()
+        from .task_protocol import prepare_task
+        prepare_task(player, time.time())
 
         letters_per_word = C.TASK_LENGTH
 
@@ -1826,20 +1830,17 @@ class Task(Page):
 
         total = player.session.config['work_length_seconds']
 
-        # CASE 1: Stop working was pressed -> work_seconds already stored
-        if player.work_seconds > 0:
-            pass  # keep stored value
-
-        # CASE 2: Stop working NOT pressed
+        # Zero is valid for an immediate stop or a completed zero-task ideal.
+        if player.stopped_work:
+            player.work_seconds = min(total, max(0, player.work_seconds))
         else:
-            # They worked until timeout
             player.work_seconds = total
 
         # Nonwork seconds always the remainder
         player.nonwork_seconds = total - player.work_seconds
 
         # For do_ideal: ensure performance_in_time is stored in participant vars.
-        # If it was never set (finished within time limit), fall back to performance.
+        # No accepted in-time answer means zero paid tasks; never use a browser total.
         if player.do_ideal:
             pit = player.field_maybe_none('performance_in_time')
             player.participant.vars['performance_in_time_5'] = pit if pit is not None else 0

@@ -41,6 +41,19 @@ def stop_task(player, now):
         player.stopped_work = True
 
 
+def prepare_task(player, now):
+    """Restore server completion without resetting the part's original clock."""
+    if player.task_start_time == 0:
+        player.task_start_time = now
+    if player.do_ideal and player.performance >= player.ideal_to_do:
+        if player.ideal_to_do == 0:
+            # No work was required, even if the first live reply arrives late.
+            player.work_seconds = 0
+            player.stopped_work = True
+        elif not player.stopped_work:
+            stop_task(player, now)
+
+
 def handle_task_message(player, data, *, bonus, task_length, bonus_tasks,
                         build_dict, build_word):
     """Accept an answer/token, never a claimed total, duration or paid snapshot.
@@ -50,8 +63,8 @@ def handle_task_message(player, data, *, bonus, task_length, bonus_tasks,
     against this protocol without database row locking or a unique-attempt table.
     """
     now = time.time()
-    if not bonus and player.task_start_time == 0:
-        player.task_start_time = now
+    if not bonus:
+        prepare_task(player, now)
     state = task_state(player, bonus, build_dict, build_word, task_length)
     perf_field = 'bonus_performance' if bonus else 'performance'
     mistake_field = 'bonus_mistakes' if bonus else 'mistakes'
