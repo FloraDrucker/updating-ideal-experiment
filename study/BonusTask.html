@@ -236,6 +236,7 @@ td {
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ static 'task_client.js' }}"></script>
 <script>
 
 /* =========================================================
@@ -251,135 +252,61 @@ document.addEventListener('keydown', e => {
     }
 });
 
-const BONUS_TASKS = js_vars.bonus_tasks;
 const letters_per_word = {{ letters_per_word|safe }};
-
-let dict = {};
-let word = [];
-
-/* =========================================================
-   On page load: send init to server
-   ========================================================= */
-document.addEventListener("DOMContentLoaded", () => {
-    const serverPerf     = {{ player.bonus_performance }};
-    const serverMistakes = {{ player.bonus_mistakes }};
-
-    liveSend({
-        init: true,
-        client_performance: serverPerf,
-        client_mistakes:    serverMistakes,
-    });
-});
-
-/* =========================================================
-   Submit answer
-   ========================================================= */
-function myFunction() {
-    const errors = checkSolution(letters_per_word);
-
-    if (errors === 0) {
-        let perf = Number(document.getElementById("bonus_performance").value) + 1;
-        document.getElementById("bonus_performance").value = perf;
-        document.getElementById("perf-display").innerText = perf;
-
-        hideFeedback();
-
-        liveSend({ performance: perf });
-
-        if (perf >= BONUS_TASKS) {
-            showCompletion();
-        }
-
-    } else {
-        let mistakes = Number(document.getElementById("bonus_mistakes").value) + 1;
-        document.getElementById("bonus_mistakes").value = mistakes;
-        liveSend({ mistakes: mistakes });
-
-        const fb = document.getElementById("feedback");
-        fb.className = "feedback-error";
-        fb.innerText  = errors === 1 ? "There is 1 mistake." : "There are " + errors + " mistakes.";
-        fb.style.display = "block";
-    }
-}
-
-function hideFeedback() {
-    const fb = document.getElementById("feedback");
-    fb.style.display = "none";
-}
-
-/* =========================================================
-   Show completion, then auto-submit
-   ========================================================= */
+let completionScheduled = false;
 function showCompletion() {
-    // Disable all inputs
-    for (let i = 0; i < letters_per_word; i++) {
-        const el = document.getElementById("task_code_" + i);
-        if (el) el.disabled = true;
-    }
-    document.getElementById("submit-solution").disabled = true;
-    document.getElementById("feedback").style.display  = "none";
-
-    document.getElementById("completion-message").style.display = "block";
-
-    // Auto-proceed after 2 seconds
-    setTimeout(() => {
-        document.getElementById("next-button").click();
-    }, 2000);
+    if (completionScheduled) return;
+    completionScheduled = true;
+    for (let i = 0; i < letters_per_word; i++) document.getElementById('task_code_' + i).disabled = true;
+    document.getElementById('submit-solution').disabled = true;
+    document.getElementById('feedback').style.display = 'none';
+    document.getElementById('completion-message').style.display = 'block';
+    setTimeout(() => document.getElementById('next-button').click(), 2000);
 }
-
-/* =========================================================
-   Check solution
-   ========================================================= */
-function checkSolution(n) {
-    let errors = 0;
-    for (let i = 0; i < n; i++) {
-        const entered = Number(document.getElementById("task_code_" + i).value);
-        if (dict[word[i]] !== entered) errors++;
-    }
-    return errors;
-}
-
-/* =========================================================
-   Live receive
-   ========================================================= */
-function liveRecv(data) {
-    if (typeof data.performance === 'number') {
-        document.getElementById("bonus_performance").value = data.performance;
-        document.getElementById("perf-display").innerText  = data.performance;
-    }
-    if (typeof data.mistakes === 'number') {
-        document.getElementById("bonus_mistakes").value = data.mistakes;
-    }
-
-    if (data.shuffle === true || data.init === true) {
-        dict = data.encryption_dict;
-        word = data.word_list;
-
-        const server_letters = Object.keys(dict);
-        for (let i = 0; i < 26; i++) {
-            document.getElementById("llid_" + i).innerText = server_letters[i];
-            document.getElementById("lcid_" + i).innerText = dict[server_letters[i]];
+const taskClient = new TaskClient({
+    storageKey: 'pending_bonus_' + js_vars.participant_code + '_' + js_vars.round_number,
+    getAnswer() {
+        return Array.from({length: letters_per_word}, (_, i) => {
+            const value = document.getElementById('task_code_' + i).value;
+            return value.trim() === '' ? null : Number(value);
+        });
+    },
+    setBusy(busy) {
+        const frozen = taskClient.state && taskClient.state.completed;
+        document.getElementById('submit-solution').disabled = busy || frozen;
+        document.getElementById('skip-button').disabled = busy;
+        for (let i = 0; i < letters_per_word; i++) document.getElementById('task_code_' + i).disabled = busy || frozen;
+    },
+    onState(data, changedTask) {
+        document.getElementById('bonus_performance').value = data.performance;
+        document.getElementById('perf-display').innerText = data.performance;
+        document.getElementById('bonus_mistakes').value = data.mistakes;
+        if (changedTask) {
+            const letters = Object.keys(data.encryption_dict);
+            for (let i = 0; i < letters.length; i++) {
+                document.getElementById('llid_' + i).innerText = letters[i];
+                document.getElementById('lcid_' + i).innerText = data.encryption_dict[letters[i]];
+            }
+            for (let i = 0; i < letters_per_word; i++) {
+                document.getElementById('task_letter_' + i).innerText = data.word_list[i];
+                document.getElementById('task_code_' + i).value = '';
+            }
         }
-
-        for (let i = 0; i < letters_per_word; i++) {
-            document.getElementById("task_letter_" + i).innerText = word[i];
-            document.getElementById("task_code_" + i).value = '';
-        }
-        document.getElementById("task_code_0").focus();
-    }
-
-    if (data.completed) {
-        showCompletion();
-    }
-}
-
-function skipTasks() {
-    document.getElementById("next-button").click();
-}
-
-// Enter key submits
-document.getElementById("submit-solution")
-    .addEventListener("keyup", e => { if (e.keyCode === 13) myFunction(); });
+        const fb = document.getElementById('feedback');
+        if (data.errors > 0) {
+            fb.className = 'feedback-error';
+            fb.innerText = data.errors === 1 ? 'There is 1 mistake.' : 'There are ' + data.errors + ' mistakes.';
+            fb.style.display = 'block';
+        } else if (data.accepted) fb.style.display = 'none';
+        if (data.completed) showCompletion();
+        else if (!taskClient.pending) document.getElementById('task_code_0').focus();
+    },
+});
+function myFunction() { taskClient.submit(); }
+function liveRecv(data) { taskClient.receive(data); }
+function skipTasks() { if (!taskClient.pending) document.getElementById('next-button').click(); }
+document.addEventListener('DOMContentLoaded', () => taskClient.init());
+document.getElementById('submit-solution').addEventListener('keyup', e => { if (e.keyCode === 13) myFunction(); });
 
 document.title = "Bonus Task";
 

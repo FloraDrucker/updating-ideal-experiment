@@ -12,7 +12,7 @@ def solve_word(enc_dict, word):
     return [enc_dict[l] for l in word]
 
 
-def play_encryption_task(bot, n_tasks=20, work_seconds=120):
+def play_encryption_task(bot, n_tasks=20):
     """
     Plays the live encryption task by directly calling the live_method function.
     This is compatible with oTree versions whose Bot API has no live_send().
@@ -21,7 +21,6 @@ def play_encryption_task(bot, n_tasks=20, work_seconds=120):
     Args:
         bot: The bot player
         n_tasks: Number of tasks to complete
-        work_seconds: Seconds worked before stopping
     """
 
     player = bot.player
@@ -33,25 +32,21 @@ def play_encryption_task(bot, n_tasks=20, work_seconds=120):
     performance = payload.get('performance', 0)
     mistakes = payload.get('mistakes', 0)
 
-    # Solve n_tasks: each "performance" update refreshes dict/word
+    # Exercise the same answer/token protocol as the browser.
     for task_num in range(n_tasks):
-        enc_dict = payload['encryption_dict']
-        word = payload['word_list']
-
-        # compute solution (not sent anywhere yet, but exercises mapping logic)
-        solve_word(enc_dict, word)
-
-        performance += 1
-        resp = live_update_performance(player, {'performance': performance})
+        if payload.get('completed'):
+            break
+        resp = live_update_performance(player, dict(
+            task_id=payload['task_id'], answer_token=payload['answer_token'],
+            answer=solve_word(payload['encryption_dict'], payload['word_list']),
+        ))
         payload = list(resp.values())[0]
-        
-        # Simulate page refresh every other task (real participants may refresh)
         if task_num % 2 == 1:
-            resp = live_update_performance(player, {'request_update': True, 'client_performance': performance, 'client_mistakes': mistakes})
+            resp = live_update_performance(player, {'request_update': True})
             payload = list(resp.values())[0]
 
-    # STOP WORK
-    live_update_performance(player, {'stop_work': True, 'work_seconds': work_seconds})
+    # Server records receipt time. Bots do not pretend that wall-clock time elapsed.
+    live_update_performance(player, {'stop_work': True})
 
 
 # ======================================================
@@ -227,23 +222,23 @@ class PlayerBot(Bot):
         # 9) Task (live page)
         # Bot behavior per round:
         # Round 1: Full work (20 tasks)
-        # Round 2: Stop after 20 seconds (2 tasks)
+        # Round 2: Stop after 2 tasks
         # Round 3: Full work (20 tasks)
-        # Round 4: Stop after 3 seconds (0 tasks)
+        # Round 4: Stop without solving a task
         # Rounds 5-6: Full work (20 tasks)
         if self.round_number == 1:
-            play_encryption_task(self, n_tasks=20, work_seconds=120)
+            play_encryption_task(self, n_tasks=20)
         elif self.round_number == 2:
-            play_encryption_task(self, n_tasks=2, work_seconds=20)
+            play_encryption_task(self, n_tasks=2)
         elif self.round_number == 3:
-            play_encryption_task(self, n_tasks=20, work_seconds=120)
+            play_encryption_task(self, n_tasks=20)
         elif self.round_number == 4:
-            play_encryption_task(self, n_tasks=0, work_seconds=3)
+            play_encryption_task(self, n_tasks=0)
         elif self.round_number in [5, 6]:
-            play_encryption_task(self, n_tasks=20, work_seconds=120)
+            play_encryption_task(self, n_tasks=20)
         
         # Submit the Task page with correct performance values
-        yield Submission(Task, dict(performance=self.player.performance, mistakes=self.player.mistakes, work_seconds=self.player.work_seconds), check_html=False)
+        yield Submission(Task, check_html=False)
 
         # 10) EndOfWork
         yield EndOfWork

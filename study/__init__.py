@@ -54,6 +54,9 @@ class Player(BasePlayer):
     task_start_time = models.FloatField(initial=0)
     current_dict = models.LongStringField()
     current_word = models.LongStringField()
+    # Server-issued tasks and attempt tokens survive refreshes; never trust client totals.
+    task_protocol = models.LongStringField(initial='')
+    bonus_task_protocol = models.LongStringField(initial='')
     performance = models.IntegerField(initial=0, blank=False)
     mistakes = models.IntegerField(initial=0, blank=False)
     work_seconds = models.IntegerField(initial=0) # This tracks the working time
@@ -1211,133 +1214,13 @@ def build_random_word(k=4):
 
 # This is the Live Send code, so that performance etc can be stored immediately
 def live_update_performance(player: Player, data):
+    from .task_protocol import handle_task_message
+    return handle_task_message(
+        player, data, bonus=False, task_length=C.TASK_LENGTH,
+        bonus_tasks=C.BONUS_TASKS, build_dict=build_random_dict,
+        build_word=build_random_word,
+    )
 
-    pid = player.id_in_group
-
-    # ------------------------------------------------------------
-    # INIT (first time the page loads)
-    # ------------------------------------------------------------
-    if data.get('init'):
-        # Reconcile client values with server (take max to never lose progress)
-        client_perf = data.get('client_performance', 0)
-        client_mistakes = data.get('client_mistakes', 0)
-
-        if client_perf > player.performance:
-            player.performance = client_perf
-
-        if client_mistakes > player.mistakes:
-            player.mistakes = client_mistakes
-
-        if not player.field_maybe_none('current_dict') or not player.field_maybe_none('current_word'):
-            d = build_random_dict()
-            w = build_random_word(C.TASK_LENGTH)
-            player.current_dict = json.dumps(d)
-            player.current_word = json.dumps(w)
-        else:
-            d = json.loads(player.current_dict)
-            w = json.loads(player.current_word)
-
-        return {
-            pid: dict(
-                init=True,
-                performance=player.performance,
-                mistakes=player.mistakes,
-                work_seconds=player.work_seconds,
-                encryption_dict=d,
-                word_list=w,
-                shuffle=False
-            )
-        }
-
-    # ------------------------------------------------------------
-    # REQUEST_UPDATE (tab refocus, but no state changes)
-    # ------------------------------------------------------------
-    if data.get('request_update'):
-        d = json.loads(player.current_dict) if player.current_dict else {}
-        w = json.loads(player.current_word) if player.current_word else []
-        return {
-            pid: dict(
-                performance=player.performance,
-                mistakes=player.mistakes,
-                work_seconds=player.work_seconds,
-                encryption_dict=d,
-                word_list=w,
-                shuffle=False
-            )
-        }
-
-    # ------------------------------------------------------------
-    # STOP WORKING — final work_seconds is stored and nothing else changes
-    # ------------------------------------------------------------
-    if data.get("stop_work"):
-        player.work_seconds = int(data["work_seconds"])
-        player.stopped_work = True
-        return {
-            pid: dict(
-                performance=player.performance,
-                mistakes=player.mistakes,
-                work_seconds=player.work_seconds,
-                stopped_work=True,
-                shuffle=False
-            )
-        }
-
-    # ------------------------------------------------------------
-    # RECORD IN-TIME PERFORMANCE (do_ideal participants at the 8-min mark)
-    # Only recorded once; server ignores subsequent sends after page refresh.
-    # ------------------------------------------------------------
-    if data.get('record_in_time'):
-        if player.field_maybe_none('performance_in_time') is None:
-            player.performance_in_time = data.get('performance', player.performance)
-            player.participant.vars['performance_in_time_5'] = player.performance_in_time
-        return {pid: dict(ok=True)}
-
-    # ------------------------------------------------------------
-    # PERFORMANCE update ⇒ increment AND refresh dict/word
-    # ------------------------------------------------------------
-    if 'performance' in data:
-        player.performance = data['performance']
-
-        d = build_random_dict()
-        w = build_random_word(C.TASK_LENGTH)
-        player.current_dict = json.dumps(d)
-        player.current_word = json.dumps(w)
-
-        print("Updated performance to ", player.performance)
-
-        return {
-            pid: dict(
-                performance=player.performance,
-                mistakes=player.mistakes,
-                work_seconds=player.work_seconds,
-                encryption_dict=d,
-                word_list=w,
-                shuffle=True
-            )
-        }
-
-    # ------------------------------------------------------------
-    # Mistakes only (no word refresh)
-    # ------------------------------------------------------------
-    if 'mistakes' in data:
-        player.mistakes = data['mistakes']
-
-    # ------------------------------------------------------------
-    # DEFAULT: just return current state
-    # ------------------------------------------------------------
-    d = json.loads(player.current_dict) if player.current_dict else {}
-    w = json.loads(player.current_word) if player.current_word else []
-
-    return {
-        pid: dict(
-            performance=player.performance,
-            mistakes=player.mistakes,
-            work_seconds=player.work_seconds,
-            encryption_dict=d,
-            word_list=w,
-            shuffle=False
-        )
-    }
 
 def get_timeout_seconds(player):
     # do_ideal participants must finish their tasks even past 8 min;
@@ -1349,83 +1232,13 @@ def get_timeout_seconds(player):
 
 
 def live_update_bonus_performance(player: Player, data):
-    pid = player.id_in_group
+    from .task_protocol import handle_task_message
+    return handle_task_message(
+        player, data, bonus=True, task_length=C.TASK_LENGTH,
+        bonus_tasks=C.BONUS_TASKS, build_dict=build_random_dict,
+        build_word=build_random_word,
+    )
 
-    # ------------------------------------------------------------
-    # INIT
-    # ------------------------------------------------------------
-    if data.get('init'):
-        client_perf = data.get('client_performance', 0)
-        client_mistakes = data.get('client_mistakes', 0)
-
-        if client_perf > player.bonus_performance:
-            player.bonus_performance = client_perf
-        if client_mistakes > player.bonus_mistakes:
-            player.bonus_mistakes = client_mistakes
-
-        # Reuse current_dict/current_word; generate fresh ones if empty
-        if not player.field_maybe_none('current_dict') or not player.field_maybe_none('current_word'):
-            d = build_random_dict()
-            w = build_random_word(C.TASK_LENGTH)
-            player.current_dict = json.dumps(d)
-            player.current_word = json.dumps(w)
-        else:
-            d = json.loads(player.current_dict)
-            w = json.loads(player.current_word)
-
-        return {
-            pid: dict(
-                init=True,
-                performance=player.bonus_performance,
-                mistakes=player.bonus_mistakes,
-                encryption_dict=d,
-                word_list=w,
-                shuffle=False,
-                completed=(player.bonus_performance >= C.BONUS_TASKS),
-            )
-        }
-
-    # ------------------------------------------------------------
-    # PERFORMANCE update → refresh dict/word
-    # ------------------------------------------------------------
-    if 'performance' in data:
-        player.bonus_performance = data['performance']
-
-        d = build_random_dict()
-        w = build_random_word(C.TASK_LENGTH)
-        player.current_dict = json.dumps(d)
-        player.current_word = json.dumps(w)
-
-        return {
-            pid: dict(
-                performance=player.bonus_performance,
-                mistakes=player.bonus_mistakes,
-                encryption_dict=d,
-                word_list=w,
-                shuffle=True,
-                completed=(player.bonus_performance >= C.BONUS_TASKS),
-            )
-        }
-
-    # ------------------------------------------------------------
-    # MISTAKES only
-    # ------------------------------------------------------------
-    if 'mistakes' in data:
-        player.bonus_mistakes = data['mistakes']
-
-    d = json.loads(player.current_dict) if player.current_dict else {}
-    w = json.loads(player.current_word) if player.current_word else []
-
-    return {
-        pid: dict(
-            performance=player.bonus_performance,
-            mistakes=player.bonus_mistakes,
-            encryption_dict=d,
-            word_list=w,
-            shuffle=False,
-            completed=(player.bonus_performance >= C.BONUS_TASKS),
-        )
-    }
 
 def page_timeout(timeout_key):
     def get_timeout_seconds(player):
@@ -1967,7 +1780,7 @@ class Work(Page):
 class Task(Page):
     live_method = live_update_performance
     form_model = 'player'
-    form_fields = ['performance', 'mistakes', 'work_seconds']
+    form_fields = []  # Live handler owns counts and work time; POST cannot overwrite them.
 
     @staticmethod
     def get_timeout_seconds(player):
@@ -1999,6 +1812,8 @@ class Task(Page):
         cfg = player.session.config
         return dict(
             required_tasks=player.ideal_to_do,
+            participant_code=player.participant.code,
+            round_number=player.round_number,
             timeout_seconds=cfg['work_length_seconds'],
             stopped_work=player.stopped_work,
             do_ideal=int(player.do_ideal),
@@ -2027,7 +1842,7 @@ class Task(Page):
         # If it was never set (finished within time limit), fall back to performance.
         if player.do_ideal:
             pit = player.field_maybe_none('performance_in_time')
-            player.participant.vars['performance_in_time_5'] = pit if pit is not None else player.performance
+            player.participant.vars['performance_in_time_5'] = pit if pit is not None else 0
 
         # Cap performance
         if player.performance > player.ideal_to_do:
@@ -2302,7 +2117,7 @@ class Survey5(Page):
 class BonusTask(Page):
     live_method = live_update_bonus_performance
     form_model = 'player'
-    form_fields = ['bonus_performance', 'bonus_mistakes']
+    form_fields = []  # Bonus totals also come only from checked answers.
 
     @staticmethod
     def is_displayed(player: Player):
@@ -2323,6 +2138,8 @@ class BonusTask(Page):
     def js_vars(player: Player):
         return dict(
             bonus_tasks=C.BONUS_TASKS,
+            participant_code=player.participant.code,
+            round_number=player.round_number,
         )
 
     @staticmethod

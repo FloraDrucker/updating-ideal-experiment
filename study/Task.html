@@ -193,9 +193,9 @@ td {
 </div>
 
 <input type="hidden" name="performance" id="performance" value="{{ player.performance }}">
-<span hidden>{{ form.performance.errors }}</span>
+<span hidden>{{ form.errors }}</span>
 <input type="hidden" name="mistakes" id="mistakes" value="{{ player.mistakes }}">
-<span hidden>{{ form.mistakes.errors }}</span>
+<span hidden>{{ form.errors }}</span>
 
 <!-- Hidden: final work time -->
 <input type="hidden" name="work_seconds" id="work_seconds" value="{{ player.work_seconds }}">
@@ -297,6 +297,7 @@ td {
 
 {% block scripts %}
 <script src="https://player.vimeo.com/api/player.js"></script>
+<script src="{{ static 'task_client.js' }}"></script>
 <script>
 
 /* =========================================================
@@ -314,332 +315,91 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-let dict = {};
-let word = [];
-
 const letters_per_word = {{ letters_per_word|safe }};
-const alphabet = genCharArray('A', 'Z');
 const required_tasks = js_vars.required_tasks;
-
-// Session storage keys for backup persistence (survives page refresh)
-const STORAGE_KEY_PERF = 'task_perf_round_{{ player.round_number }}';
-const STORAGE_KEY_MISTAKES = 'task_mistakes_round_{{ player.round_number }}';
-const STORAGE_KEY_WORK = 'task_work_seconds_round_{{ player.round_number }}';
-const STORAGE_KEY_STOPPED = 'task_stopped_round_{{ player.round_number }}';
-const STORAGE_KEY_TASK_COMPLETED = 'task_completed_round_{{ player.round_number }}';
-const STORAGE_KEY_IN_TIME_RECORDED = 'task_in_time_recorded_round_{{ player.round_number }}';
-
-// State for do_ideal time tracking (persisted across page refreshes)
-let inTimeRecorded = sessionStorage.getItem(STORAGE_KEY_IN_TIME_RECORDED) === '1';
-let taskCompleted = sessionStorage.getItem(STORAGE_KEY_TASK_COMPLETED) === '1';
+let taskCompleted = false;
 let taskSecondsLeft = Infinity;
+let inTimeRecorded = false;
+let serverRemaining = null;
+let receivedAt = performance.now();
+let videosStarted = false;
 
-// Re-freeze UI if Back button restores this page from bfcache
-window.addEventListener('pageshow', function(event) {
-    if (event.persisted && sessionStorage.getItem(STORAGE_KEY_STOPPED) === '1') {
-        disableTaskInputs();
-        document.getElementById("submit-solution").disabled = true;
-        const stopBtn = document.getElementById("stop-working");
-        if (stopBtn) stopBtn.style.display = "none";
-        startBreakVideos();
-    }
-});
-
-// Helper to safely read from sessionStorage
-function getStoredValue(key) {
-    try {
-        return parseInt(sessionStorage.getItem(key)) || 0;
-    } catch (e) {
-        return 0;  // sessionStorage unavailable
-    }
-}
-
-// Helper to safely write to sessionStorage
-function setStoredValue(key, value) {
-    try {
-        sessionStorage.setItem(key, value);
-    } catch (e) {
-        // sessionStorage unavailable, continue without backup
-    }
-}
-
-// --- Disable inputs ---
 function disableTaskInputs() {
     for (let i = 0; i < letters_per_word; i++) {
-        const el = document.getElementById("task_code_" + i);
-        if (el) el.disabled = true;
+        document.getElementById('task_code_' + i).disabled = true;
     }
 }
 
-// Lockout if already finished required tasks
-document.addEventListener("DOMContentLoaded", () => {
-
-    // Hide stop working button if do_ideal = 1
-    if (js_vars.do_ideal === 1) {
-        const stopBtn = document.getElementById("stop-working");
-        if (stopBtn) stopBtn.style.display = "none";
-    }
-
-    // 1. Load frozen state if Stop Working was pressed earlier
-    // Check both server flag AND sessionStorage (covers race condition where Back button fires before liveSend is processed)
-    if (js_vars.stopped_work === true || sessionStorage.getItem(STORAGE_KEY_STOPPED) === '1') {
-        disableTaskInputs();
-        document.getElementById("submit-solution").disabled = true;
-        const stopBtn = document.getElementById("stop-working");
-        if (stopBtn) stopBtn.disabled = true;
-
-        const msg = document.getElementById("error-form");
-        msg.classList.remove("otree-form-errors");
-        msg.classList.add("success-message");
-        msg.innerText = "You chose to stop working. Non-work time begins now.";
-        msg.style.display = "block";
-
-        startBreakVideos();
-
-        return;
-    }
-
-    // 2. Required Tasks Completion Freeze
-    const perf = Number("{{ player.performance }}");
-    if (perf >= required_tasks) {
-        disableTaskInputs();
-        document.getElementById("submit-solution").disabled = true;
-        const stopBtn = document.getElementById("stop-working");
-        if (stopBtn) stopBtn.disabled = true;
-
-        const msg = document.getElementById("error-form");
-        msg.classList.remove("otree-form-errors");
-        msg.classList.add("success-message");
-        msg.innerText = "You have completed all required tasks. Flat-fee time has begun.";
-        msg.style.display = "block";
-
-        startBreakVideos();
-
-        return;
-    }
-});
-
-// Request first word/dict from server + reconcile sessionStorage
-document.addEventListener("DOMContentLoaded", () => {
-    // Reconcile sessionStorage with server value (take max to never lose progress)
-    const storedPerf = getStoredValue(STORAGE_KEY_PERF);
-    const serverPerf = {{ player.performance }};
-    const reconciledPerf = Math.max(storedPerf, serverPerf);
-
-    const storedMistakes = getStoredValue(STORAGE_KEY_MISTAKES);
-    const serverMistakes = {{ player.mistakes }};
-    const reconciledMistakes = Math.max(storedMistakes, serverMistakes);
-
-    // Update hidden inputs with reconciled values
-    document.getElementById("performance").value = reconciledPerf;
-    document.getElementById("performance-display").innerText = reconciledPerf;
-    document.getElementById("mistakes").value = reconciledMistakes;
-
-    // Update sessionStorage with reconciled values
-    setStoredValue(STORAGE_KEY_PERF, reconciledPerf);
-    setStoredValue(STORAGE_KEY_MISTAKES, reconciledMistakes);
-
-    // Reconcile work_seconds (same pattern as perf/mistakes)
-    const storedWork = getStoredValue(STORAGE_KEY_WORK);
-    const serverWork = {{ player.work_seconds }};
-    const reconciledWork = Math.max(storedWork, serverWork);
-    document.getElementById("work_seconds").value = reconciledWork;
-    setStoredValue(STORAGE_KEY_WORK, reconciledWork);
-
-    // Send init with client's known values for server-side reconciliation
-    liveSend({
-        init: true,
-        client_performance: reconciledPerf,
-        client_mistakes: reconciledMistakes
-    });
-});
-
-function myFunction() {
-    let errors = checkSolution(letters_per_word);
-
-    if (errors === 0) {
-        let temp = Number(document.getElementById("performance").value || 0) + 1;
-        document.getElementById("performance").value = temp;
-        setStoredValue(STORAGE_KEY_PERF, temp);  // Backup to sessionStorage
-
-        document.getElementById("performance-display").innerText = temp;
-
-        document.getElementById("error-form").style.display = "none";
-
-        liveSend({ performance: temp });
-
-        if (temp >= required_tasks) {
+const taskClient = new TaskClient({
+    storageKey: 'pending_task_' + js_vars.participant_code + '_' + js_vars.round_number,
+    getAnswer() {
+        return Array.from({length: letters_per_word}, (_, i) => {
+            const value = document.getElementById('task_code_' + i).value;
+            return value.trim() === '' ? null : Number(value);
+        });
+    },
+    setBusy(busy) {
+        const frozen = taskClient.state && (taskClient.state.completed || taskClient.state.stopped_work);
+        document.getElementById('submit-solution').disabled = busy || frozen;
+        document.getElementById('stop-working').disabled = busy || frozen;
+        for (let i = 0; i < letters_per_word; i++) {
+            document.getElementById('task_code_' + i).disabled = busy || frozen;
+        }
+    },
+    onState(data, changedTask) {
+        document.getElementById('performance').value = data.performance;
+        document.getElementById('performance-display').innerText = data.performance;
+        document.getElementById('mistakes').value = data.mistakes;
+        document.getElementById('work_seconds').value = data.work_seconds;
+        serverRemaining = data.remaining_seconds;
+        receivedAt = performance.now();
+        if (changedTask) {
+            const letters = Object.keys(data.encryption_dict);
+            for (let i = 0; i < letters.length; i++) {
+                document.getElementById('llid_' + i).innerText = letters[i];
+                document.getElementById('lcid_' + i).innerText = data.encryption_dict[letters[i]];
+            }
+            for (let i = 0; i < letters_per_word; i++) {
+                document.getElementById('task_letter_' + i).innerText = data.word_list[i];
+                document.getElementById('task_code_' + i).value = '';
+            }
+        }
+        const msg = document.getElementById('error-form');
+        if (data.errors > 0) {
+            msg.classList.remove('success-message');
+            msg.classList.add('otree-form-errors');
+            msg.innerText = data.errors === 1 ? 'There is 1 mistake.' : 'There are ' + data.errors + ' mistakes.';
+            msg.style.display = 'block';
+        } else if (data.accepted) {
+            msg.style.display = 'none';
+        }
+        // The separate zero-ideal repair will restore completion on initial load.
+        if (data.completed && data.performance > 0) taskCompleted = true;
+        if (data.stopped_work || data.completed) {
             disableTaskInputs();
-            document.getElementById("submit-solution").disabled = true;
-            document.getElementById("stop-working").disabled = true;
-
-            const msg = document.getElementById("error-form");
-            msg.classList.remove("otree-form-errors");
-            msg.classList.add("success-message");
-            msg.style.display = "block";
-
-            if (js_vars.do_ideal === 1) {
-                taskCompleted = true;
-                setStoredValue(STORAGE_KEY_TASK_COMPLETED, '1');
-                if (taskSecondsLeft > 0) {
-                    // Record actual work seconds at the moment of task completion
-                    const now = Math.floor(Date.now() / 1000);
-                    const workSecs = Math.floor(now - {{ task_start_time|json }});
-                    document.getElementById("work_seconds").value = workSecs;
-                    setStoredValue(STORAGE_KEY_WORK, workSecs);
-                    liveSend({ stop_work: true, work_seconds: workSecs });
-
-                    // Finished within time — show videos; tick() submits when timer expires
-                    msg.innerText = "You have completed all required tasks. Leisure time has begun.";
-                    js_vars.stopped_work = true;
-                    sessionStorage.setItem(STORAGE_KEY_STOPPED, '1');
-                    startBreakVideos();
-                } else {
-                    // Finished after time expired — submit immediately
-                    msg.innerText = "You have completed all required tasks.";
-                    document.getElementById("next-button").click();
-                }
-            } else {
-                msg.innerText = "You have completed all required tasks. Non-work time has begun.";
-                js_vars.stopped_work = true;
-                sessionStorage.setItem(STORAGE_KEY_STOPPED, '1');
+            if (data.completed && data.remaining_seconds <= 0 && taskCompleted) {
+                document.getElementById('next-button').click();
+            } else if (!videosStarted) {
+                videosStarted = true;
                 startBreakVideos();
             }
-
-            return;
         }
-    }
-
-    else if (errors > 0) {
-        let temp = Number(document.getElementById("mistakes").value || 0) + 1;
-        document.getElementById("mistakes").value = temp;
-        setStoredValue(STORAGE_KEY_MISTAKES, temp);  // Backup to sessionStorage
-        liveSend({ mistakes: temp });
-
-        const msg = document.getElementById("error-form");
-        msg.classList.remove("success-message");
-        msg.classList.add("otree-form-errors");
-        msg.innerText = errors === 1 ? "There is 1 mistake." : "There are " + errors + " mistakes.";
-        msg.style.display = "block";
-    }
-}
-
-function checkSolution(n) {
-    let errors = 0;
-    for (let i = 0; i < n; i++) {
-        if (dict[word[i]] !== Number(document.getElementById("task_code_" + i).value)) {
-            errors++;
+        if (!data.completed && !data.stopped_work && !taskClient.pending) {
+            document.getElementById('task_code_0').focus();
         }
-    }
-    return errors;
-}
-
-function genCharArray(a, z) {
-    let arr = [], i = a.charCodeAt(0), j = z.charCodeAt(0);
-    for (; i <= j; ++i) arr.push(String.fromCharCode(i));
-    return arr;
-}
-
-function liveRecv(data) {
-
-    // --- Always update counters ---
-    if (typeof data.performance === 'number') {
-        document.getElementById("performance").value = data.performance;
-        document.getElementById("performance-display").innerText = data.performance;
-
-    }
-    if (typeof data.mistakes === 'number') {
-        document.getElementById("mistakes").value = data.mistakes;
-    }
-    if (typeof data.work_seconds === 'number') {
-        // Reconcile with sessionStorage to prevent server overwriting valid local value
-        const storedWork = getStoredValue(STORAGE_KEY_WORK);
-        const reconciledWork = Math.max(storedWork, data.work_seconds);
-        document.getElementById("work_seconds").value = reconciledWork;
-        setStoredValue(STORAGE_KEY_WORK, reconciledWork);
-    }
-
-    // ------------------------------------------------------------
-    // REPAINT ONLY WHEN shuffle == true
-    // ------------------------------------------------------------
-    if (data.shuffle === true || data.init === true) {
-
-        dict = data.encryption_dict;
-        word = data.word_list;
-
-        const server_letters = Object.keys(dict);
-
-        // Legend
-        for (let i = 0; i < 26; i++) {
-            const L = server_letters[i];
-            document.getElementById("llid_" + i).innerText = L;
-            document.getElementById("lcid_" + i).innerText = dict[L];
-        }
-
-        // Task boxes
-        for (let i = 0; i < letters_per_word; i++) {
-            document.getElementById("task_letter_" + i).innerText = word[i];
-            document.getElementById("task_code_" + i).value = '';   // ← OK only after a correct answer
-        }
-
-        document.getElementById("task_code_0").focus();
-    }
-
-    // ------------------------------------------------------------
-    // DO NOT REPAINT INPUTS WHEN shuffle == false
-    // (mistakes, stop_work, request_update)
-    // ------------------------------------------------------------
-
-    // Lockout if needed
-    if (Number(document.getElementById("performance").value) >= required_tasks) {
-        disableTaskInputs();
-        document.getElementById("submit-solution").disabled = true;
-        document.getElementById("stop-working").disabled = true;
-    }
-}
-
-
-// ENTER key submits
-document.getElementById("submit-solution")
-    .addEventListener("keyup", e => { if (e.keyCode === 13) myFunction(); });
-
-// -----------------------------
-// STOP WORKING BUTTON
-// -----------------------------
-function stopWorking() {
-
-    // Freeze the UI
-    disableTaskInputs();
-    document.getElementById("submit-solution").disabled = true;
-    document.getElementById("stop-working").disabled = true;
-
-    const msg = document.getElementById("error-form");
-    msg.classList.remove("otree-form-errors");
-    msg.classList.add("success-message");
-    msg.innerText = "You chose to stop working. Non-work time begins now.";
-    msg.style.display = "block";
-
-    // Compute work time (so far)
-    const now = Math.floor(Date.now() / 1000);
-    const start = {{ task_start_time|json }};
-    const work = Math.floor(now - start);
-
-    // Save in hidden form field
-    document.getElementById("work_seconds").value = work;
-
-    // Backup to sessionStorage BEFORE async liveSend (survives page reload)
-    setStoredValue(STORAGE_KEY_WORK, work);
-    sessionStorage.setItem(STORAGE_KEY_STOPPED, '1');
-
-    // Send to server via websockets
-    liveSend({
-        stop_work: true,
-        work_seconds: work
-    });
-
-    startBreakVideos();
-}
-
+    },
+});
+function myFunction() { taskClient.submit(); }
+function liveRecv(data) { taskClient.receive(data); }
+function stopWorking() { taskClient.stop(); }
+document.addEventListener('DOMContentLoaded', () => {
+    if (js_vars.do_ideal === 1) document.getElementById('stop-working').style.display = 'none';
+    taskClient.init();
+});
+window.addEventListener('focus', () => liveSend({request_update: true}));
+document.getElementById('submit-solution').addEventListener('keyup', e => {
+    if (e.keyCode === 13) myFunction();
+});
 
 // PAGE TITLE
 document.title = "Task";
@@ -737,8 +497,8 @@ function playNextVideo() {
     const total_time = {{ total_time|json }};
 
     function seconds_left() {
-        const now = Date.now() / 1000;
-        return total_time - (now - start_time);
+        if (serverRemaining === null) return Infinity;
+        return serverRemaining - (performance.now() - receivedAt) / 1000;
     }
 
     function formatTime(seconds) {
@@ -755,16 +515,16 @@ function playNextVideo() {
 
         if (!el) return;
 
+        if (serverRemaining === null) {
+            el.innerText = 'Connecting...';
+            return;
+        }
+
         if (left <= 0) {
             if (js_vars.do_ideal === 1 && !taskCompleted) {
                 // Time's up but tasks not done: record in-time performance once,
                 // then let the participant keep working.
-                if (!inTimeRecorded) {
-                    inTimeRecorded = true;
-                    sessionStorage.setItem(STORAGE_KEY_IN_TIME_RECORDED, '1');
-                    const currentPerf = Number(document.getElementById("performance").value || 0);
-                    liveSend({ record_in_time: true, performance: currentPerf });
-                }
+                // Paid performance is counted on the server at each accepted answer.
                 el.innerText = "Time is up — please complete your remaining tasks.";
             } else {
                 // Normal timeout OR do_ideal participant finished all tasks
