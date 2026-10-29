@@ -26,11 +26,13 @@ try {
     $env:OTREE_ADMIN_PASSWORD = [Guid]::NewGuid().ToString('N')
     $env:OTREE_AUTH_LEVEL = 'DEMO'
     $runtimeRoot = Join-Path $sandboxRoot '.sandbox-runtime'
+    # The checked-task fields require a fresh schema. Preserve all older test runs.
+    $runtimeRevision = 'checked-tasks-v1'
     if ($Action -eq 'Fast') {
         $env:SANDBOX_FAST_TEST = '1'
-        $runPath = Join-Path $runtimeRoot 'fast-interactive'
+        $runPath = Join-Path $runtimeRoot ('fast-interactive-' + $runtimeRevision)
     } elseif ($Action -eq 'Start') {
-        $runPath = Join-Path $runtimeRoot 'interactive'
+        $runPath = Join-Path $runtimeRoot ('interactive-' + $runtimeRevision)
     } else {
         $runPath = Join-Path $runtimeRoot ($Action.ToLower() + '-' + [Guid]::NewGuid().ToString('N'))
     }

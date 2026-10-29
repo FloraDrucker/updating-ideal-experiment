@@ -22,7 +22,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\sandbox.ps1 -Action Start
 
 The launcher copies current application files into an ignored `.sandbox-runtime` folder before each command. Tests use a new disposable run directory. Interactive runs reuse their local test database. It removes inherited production database and cache variables for the child command and restores them afterward. Python packages are installed in this repository's ignored `.venv`. Nothing is connected to a live database. Embedded videos can still contact external video providers; video loading requires an internet connection.
 
-After model/schema changes, use a fresh interactive test directory rather than reusing old test data. Do not run `otree resetdb` against an unspecified database. Ask for help to archive the old local test directory safely.
+The checked-task repair adds model fields. The launcher now uses `fast-interactive-checked-tasks-v1` and `interactive-checked-tasks-v1`, so older local test databases are preserved and not reused with the new schema. Start a new session and use its new links. Do not run `otree resetdb` against an unspecified database.
 
 ## Safe development process
 
@@ -38,9 +38,9 @@ At http://localhost:8000/demo choose a **TEST ONLY** entry and then its P1 parti
 
 The shortcut uses the same task template, checked-answer handler, timer and final-save method as the full route, including the two sandbox fixes. Tests with a 30-second duration check the same logic with a shorter configured window; exact 480-second browser claims still require the 480-second test. This mode is for the work/task bugs, not a valid test of consent, questionnaires, belief elicitation, real payments, or complete exports.
 
-Stop the server with Ctrl+C. To return to the full route, use `-Action Start` instead of `-Action Fast`. The two modes use separate local databases. Do not reuse links from the other database. For independent tests, use a fresh private browser window to avoid the known round-only storage carryover. Keep the same tab only when deliberately testing that defect.
+Stop the server with Ctrl+C. To return to the full route, use `-Action Start` instead of `-Action Fast`. The two modes use separate local databases. Do not reuse links from the other database. Task progress now comes from the server and pending task storage identifies the participant and round. Use a fresh private browser window for independent full-study tests because unrelated questionnaire storage has not been reviewed in this repair.
 
-This temporary branch is local only. It is not pushed to GitHub or transferred to the original experiment.
+The shortcut setup and repair branch belong only to your private sandbox. Nothing has been transferred to the original experiment.
 
 #### Direct form access
 
@@ -66,6 +66,8 @@ Skipped prerequisites are supplied as explicit synthetic fixtures: prior 100, ea
 6. Any transfer back to FloraDrucker's experiment, pull request there, deployment, recruitment or payment requires separate explicit consent.
 
 Report 3 is in `sandbox-docs/report_3_experiment_bug_audit.md`. Existing passing bots do not establish that its defects are fixed. Prioritise double counting, zero-ideal completion, authoritative task validation and paid deadline counts. Keep research-design changes separate from software corrections.
+
+The repairs and their checks are described in `sandbox-docs/TASK_COUNT_FIX.md`, `sandbox-docs/ZERO_IDEAL_FIX.md` and `sandbox-docs/FIX_VALIDATION_2026-10-29.md`. The two repairs are separate commits on `fix/task-counts-and-zero-ideal`. This is a test branch, not permission to deploy or use real participant data.
 
 ## GitHub and push safeguards
 
