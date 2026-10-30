@@ -1073,7 +1073,7 @@ def creating_session(subsession: Subsession):
     random.shuffle(letters)
     numbers = []
     N = list(range(100, 1000))
-    for i in range(27):
+    for i in range(26):
         choice = random.choice(N)
         N.remove(choice)
         numbers.append(choice)
@@ -1203,7 +1203,7 @@ def creating_session(subsession: Subsession):
                 ppvars['ideal_index'] = idx
             # else: do_ideal remains False, ideal_index remains None
 
-            print(f"Participant {p.id_in_subsession}assigned do_ideal={ppvars['do_ideal']}, ideal_index={ppvars['ideal_index']}")
+            print(f"Participant {p.id_in_subsession} assigned do_ideal={ppvars['do_ideal']}, ideal_index={ppvars['ideal_index']}")
 
 
 def build_random_dict():
@@ -1525,6 +1525,11 @@ class Predicted(Page):
                     ideal_val = getattr(player, ideal_field)
                     predicted_val = values[pred_field]
 
+                    # ideal_val is None when the Ideal page timed out and excluded the
+                    # participant; skip validation rather than raise TypeError.
+                    if ideal_val is None or predicted_val is None:
+                        continue
+
                     if predicted_val > ideal_val:
                         return (
                             f"For payoff {payoff}, your predicted tasks "
@@ -1543,6 +1548,9 @@ class Predicted(Page):
             else:
                 ideal_val = player.lastideal_c
                 predicted_val = values['lastpredicted_c']
+
+            if ideal_val is None or predicted_val is None:
+                return None
 
             if predicted_val > ideal_val:
                 return (
@@ -1654,10 +1662,6 @@ class Performance(Page):  # display performance from the previous round
 class Belief(Page):
     get_timeout_seconds = page_timeout('belief')
     timeout_submission = {'belief_t': None, 'belief_c': None}
-
-    @staticmethod
-    def is_displayed(player):
-        return player.round_number > 2
 
     @staticmethod
     def is_displayed(player):
@@ -2160,7 +2164,7 @@ class Payment(Page):
 
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS
+        return player.round_number == C.NUM_ROUNDS and not player.participant.vars.get('excluded', False)
 
     form_model = 'player'
     form_fields = ['comments']
@@ -2241,7 +2245,7 @@ class Payment(Page):
 class FinalPage(Page):
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == C.NUM_ROUNDS
+        return player.round_number == C.NUM_ROUNDS and not player.participant.vars.get('excluded', False)
 
     @staticmethod
     def vars_for_template(player: Player):
@@ -2323,8 +2327,11 @@ if _sandbox_environ.get('SANDBOX_FAST_TEST') == '1':
 
 
 def custom_export(players):
+    player_list = list(players)
+    if not player_list:
+        return
     # Collect keys for the export table
-    fp = players[0]
+    fp = player_list[0]
     all_participant_vars = list(fp.participant.vars.keys())
     all_var_keys = []
     for var in all_participant_vars:
@@ -2344,7 +2351,7 @@ def custom_export(players):
 
     # Build data rows
 
-    for p in players:
+    for p in player_list:
         participant = p.participant
         session = p.session
 
