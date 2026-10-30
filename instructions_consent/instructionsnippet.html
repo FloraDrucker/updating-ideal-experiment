@@ -51,12 +51,12 @@
 <h5> 2. Further information about the {{ guess_about }} </h5>
 
 <p>
-    The {{ guess_about }} is  the average of 60 numbers that lie between {{ C.BENEFIT_RANGE_MIN }} {{ if player.treatment }}points{{ endif }} and {{ C.BENEFIT_RANGE_MAX }}{{ if player.treatment }} points{{ endif }}. The same number can occur multiple times. During the course of the study, you will get more and more information about the {{ guess_about }}, in the following way: <b>At the beginning of parts two, three and four, we will briefly display 20 of these 60 numbers – represented by balls – on the screen.</b> Each of the 60 balls will be displayed only once, so you will have seen all the balls after part four. See the example of a ball below.
+    <b> The {{ guess_about }} </b> is the same in all parts of the study. It <b> is the average of 60 numbers that lie between {{ C.BENEFIT_RANGE_MIN }} {{ if player.treatment }}points{{ endif }} and {{ C.BENEFIT_RANGE_MAX }}{{ if player.treatment }} points{{ endif }}.</b> The same number can occur multiple times. During the course of the study, you will get more and more information about the {{ guess_about }}, in the following way: <b>At the beginning of parts two, three and four, we will briefly display 20 of these 60 numbers – represented by balls – on the screen.</b> Each of the 60 balls will be displayed only once, so you will have seen all the balls after part four. See the examples of balls below.
 </p>
 
 <div style="text-align: center;">
-    <img src="{{ static 'ball.png' }}" alt="Ball" style="width: 90px; height: 90px;">
-    <p>Example of a number represented by a ball</p>
+    <img src="{{ static 'ball.png' }}" alt="Ball" style="width: 420px; max-width: 100%; height: auto;">
+    <p>Examples of numbers represented by balls</p>
 </div>
 
 <script>
