@@ -95,10 +95,6 @@ From the sandbox directory:
 node sandbox-tests/task_client.test.cjs
 node sandbox-tests/zero_ideal_page.test.cjs
 powershell -NoProfile -ExecutionPolicy Bypass -File .\sandbox.ps1 -Action Bots
-powershell -NoProfile -ExecutionPolicy Bypass -File .\sandbox.ps1 -Action Fast
 ```
 
-For the last command, open `http://localhost:8000/demo`, choose a TEST ONLY route,
-and open P1. Start with the zero-ideal route, then a positive ideal and free work.
-Stop the server with Ctrl+C. Approve any transfer to the original experiment
-separately after reviewing and testing the changes.
+Approve any transfer to the original experiment separately after reviewing and testing the changes.

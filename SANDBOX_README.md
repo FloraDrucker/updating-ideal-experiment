@@ -22,39 +22,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\sandbox.ps1 -Action Start
 
 The launcher copies current application files into an ignored `.sandbox-runtime` folder before each command. Tests use a new disposable run directory. Interactive runs reuse their local test database. It removes inherited production database and cache variables for the child command and restores them afterward. Python packages are installed in this repository's ignored `.venv`. Nothing is connected to a live database. Embedded videos can still contact external video providers; video loading requires an internet connection.
 
-The checked-task repair adds model fields. The launcher now uses `fast-interactive-checked-tasks-v1` and `interactive-checked-tasks-v1`, so older local test databases are preserved and not reused with the new schema. Start a new session and use its new links. Do not run `otree resetdb` against an unspecified database.
+The checked-task repair adds model fields. The launcher now uses `interactive-checked-tasks-v1`, so older local test databases are preserved and not reused with the new schema. Start a new session and use its new links. Do not run `otree resetdb` against an unspecified database.
 
 ## Safe development process
-
-### Temporary direct-access mode
-
-The local branch `sandbox/fast-bug-checks` adds opt-in shortcuts. Run:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\sandbox.ps1 -Action Fast
-```
-
-At http://localhost:8000/demo choose a **TEST ONLY** entry and then its P1 participant link. Consent, comprehension, trial, beliefs, ideals, predictions and surveys are skipped. Synthetic fixtures are supplied instead; they are marked `sandbox_fast_test` and are not research observations. Choices are normal work at 480 seconds, normal work at 30 seconds, required ideal 0 at 30 seconds, and required ideal 5 at 30 seconds. After task submission, a result page shows the saved counts and work/leisure times. With the two sandbox fixes, ideal 0 starts with videos and should reach the result page after 30 seconds with zero tasks, zero work seconds and 30 leisure seconds.
-
-The shortcut uses the same task template, checked-answer handler, timer and final-save method as the full route, including the two sandbox fixes. Tests with a 30-second duration check the same logic with a shorter configured window; exact 480-second browser claims still require the 480-second test. This mode is for the work/task bugs, not a valid test of consent, questionnaires, belief elicitation, real payments, or complete exports.
-
-Stop the server with Ctrl+C. To return to the full route, use `-Action Start` instead of `-Action Fast`. The two modes use separate local databases. Do not reuse links from the other database. Task progress now comes from the server and pending task storage identifies the participant and round. Use a fresh private browser window for independent full-study tests because unrelated questionnaire storage has not been reviewed in this repair.
-
-The shortcut setup and repair branch belong only to your private sandbox. Nothing has been transferred to the original experiment.
-
-#### Direct form access
-
-The same Fast menu now includes **TEST FORMS** entries for MAIN and CONTROL separately:
-
-- Initial belief: opens the prior-belief form directly.
-- Part 1 ideal amounts and predictions: opens the original 11-column ideal table, followed by the prediction table.
-- Part 2 belief and signal: opens the updated-belief form, followed by the original signal.
-- Part 5 belief, ideal and prediction: opens those three final-part forms in order.
-- Questionnaire 1 through 5: opens each original filler questionnaire directly.
-
-Choose an entry, then its P1 link. These routes skip work periods, consent, comprehension and the trial. Form sessions retain the 480-second setting so their instructions still refer to 8 minutes; no work is required. Original validation, timeouts and form-saving methods remain active. The result screen lists the belief/ideal/prediction answers submitted in that route. Questionnaire-specific results are available through the local session data view; the result screen does not list all questionnaire answers.
-
-Skipped prerequisites are supplied as explicit synthetic fixtures: prior 100, earlier performance 0, ideal 10, prediction 8 and safe risk choices. These allow pages to render but are not evidence of real choices. No payment or live study is run. Start a fresh P1 session after restarting the server; old test links may no longer exist in the local development database.
 
 ### Fix review
 

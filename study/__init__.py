@@ -2288,44 +2288,6 @@ page_sequence = [
 
 
 # Data export
-class SandboxResult(Page):
-    @staticmethod
-    def is_displayed(player):
-        config = player.session.config
-        return config.get('sandbox_fast_test', False) and player.round_number == config['sandbox_test_round']
-
-    @staticmethod
-    def vars_for_template(player):
-        pages = player.session.config.get('sandbox_pages', [])
-        saved_answers = []
-        values = player.participant.vars
-        if 'Interval' in pages:
-            saved_answers.append(dict(label='Initial belief', value=values['belief'][0]))
-        if 'Belief' in pages:
-            saved_answers.append(dict(label='Belief in this part', value=values['belief'][player.round_number - 1]))
-        for page_name, key, label in [('Ideal', 'ideal', 'Ideal tasks'), ('Predicted', 'predicted', 'Predicted tasks')]:
-            if page_name in pages:
-                indices = range(1, 12) if player.round_number == 2 else [12]
-                for index in indices:
-                    suffix = f' at {40 + index * 10} points per task' if index < 12 else ' in Part 5'
-                    saved_answers.append(dict(label=label + suffix, value=values[key][index]))
-        return dict(
-            test_name=player.session.config['display_name'],
-            test_duration=player.session.config['work_length_seconds'],
-            total_saved=player.work_seconds + player.nonwork_seconds,
-            required_ideal=player.ideal_to_do if player.do_ideal else 'Free choice',
-            form_test=bool(player.session.config.get('sandbox_pages')),
-            saved_answers=saved_answers,
-        )
-
-
-# No task/live-message/timer/payment behavior is changed by the shortcut mode.
-from os import environ as _sandbox_environ
-if _sandbox_environ.get('SANDBOX_FAST_TEST') == '1':
-    from sandbox_fast import install as _install_sandbox_fast
-    _install_sandbox_fast(globals())
-
-
 def custom_export(players):
     player_list = list(players)
     if not player_list:
