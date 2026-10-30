@@ -5,4 +5,14 @@
 {% endblock %}
 
 {% block global_scripts  %}
+<script>
+    // Prevent backward navigation showing a previous page: if the browser
+    // restores this page from its back/forward cache, reload it so the
+    // server sends the participant to their current page.
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+</script>
 {% endblock %}
