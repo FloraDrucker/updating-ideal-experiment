@@ -32,12 +32,12 @@ possible export columns are present.
   deadline, valid zero stopping, short/full duration final saves, export values,
   existing payment arithmetic in both treatments, positive overtime and an
   unfinished ideal. Five of the first nine cases failed before the fix.
-- Together with the first repair, `python -m unittest discover -s sandbox-tests
+- Together with the first repair, `python -m unittest discover -s regression-tests
   -v` runs 26 server/source checks.
-- `node sandbox-tests/zero_ideal_page.test.cjs` executes the actual task callback
+- `node regression-tests/zero_ideal_page.test.cjs` executes the actual task callback
   and timer in seven controlled DOM/clock cases: zero, refresh, late refresh,
   positive early and overtime completion, unfinished ideal and immediate Stop.
-- `node sandbox-tests/task_client.test.cjs` retains the eight task-client checks
+- `node regression-tests/task_client.test.cjs` retains the eight task-client checks
   from the first repair.
 - The full ten-participant bot route passed in a fresh disposable database
   (`sandbox.ps1 -Action Bots`, exit 0).

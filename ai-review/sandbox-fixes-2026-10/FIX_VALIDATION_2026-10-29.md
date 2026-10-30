@@ -88,13 +88,11 @@ Use new local sessions for this branch. No historical data were migrated.
 
 ## Repeat the local checks
 
-From the sandbox directory:
+From the repository folder:
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s sandbox-tests -v
-node sandbox-tests/task_client.test.cjs
-node sandbox-tests/zero_ideal_page.test.cjs
-powershell -NoProfile -ExecutionPolicy Bypass -File .\sandbox.ps1 -Action Bots
+.\.venv\Scripts\python.exe -m unittest discover -s regression-tests -v
+node regression-tests/task_client.test.cjs
+node regression-tests/zero_ideal_page.test.cjs
+.\.venv\Scripts\otree.exe test study_on_work
 ```
-
-Approve any transfer to the original experiment separately after reviewing and testing the changes.

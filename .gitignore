@@ -13,8 +13,7 @@ __pycache__/
 .DS_Store
 *.otreezip
 
-# Local sandbox files and participant data must not be published.
-.sandbox-runtime/
+# Local secrets and participant data must not be published.
 .env
 .env.*
 !.env.example

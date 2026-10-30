@@ -1,4 +1,4 @@
-"""Run: .venv\Scripts\python.exe -m unittest discover -s sandbox-tests -v"""
+"""Run: .venv\Scripts\python.exe -m unittest discover -s regression-tests -v"""
 import importlib.util
 import json
 from pathlib import Path

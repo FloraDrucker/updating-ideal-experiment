@@ -26,8 +26,8 @@ An answer arriving after the deadline is late even if typed earlier offline.
 
 ## Regression checks
 
-- `python -m unittest discover -s sandbox-tests -v`: 15 server protocol cases.
-- `node sandbox-tests/task_client.test.cjs`: 8 client retry/duplicate/focus-order cases.
+- `python -m unittest discover -s regression-tests -v`: 15 server protocol cases.
+- `node regression-tests/task_client.test.cjs`: 8 client retry/duplicate/focus-order cases.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File .\sandbox.ps1 -Action Bots`:
   complete ten-participant route in a disposable local database. Bots now submit
   answers rather than claimed totals. They do not fake elapsed work time.
