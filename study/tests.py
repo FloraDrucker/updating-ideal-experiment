@@ -292,8 +292,8 @@ class PlayerBot(Bot):
         # 2) PartStart (always)
         yield PartStart
 
-        # 3) Performance (displayed only if round_number > 1)
-        if self.round_number > 1:
+        # 3) Performance (displayed only if round_number > 2)
+        if self.round_number > 2:
             yield Performance
 
         # 4) Belief (displayed only if round_number > 2)

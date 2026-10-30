@@ -1650,7 +1650,8 @@ class Performance(Page):  # display performance from the previous round
 
     @staticmethod
     def is_displayed(player):
-        return player.round_number > 1
+        # Not in part one (round 2): the trial performance is redundant before Ideal
+        return player.round_number > 2
 
     @staticmethod
     def vars_for_template(player):
