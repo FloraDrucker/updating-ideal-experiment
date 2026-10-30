@@ -53,6 +53,38 @@ def play_encryption_task(bot, n_tasks=20):
 # 🧠 ANSWER BLOCKS
 # ======================================================
 
+def ideal_zero_answers_for_round(bot):
+    """Ideal answers where ideal120=0; all other payoff levels stay at 10."""
+    if bot.round_number == 2:
+        return dict(
+            ideal50=10, ideal60=10, ideal70=10, ideal80=10,
+            ideal90=10, ideal100=10, ideal110=10, ideal120=0,
+            ideal130=10, ideal140=10, ideal150=10,
+        )
+    if bot.round_number == 6:
+        if bot.player.participant.vars['treatment']:
+            return dict(lastideal_t=0)
+        else:
+            return dict(lastideal_c=0)
+    return {}
+
+
+def predicted_zero_answers_for_round(bot):
+    """Predicted answers consistent with ideal120=0 (predicted must not exceed ideal)."""
+    if bot.round_number == 2:
+        return dict(
+            predicted50=8, predicted60=8, predicted70=8, predicted80=8,
+            predicted90=8, predicted100=8, predicted110=8, predicted120=0,
+            predicted130=8, predicted140=8, predicted150=8,
+        )
+    if bot.round_number == 6:
+        if bot.player.participant.vars['treatment']:
+            return dict(lastpredicted_t=0)
+        else:
+            return dict(lastpredicted_c=0)
+    return {}
+
+
 def ideal_answers_for_round(bot):
     # Round 2: all 11 fields
     if bot.round_number == 2:
@@ -179,6 +211,7 @@ def survey5_answers():
 # ======================================================
 
 class PlayerBot(Bot):
+    cases = ['default', 'ideal_zero']
 
     def play_round(self):
 
@@ -205,11 +238,26 @@ class PlayerBot(Bot):
 
         # 5) Ideal (round 2 and 6)
         if self.round_number in [2, 6]:
-            yield Ideal, ideal_answers_for_round(self)
+            if self.case == 'ideal_zero':
+                yield Ideal, ideal_zero_answers_for_round(self)
+            else:
+                yield Ideal, ideal_answers_for_round(self)
 
         # 6) Predicted (round 2 and 6)
         if self.round_number in [2, 6]:
-            yield Predicted, predicted_answers_for_round(self)
+            if self.case == 'ideal_zero' and self.round_number == 6:
+                # Force do_ideal so that Predicted.before_next_page resolves
+                # ideal_to_do from ideal_index=8 (ideal120), which was entered as 0
+                # in round 2. This simulates the 2 % of participants who must do
+                # exactly their stated ideal number of tasks.
+                ppvars = self.player.participant.vars
+                ppvars['do_ideal'] = True
+                ppvars['ideal_index'] = 8
+                yield Predicted, predicted_zero_answers_for_round(self)
+            elif self.case == 'ideal_zero':
+                yield Predicted, predicted_zero_answers_for_round(self)
+            else:
+                yield Predicted, predicted_answers_for_round(self)
 
         # 7) Signal (rounds 3-5)
         if 2 < self.round_number < 6:
@@ -220,13 +268,16 @@ class PlayerBot(Bot):
             yield Work
 
         # 9) Task (live page)
-        # Bot behavior per round:
+        # Bot behaviour per round:
         # Round 1: Full work (20 tasks)
         # Round 2: Stop after 2 tasks
         # Round 3: Full work (20 tasks)
         # Round 4: Stop without solving a task
-        # Rounds 5-6: Full work (20 tasks)
-        if self.round_number == 1:
+        # Rounds 5-6 (default): Full work (20 tasks)
+        # Round 6 (ideal_zero): ideal_to_do=0, so stop immediately with 0 tasks
+        if self.case == 'ideal_zero' and self.round_number == 6:
+            play_encryption_task(self, n_tasks=0)
+        elif self.round_number == 1:
             play_encryption_task(self, n_tasks=20)
         elif self.round_number == 2:
             play_encryption_task(self, n_tasks=2)
@@ -236,9 +287,15 @@ class PlayerBot(Bot):
             play_encryption_task(self, n_tasks=0)
         elif self.round_number in [5, 6]:
             play_encryption_task(self, n_tasks=20)
-        
+
         # Submit the Task page with correct performance values
         yield Submission(Task, check_html=False)
+
+        # Verify the do_ideal / ideal_to_do=0 state after the Task is submitted
+        if self.case == 'ideal_zero' and self.round_number == 6:
+            expect(self.player.do_ideal, True)
+            expect(self.player.ideal_to_do, 0)
+            expect(self.player.performance, 0)
 
         # 10) EndOfWork
         yield EndOfWork

@@ -1112,6 +1112,11 @@ def creating_session(subsession: Subsession):
             ppvars['nonwork_seconds'] = {i: None for i in range(C.NUM_ROUNDS)}
             ppvars['performance_in_time_5'] = None  # tasks within time for do_ideal
 
+            # Exclusion diagnostics
+            ppvars['exclusion_reason'] = None
+            ppvars['exclusion_page'] = None
+            ppvars['missing_fields_at_timeout'] = None
+
             # Risk preferences
             ppvars['risk_choices'] = {i: None for i in range(21)}
 
