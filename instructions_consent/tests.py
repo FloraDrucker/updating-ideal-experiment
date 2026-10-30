@@ -19,6 +19,7 @@ class PlayerBot(Bot):
                 q3=C.SOLUTIONS['q3'],
                 q4t=C.SOLUTIONS['q4t'],
                 q5t=C.SOLUTIONS['q5t'],
+                q6t=C.SOLUTIONS['q6t'],
             )
         else:
             yield ComprehensionCheck, dict(
@@ -27,6 +28,7 @@ class PlayerBot(Bot):
                 q3=C.SOLUTIONS['q3'],
                 q4c=C.SOLUTIONS['q4c'],
                 q5c=C.SOLUTIONS['q5c'],
+                q6c=C.SOLUTIONS['q6c'],
             )
 
         # consent yes

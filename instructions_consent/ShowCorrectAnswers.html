@@ -12,9 +12,11 @@
     {{ if player.treatment }}
     <tr><td>When guessing the fixed payoff per task, how should you choose your guess to maximize your chance of winning the extra payment?</td><td>{{ solutions.q4t }}</td></tr>
     <tr><td>How is the fixed payoff per correctly solved task calculated?</td><td>{{ solutions.q5t}}</td></tr>
+    <tr><td>Does the payoff per task change from part to part?</td><td>{{ solutions.q6t }}</td></tr>
     {{ else }}
     <tr><td>When guessing the chosen number, how should you choose your guess to maximize your chance of winning the extra payment?</td><td>{{ solutions.q4c }}</td></tr>
     <tr><td>How is the chosen number calculated?</td><td>{{ solutions.q5c}}</td></tr>
+    <tr><td>Does the chosen number change from part to part?</td><td>{{ solutions.q6c }}</td></tr>
     {{ endif }}
 </table>
 

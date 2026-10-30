@@ -28,7 +28,9 @@ class C(BaseConstants):
         q4c='State your actual belief about the chosen number, because the closer your guess is to the real value (between 50 points and 150 points), the higher is your probability of winning.',
         q4t='State your actual belief about the true payoff, because the closer your guess is to the real value (between 50 points and 150 points), the higher is your probability of winning.',
         q5c='It is the average of the numbers displayed on the 60 balls.',
-        q5t='It is the average of the numbers displayed on the 60 balls.'
+        q5t='It is the average of the numbers displayed on the 60 balls.',
+        q6c='No, the chosen number remains the same throughout all parts of this study. I just get more precise information about it during the course of the study by seeing more balls.',
+        q6t='No, the payoff per task remains the same throughout all parts of this study. I just get more precise information about it during the course of the study by seeing more balls.',
     )
 
 
@@ -109,6 +111,24 @@ class Player(BasePlayer):
             'It is the average of the numbers displayed on the 60 balls.',
             'It is the highest number out of the 60 balls shown.',
             'It is a number between 50 and 150 randomly chosen in each part.',
+        ],
+        widget=widgets.RadioSelect,
+    )
+
+    q6t = models.StringField(
+        label='<b>Question 6</b> <br> Does the payoff per task change from part to part?',
+        choices=[
+            'Yes, for each part only the balls I see in this part matter for calculating the payoff per task.',
+            'No, the payoff per task remains the same throughout all parts of this study. I just get more precise information about it during the course of the study by seeing more balls.',
+        ],
+        widget=widgets.RadioSelect,
+    )
+
+    q6c = models.StringField(
+        label='<b>Question 6</b> <br> Does the chosen number change from part to part?',
+        choices=[
+            'Yes, for each part only the balls I see in this part matter for calculating the chosen number.',
+            'No, the chosen number remains the same throughout all parts of this study. I just get more precise information about it during the course of the study by seeing more balls.',
         ],
         widget=widgets.RadioSelect,
     )
@@ -212,14 +232,16 @@ class ComprehensionCheck(Page):
         'q4c': None,
         'q5t': None,
         'q5c': None,
+        'q6t': None,
+        'q6c': None,
     }
 
     @staticmethod
     def get_form_fields(player):
         if player.treatment:
-            return ['q1', 'q2', 'q3', 'q4t', 'q5t']
+            return ['q1', 'q2', 'q3', 'q4t', 'q5t', 'q6t']
         else:
-            return ['q1', 'q2', 'q3', 'q4c', 'q5c']
+            return ['q1', 'q2', 'q3', 'q4c', 'q5c', 'q6c']
 
     @staticmethod
     def is_displayed(player):
@@ -270,11 +292,15 @@ class ComprehensionCheck(Page):
                 wrong_list.append('q4t')
             if player.q5t != C.SOLUTIONS['q5t']:
                 wrong_list.append('q5t')
+            if player.q6t != C.SOLUTIONS['q6t']:
+                wrong_list.append('q6t')
         else:
             if player.q4c != C.SOLUTIONS['q4c']:
                 wrong_list.append('q4c')
             if player.q5c != C.SOLUTIONS['q5c']:
                 wrong_list.append('q5c')
+            if player.q6c != C.SOLUTIONS['q6c']:
+                wrong_list.append('q6c')
 
         player.num_wrong = len(wrong_list)
         player.wrong_questions = ','.join(wrong_list)
@@ -313,9 +339,9 @@ class ShowCorrectAnswers(Page):
     @staticmethod
     def vars_for_template(player):
         if player.treatment:
-            keys = ['q1', 'q2', 'q3', 'q4t', 'q5t']
+            keys = ['q1', 'q2', 'q3', 'q4t', 'q5t', 'q6t']
         else:
-            keys = ['q1', 'q2', 'q3', 'q4c', 'q5c']
+            keys = ['q1', 'q2', 'q3', 'q4c', 'q5c', 'q6c']
         solutions = {k: C.SOLUTIONS[k] for k in keys if k in C.SOLUTIONS}
         return dict(solutions=solutions)
 
