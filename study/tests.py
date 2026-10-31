@@ -415,6 +415,9 @@ class PlayerBot(Bot):
             expect(self.player.stopped_work, True)
             expect(self.player.field_maybe_none('performance_in_time'), 0)
 
+        # 10) EndOfWork
+        yield EndOfWork
+
         # 11) Survey1 (round 2)
         if self.round_number == 2:
             if self.case == 'early_exclusion':
@@ -422,12 +425,12 @@ class PlayerBot(Bot):
                 yield Submission(Survey1, {}, check_html=False, timeout_happened=True)
                 expect(self.player.participant.vars['excluded'], True)
                 expect(self.player.participant.vars['exclusion_page'], 'Survey1')
-                for _ in range(5):  # Excluded[14,16,18,20,22]
+                for _ in range(5):  # Excluded[15,17,19,21,23]
                     yield Submission(Excluded, check_html=False)
             else:
                 yield Survey1, survey1_answers()
 
-        # Excluded[14]: after Survey1 position; shown from round 3 onwards for early_exclusion
+        # Excluded[15]: after Survey1 position; shown from round 3 onwards for early_exclusion
         if self.case == 'early_exclusion' and self.round_number >= 3:
             yield Submission(Excluded, check_html=False)
 
@@ -435,7 +438,7 @@ class PlayerBot(Bot):
         if self.round_number == 3:
             yield Survey2, survey2_answers()
 
-        # Excluded[16]: after Survey2 position
+        # Excluded[17]: after Survey2 position
         if self.case == 'early_exclusion' and self.round_number >= 3:
             yield Submission(Excluded, check_html=False)
 
@@ -443,7 +446,7 @@ class PlayerBot(Bot):
         if self.round_number == 4:
             yield Survey3, survey3_answers()
 
-        # Excluded[18]: after Survey3 position
+        # Excluded[19]: after Survey3 position
         if self.case == 'early_exclusion' and self.round_number >= 3:
             yield Submission(Excluded, check_html=False)
 
@@ -451,7 +454,7 @@ class PlayerBot(Bot):
         if self.round_number == 5:
             yield Survey4, survey4_answers()
 
-        # Excluded[20]: after Survey4 position
+        # Excluded[21]: after Survey4 position
         if self.case == 'early_exclusion' and self.round_number >= 3:
             yield Submission(Excluded, check_html=False)
 
@@ -466,7 +469,7 @@ class PlayerBot(Bot):
             elif self.case == 'early_exclusion':
                 # Already excluded from round 2; still sees Survey5 (no exclusion guard there)
                 yield Survey5, survey5_answers()
-                yield Submission(Excluded, check_html=False)  # Excluded[22]
+                yield Submission(Excluded, check_html=False)  # Excluded[23]
             elif self.case == 'bonus_tasks':
                 yield Survey5, survey5_bonus_answers()
                 play_bonus_task(self)
@@ -479,8 +482,8 @@ class PlayerBot(Bot):
                 yield Submission(Payment, dict(comments="bot test"), check_html=False)
                 yield Submission(FinalPage, check_html=False)
 
-        # Excluded[22]: after Survey5 position; rounds 3-5 for early_exclusion
-        # (round 6 handles its own Excluded[22] in the block above)
+        # Excluded[23]: after Survey5 position; rounds 3-5 for early_exclusion
+        # (round 6 handles its own Excluded[23] in the block above)
         if self.case == 'early_exclusion' and self.round_number in [3, 4, 5]:
             yield Submission(Excluded, check_html=False)
 

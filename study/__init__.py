@@ -1876,6 +1876,10 @@ class Task(Page):
             'nonwork seconds:', p.nonwork_seconds,
         )
 
+class EndOfWork(Page):
+    get_timeout_seconds = page_timeout('end_of_work')
+
+
 class Excluded(Page):
     @staticmethod
     def is_displayed(player):
@@ -2267,6 +2271,7 @@ page_sequence = [
     Signal,
     Work,
     Task,
+    EndOfWork,
     Survey1,
     Excluded,
     Survey2,
