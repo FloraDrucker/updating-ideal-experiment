@@ -48,7 +48,15 @@ class Player(BasePlayer):
 
     # Consent
     consent = models.BooleanField(label="Do you wish to participate in the study?", blank=False)
-    consent_no_ai = models.BooleanField(label="I agree to not using AI during any part of this study.", blank=False)
+    consent_no_ai = models.BooleanField(
+        label="Please select one option:",
+        choices=[
+            [True, "I agree to not using AI during any part of this study."],
+            [False, "I would like to exit the study"],
+        ],
+        widget=widgets.RadioSelect,
+        blank=False,
+    )
 
     # comprehension check answers
     q1 = models.StringField(
