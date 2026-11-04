@@ -616,7 +616,7 @@ class Player(BasePlayer):
         min=0,
         max=555,
         blank=False,
-        label='What is the average of the following five numbers? 123, 88, 147, 102, 95. Please do not use a calculator.'
+        label='What is the average of 88 and 122? Please do not use a calculator.'
     )
 
     # ballsremembered1 correct answer is 2
