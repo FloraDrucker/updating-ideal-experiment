@@ -3,7 +3,7 @@
 <div class="text">
 
 <p>
-    In the trial and in all five consecutive parts, you will work on the task you just saw for at most eight minutes. You will receive <b> a fixed payoff {{ if not player.treatment }} of {{ C.TRUE_PAYOFF }} points {{ endif }} for each correctly solved encryption task in the part that will be randomly chosen for payment.</b> {{ if player.treatment }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: we chose <b> a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }}</b>, and you will have to guess this number. {{ endif }}
+    In the trial and in all five consecutive parts, you will work on the task you just saw for at most eight minutes. You will receive <b> a fixed payoff {{ if not player.treatment }} of {{ C.TRUE_PAYOFF }} points {{ endif }} for each correctly solved encryption task in the part that will be randomly chosen for payment.</b> {{ if player.treatment }} Right now, you only know that the payoff is <b> between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }} points </b> per task. {{ else }} Besides working on the encryption task, you have an additional task to do: <b>a number between {{ C.BENEFIT_RANGE_MIN }} and {{ C.BENEFIT_RANGE_MAX }}</b> has been chosen, and you will have to guess this number. {{ endif }}
 </p>
 
     <p>Each part of the study will have the following stages:</p>
@@ -51,7 +51,7 @@
 <h5> 2. Further information about the {{ guess_about }} </h5>
 
 <p>
-    <b> The {{ guess_about }} </b> is the same in all parts of the study. It <b> is the average of 60 numbers that lie between {{ C.BENEFIT_RANGE_MIN }} {{ if player.treatment }}points{{ endif }} and {{ C.BENEFIT_RANGE_MAX }}{{ if player.treatment }} points{{ endif }}.</b> The same number can occur multiple times. During the course of the study, you will get more and more information about the {{ guess_about }}, in the following way: <b>At the beginning of parts two, three and four, we will briefly display 20 of these 60 numbers – represented by balls – on the screen.</b> Each of the 60 balls will be displayed only once, so you will have seen all the balls after part four. See the examples of balls below.
+    <b> The {{ guess_about }} </b> is the same in all parts of the study. It <b> is the average of 60 numbers that lie between {{ C.BENEFIT_RANGE_MIN }} {{ if player.treatment }}points{{ endif }} and {{ C.BENEFIT_RANGE_MAX }}{{ if player.treatment }} points{{ endif }}.</b> During the course of the study, you will get more and more information about the {{ guess_about }}, in the following way: <b>At the beginning of parts two, three and four, we will briefly display 20 of these 60 numbers – represented by balls – on the screen.</b> Each of the 60 balls will be displayed only once, so you will have seen all the balls after part four. See the examples of balls below.
 </p>
 
 <div style="text-align: center;">
@@ -93,7 +93,7 @@
 <h5> 3. Working on the encryption task </h5>
 
 <p>
-    <b>In every part, you will have the opportunity to work on the encryption task for eight minutes.</b> As explained above, in parts two to four, you will receive further information about the {{ guess_about }} before working. Your payment for the encryption task will be {{ if player.treatment }}the fixed payoff {{ else }} {{C.TRUE_PAYOFF }} points {{ endif }}times the number of tasks you completed correctly in the part randomly chosen for payment.
+    <b>In every part, you will have the opportunity to work on the encryption task for eight minutes.</b> Your payment for the encryption task will be {{ if player.treatment }}the fixed payoff {{ else }} {{C.TRUE_PAYOFF }} points {{ endif }}times the number of tasks you completed correctly in the part randomly chosen for payment.
 </p>
     <p>
     In the trial part, you have to work for the full eight minutes to become familiar with the task. However, in all other parts, <b>you can stop working on the encryption task</b> by clicking on the "Stop working" button at any point during the eight minutes. For the remainder of the eight minutes, we offer you to watch entertaining videos (see screenshots from example videos below). You will receive a flat fee of <b>{{ C.FLAT_LEISURE_FEE }} points for every minute spent on watching the videos. </b> Please note that once you decide to stop working, you will NOT be able to return to the encryption task in that part.
