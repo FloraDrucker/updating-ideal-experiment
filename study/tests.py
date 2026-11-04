@@ -216,7 +216,7 @@ def survey5_answers():
         BSCS_work=3,
         BSCS_stop=3,
         BSCS_alternatives=3,
-        averagetask=111,
+        averagetask=105,
         ballsremembered1=0,
         ballsremembered2=0,
         ballsremembered3=0,
