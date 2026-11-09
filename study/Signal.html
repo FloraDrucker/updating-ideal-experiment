@@ -73,21 +73,27 @@ img {
 <script>
 (function() {
 
-    // Values provided by vars_for_template in Python
-    const start_time = {{ start_time }};
-    const total_time = {{ total_time }};
+    // Seconds left, computed on the server from the start time it stored when
+    // the page was first shown. A reload or the Back button re-renders the
+    // page with the server's (smaller) remaining time, so the countdown never
+    // resets. Elapsed time is measured with the browser's monotonic clock
+    // (performance.now), so a wrong computer clock does not matter.
+    const remaining_at_load = {{ remaining_time }};
+    const loaded_at = performance.now();
 
-    // Compute remaining seconds
     function seconds_left() {
-        const now = Date.now() / 1000;
-        return total_time - (now - start_time);
+        return remaining_at_load - (performance.now() - loaded_at) / 1000;
     }
+
+    let submitted = false;
 
     function tick() {
         const left = seconds_left();
 
         if (left <= 0) {
-            // Auto click the hidden oTree next button
+            // Auto click the hidden oTree next button (only once)
+            if (submitted) return;
+            submitted = true;
             document.querySelector('.otree-btn-next').click();
         } else {
             document.getElementById("timer").innerText =
