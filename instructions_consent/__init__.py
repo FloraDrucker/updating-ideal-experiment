@@ -323,6 +323,8 @@ class ComprehensionCheck(Page):
         if player.num_wrong >= 4:
             player.excluded = True  # immediately exclude
             player.success_attempt = None
+            player.participant.vars['exclusion_reason'] = 'comprehension_failed'
+            player.participant.vars['exclusion_page'] = 'ComprehensionCheck'
         elif player.num_wrong == 0:
             player.success_attempt = player.attempt_number
         else:
