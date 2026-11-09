@@ -436,7 +436,12 @@ class PlayerBot(Bot):
 
         # 12) Survey2 (round 3)
         if self.round_number == 3:
-            yield Survey2, survey2_answers()
+            yield Survey2Intro
+            # Test and end page are skipped for already excluded participants
+            if self.case != 'early_exclusion':
+                # The test page submits itself via JavaScript (no button)
+                yield Submission(Survey2, survey2_answers(), check_html=False)
+                yield Survey2End
 
         # Excluded[17]: after Survey2 position
         if self.case == 'early_exclusion' and self.round_number >= 3:

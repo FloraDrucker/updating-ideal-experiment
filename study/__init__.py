@@ -1921,21 +1921,34 @@ class Survey1(Page):
         ppvars['big5_openness4'] = player.big5_openness4
 
 
-class Survey2(Page):
-    get_timeout_seconds = page_timeout('survey2')
-    form_model = 'player'
-    form_fields = ['digitspan_max_level']
-    timeout_submission = {'digitspan_max_level': None}
+class Survey2Intro(Page):
+    """Memory test instructions, with a visible timer."""
+    get_timeout_seconds = page_timeout('survey2_instructions')
 
     @staticmethod
     def is_displayed(player):
         return player.round_number == 3
 
     @staticmethod
-    def js_vars(player):
-        return dict(
-            survey2_timeout=player.session.config['page_timeouts']['survey2']
+    def before_next_page(player, timeout_happened):
+        # Timer ran out before the participant started the test.
+        exclude_on_incomplete_timeout(
+            player, timeout_happened, [], 'Survey2Intro', ['digitspan_max_level']
         )
+
+
+class Survey2(Page):
+    """The memory test itself. No visible timer: each answer has its own
+    input timer, and the page submits itself when the test ends. The hidden
+    page timeout is only a safety net in case the test gets stuck."""
+    get_timeout_seconds = page_timeout('survey2_test')
+    form_model = 'player'
+    form_fields = ['digitspan_max_level']
+    timeout_submission = {'digitspan_max_level': None}
+
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number == 3 and not player.participant.vars.get('excluded', False)
 
     @staticmethod
     def before_next_page(player, timeout_happened):
@@ -1953,6 +1966,15 @@ class Survey2(Page):
 
         ppvars = player.participant.vars
         ppvars['digitspan_max_level'] = player.digitspan_max_level
+
+
+class Survey2End(Page):
+    """End of the memory test, with a short visible timer."""
+    get_timeout_seconds = page_timeout('survey2_end')
+
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number == 3 and not player.participant.vars.get('excluded', False)
 
 
 class Survey3(Page):
@@ -2274,7 +2296,9 @@ page_sequence = [
     EndOfWork,
     Survey1,
     Excluded,
+    Survey2Intro,
     Survey2,
+    Survey2End,
     Excluded,
     Survey3,
     Excluded,

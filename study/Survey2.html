@@ -8,7 +8,8 @@ Survey Two.
 {% block content %}
 
 <style>
-    /* Hide the built-in oTree timer on this page; we use a custom timer. */
+    /* No visible page timer during the test. The page still has a hidden
+       safety time limit (page_timeouts['survey2_test']) in case it gets stuck. */
     .otree-timer,
     .otree-timer.alert {
         display: none !important;
@@ -21,54 +22,16 @@ Survey Two.
         -ms-user-select: none;
         user-select: none;
     }
-
-    .pretty-timer {
-        display: inline-block;
-        background: #fff7c2;
-        border: 2px solid #f5d768;
-        border-radius: 6px;
-        padding: 10px 16px;
-        font-size: 16px;
-        font-weight: 600;
-        color: #6a4d00;
-        margin-bottom: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    }
 </style>
 
-<!-- PAGE TIMER -->
-<div id="survey2-timer" class="pretty-timer"></div>
+<input type="hidden" name="digitspan_max_level" id="digitspan_max_level" value="0">
 
-<!-- INSTRUCTIONS -->
-<div id="instructions" style="font-size:1.2em; line-height:1.4; margin-bottom:2em;">
-    <h5>This is a memory test.</h5>
-    <p>In the following you will see a sequence of numbers. After a few seconds the numbers will disappear.
-        After the numbers disappear, please <b>type in the exact sequence of numbers that was presented</b> to you.</p>
-    <p>The <b>sequences will get longer</b> throughout the survey. After failing a sequence of the same length twice,
-        you will proceed to the next round of encryption tasks.</p>
-    <p>Each sequence is <b>shown for 0.5 seconds per digit</b> (so e.g., a two-digit number is shown for one second).
-        Then, you have <b>1.5 seconds per digit to type the sequence</b> into the box (so e.g., you have three seconds to type in a two-digit number). Your answer will be <b>logged automatically</b> once the time has expired.</p>
-     <p> Please note that to ensure that the memory test is done properly, <b>copy and paste is disabled</b> on the page.</p>
-    <button id="start-btn" type="button" style="padding:0.5em 1em;">Start Test</button>
+<div id="display-box" style="font-size:2em; height:2em; margin:1.5em 0;">Get ready…</div>
+
+<div id="input-block" style="display:none; margin-bottom:1em;">
+    <input id="response" type="number" inputmode="numeric" pattern="[0-9]*"
+           autocomplete="off" style="font-size:1.5em; width:6em;">
 </div>
-
-<!-- TASK FORM -->
-<form id="digitspan-form" method="post">
-    <input type="hidden" name="digitspan_max_level" id="digitspan_max_level" value="0">
-
-    <div id="display-box" style="display:none; font-size:2em; height:2em; margin:1.5em 0;"></div>
-
-    <div id="input-block" style="display:none; margin-bottom:1em;">
-        <input id="response" type="number" inputmode="numeric" pattern="[0-9]*"
-               autocomplete="off" style="font-size:1.5em; width:6em;">
-    </div>
-
-    <div id="end-message" style="display:none; font-size:1.2em; color:#000000; margin-top:1em;">
-        <p><strong>The test has ended. Please click on the "Next" button to continue.</strong></p>
-    </div>
-
-    <button id="next-page-btn" type="submit" style="display:none; padding:0.5em 1em;">Next</button>
-</form>
 
 {% endblock %}
 
@@ -82,13 +45,29 @@ Survey Two.
         ['275862584','713942568']
     ];
 
+    const disp     = document.getElementById('display-box'),
+          inputBlk = document.getElementById('input-block'),
+          resp     = document.getElementById('response'),
+          maxField = document.getElementById('digitspan_max_level'),
+          form     = document.getElementById('form');
+
+    let level = 0, stage = 0, correctCount = 0, phase = 'show';
     let inputTimer = null;
+    let finished = false;
+
+    function saveState() {
+        try {
+            sessionStorage.setItem('ds_state', JSON.stringify({ level, stage, correctCount, phase }));
+        } catch (e) {}
+    }
+    function clearState() {
+        try { sessionStorage.removeItem('ds_state'); } catch (e) {}
+    }
 
     function startInputTimer() {
         clearInputTimer();
-        const currentSequence = sequences[level][stage];
-        const INPUT_TIME_LIMIT = currentSequence.length * 1500;
-        inputTimer = setTimeout(() => { forceSubmit(); }, INPUT_TIME_LIMIT);
+        const INPUT_TIME_LIMIT = sequences[level][stage].length * 1500;
+        inputTimer = setTimeout(submitResponse, INPUT_TIME_LIMIT);
     }
 
     function clearInputTimer() {
@@ -96,6 +75,25 @@ Survey Two.
             clearTimeout(inputTimer);
             inputTimer = null;
         }
+    }
+
+    function showInput() {
+        disp.textContent = '';
+        inputBlk.style.display = 'block';
+        resp.value = '';
+        resp.focus();
+        phase = 'input';
+        saveState();
+        startInputTimer();
+    }
+
+    function showTrial() {
+        inputBlk.style.display = 'none';
+        const currentSequence = sequences[level][stage];
+        disp.textContent = currentSequence;
+        phase = 'show';
+        saveState();
+        setTimeout(showInput, currentSequence.length * 500);
     }
 
     function submitResponse() {
@@ -109,147 +107,52 @@ Survey Two.
         stage++;
 
         if (stage < 2) {
-            phase = 'show'; saveState();
+            showTrial();
+        } else if (correctCount > 0 && level < sequences.length - 1) {
+            level++;
+            stage = 0;
+            correctCount = 0;
             showTrial();
         } else {
-            if (correctCount > 0 && level < sequences.length - 1) {
-                level++;
-                stage = 0;
-                correctCount = 0;
-                phase = 'show'; saveState();
-                showTrial();
-            } else {
-                finishTask();
-            }
+            finishTask();
         }
     }
 
-    function forceSubmit() {
-        clearInputTimer();
-        submitResponse();
-    }
-
-    let level = 0, stage = 0, correctCount = 0, phase = 'idle';
-
-    const instr    = document.getElementById('instructions'),
-          startBtn = document.getElementById('start-btn'),
-          disp     = document.getElementById('display-box'),
-          inputBlk = document.getElementById('input-block'),
-          resp     = document.getElementById('response'),
-          nextBtn  = document.getElementById('next-page-btn'),
-          maxField = document.getElementById('digitspan_max_level'),
-          timerEl  = document.getElementById('survey2-timer');
-
-    // Page-level countdown — visible during instructions and end-message only
-    const PAGE_TIMEOUT = js_vars.survey2_timeout;
-    const pageLoadTime = Date.now();
-    function getRemainingSeconds() {
-        return Math.max(0, Math.round(PAGE_TIMEOUT - (Date.now() - pageLoadTime) / 1000));
-    }
-    function formatPageTime(secs) {
-        const m = Math.floor(secs / 60).toString().padStart(2, '0');
-        const s = (secs % 60).toString().padStart(2, '0');
-        return m + ':' + s;
-    }
-    function updateTimerDisplay() {
-        timerEl.textContent = 'Remaining time: ' + formatPageTime(getRemainingSeconds());
-    }
-    updateTimerDisplay();
-    setInterval(updateTimerDisplay, 1000);
-
-    function saveState() {
-        sessionStorage.setItem('ds_state', JSON.stringify({ level, stage, correctCount, phase }));
-    }
-    function clearState() { sessionStorage.removeItem('ds_state'); }
-
-    function showTrial() {
-        inputBlk.style.display = 'none';
-        const currentSequence = sequences[level][stage];
-
-        disp.textContent = currentSequence;
-        phase = 'show';
-        saveState();
-
-        const displayTime = currentSequence.length * 500;
-
-        setTimeout(() => {
-            disp.textContent = '';
-            inputBlk.style.display = 'block';
-            resp.value = '';
-            resp.focus();
-            phase = 'input';
-            saveState();
-            startInputTimer();
-        }, displayTime);
-    }
-
+    // Test finished: store the result and go on to the end-of-test page.
     function finishTask() {
+        if (finished) return;
+        finished = true;
         maxField.value = (level + 1);
-
-        inputBlk.style.display = 'none';
-        disp.style.display = 'none';
-
-        document.getElementById('end-message').style.display = 'block';
-        nextBtn.style.display = 'inline-block';
-        timerEl.style.display = 'inline-block';
-
-        sessionStorage.setItem('digitspan_finished', '1');
+        disp.textContent = '';
         clearState();
+        form.submit();
     }
 
-    (function restoreIfAny(){
-        const finished = sessionStorage.getItem('digitspan_finished');
-        if (finished === '1') {
-            instr.style.display = 'none';
-            disp.style.display = 'none';
-            inputBlk.style.display = 'none';
-            document.getElementById('end-message').style.display = 'block';
-            nextBtn.style.display = 'inline-block';
-            return;
-        }
+    // Resume after a page reload, otherwise start a fresh test.
+    let saved = null;
+    try { saved = JSON.parse(sessionStorage.getItem('ds_state')); } catch (e) {}
 
-        const st = sessionStorage.getItem('ds_state');
-        if (!st) return;
-
-        const s = JSON.parse(st);
-        level = s.level ?? 0;
-        stage = s.stage ?? 0;
-        correctCount = s.correctCount ?? 0;
-        phase = s.phase ?? 'show';
-
-        instr.style.display = 'none';
-        timerEl.style.display = 'none';
-        disp.style.display = 'block';
-
-        if (phase === 'input') {
-            disp.textContent = '';
-            inputBlk.style.display = 'block';
-            resp.value = '';
-            resp.focus();
-            startInputTimer();
+    if (saved) {
+        level = saved.level ?? 0;
+        stage = saved.stage ?? 0;
+        correctCount = saved.correctCount ?? 0;
+        if (saved.phase === 'input') {
+            showInput();
         } else {
             showTrial();
         }
-    })();
+    } else {
+        setTimeout(showTrial, 1000);
+    }
 
-    startBtn.addEventListener('click', () => {
-        instr.style.display = 'none';
-        timerEl.style.display = 'none';
-        disp.style.display = 'block';
-        level = 0; stage = 0; correctCount = 0; phase = 'show';
-        saveState();
-        showTrial();
-    });
-
-    // Disable Enter (except when Next is focused)
+    // Disable Enter (it would submit the page)
     document.addEventListener("keydown", function(e) {
         if (e.key === "Enter") {
-            if (document.activeElement === nextBtn) return;
             e.preventDefault();
         }
     });
 
-    // --- Site-wide: disable copy/cut/paste + common keyboard shortcuts ---
+    // Disable copy/cut/paste + common keyboard shortcuts
     ['copy', 'cut', 'paste'].forEach(evt => {
         document.addEventListener(evt, (e) => {
             e.preventDefault();

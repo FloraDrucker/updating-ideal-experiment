@@ -1,0 +1,30 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block title %}
+Survey Two.
+{% endblock %}
+
+{% block content %}
+
+<div id="instructions" style="font-size:1.2em; line-height:1.4; margin-bottom:2em;">
+    <h5>This is a memory test.</h5>
+    <p>In the following you will see a sequence of numbers. After a few seconds the numbers will disappear.
+        After the numbers disappear, please <b>type in the exact sequence of numbers that was presented</b> to you.</p>
+    <p>The <b>sequences will get longer</b> throughout the survey. After failing a sequence of the same length twice,
+        you will proceed to the next round of encryption tasks.</p>
+    <p>Each sequence is <b>shown for 0.5 seconds per digit</b> (so e.g., a two-digit number is shown for one second).
+        Then, you have <b>1.5 seconds per digit to type the sequence</b> into the box (so e.g., you have three seconds to type in a two-digit number). Your answer will be <b>logged automatically</b> once the time has expired.</p>
+     <p> Please note that to ensure that the memory test is done properly, <b>copy and paste is disabled</b> on the page.</p>
+    <button type="submit" class="btn btn-primary" style="padding:0.5em 1em;">Start Test</button>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Forget any test progress left in this browser tab, so the test page
+    // always starts a fresh test after the instructions.
+    try { sessionStorage.removeItem('ds_state'); } catch (e) {}
+</script>
+{% endblock %}
