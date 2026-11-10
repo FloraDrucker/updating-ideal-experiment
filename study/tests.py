@@ -274,9 +274,18 @@ class PlayerBot(Bot):
     cases = [
         'default', 'ideal_zero', 'stop_immediately', 'excluded_timeout',
         'ideal_finish_early', 'ideal_overtime', 'bonus_tasks', 'early_exclusion',
+        'comprehension_retry', 'comprehension_fail', 'no_consent', 'survey2_timeout',
     ]
 
     def play_round(self):
+
+        # These participants never reach the study app (stopped in instructions_consent)
+        if self.case in ('comprehension_fail', 'no_consent'):
+            return
+
+        # survey2_timeout: stopped on the Excluded page in round 3
+        if self.case == 'survey2_timeout' and self.round_number > 3:
+            return
 
         # 1) Interval (only round 1; shown before PartStart)
         if self.round_number == 1:
@@ -435,6 +444,17 @@ class PlayerBot(Bot):
             yield Submission(Excluded, check_html=False)
 
         # 12) Survey2 (round 3)
+        if self.round_number == 3 and self.case == 'survey2_timeout':
+            # Instructions timer runs out before the test is started -> excluded,
+            # test and end pages are skipped, participant stops on Excluded
+            yield Submission(Survey2Intro, check_html=False, timeout_happened=True)
+            yield Submission(Excluded, check_html=False)
+            pv = self.player.participant.vars
+            expect(pv['excluded'], True)
+            expect(pv['exclusion_reason'], 'incomplete_timeout')
+            expect(pv['exclusion_page'], 'Survey2Intro')
+            expect(pv['missing_fields_at_timeout'], ['digitspan_max_level'])
+            return
         if self.round_number == 3:
             yield Survey2Intro
             # Test and end page are skipped for already excluded participants
