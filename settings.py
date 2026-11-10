@@ -18,8 +18,8 @@ SESSION_CONFIGS = [
 
             # study app
             interval=120,
-            part_start=30,
-            end_of_work=30,
+            part_start=15,
+            end_of_work=15,
             performance=60,
             belief=120,
             belief_ideal=300,
